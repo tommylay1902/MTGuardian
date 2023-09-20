@@ -1,8 +1,8 @@
 ﻿using System;
-using medication.Models;
+using prescription.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace medication.Data
+namespace prescription.Data
 {
 	public class PrescriptionContext : DbContext
 

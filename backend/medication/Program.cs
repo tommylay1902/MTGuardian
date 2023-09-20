@@ -1,6 +1,9 @@
-using medication.Data;
+using prescription.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using prescription.Interfaces;
+using prescription.ServicesLayer;
+using prescription.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +18,9 @@ builder.Services.AddDbContext<PrescriptionContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRespotiory>();
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
 
 
 var app = builder.Build();

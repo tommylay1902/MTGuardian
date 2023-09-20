@@ -1,12 +1,15 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
-namespace medication.Models
+namespace prescription.Entities
 {
 	public class Prescription
 	{
 		[Key]
-		public Guid Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
 
 		[Required]
 		public String Medication { get; set; }
@@ -37,6 +40,18 @@ namespace medication.Models
             Medication = medication;
             Doseage = doseage;
             PrescribedAt = prescribedAt;
+        }
+
+        [JsonConstructor]
+        public Prescription(string medication, string doseage, DateTime prescribedAt)
+        {
+            Medication = medication;
+            Doseage = doseage;
+            PrescribedAt = prescribedAt;
+        }
+
+        public Prescription()
+        {
         }
     }
 }
