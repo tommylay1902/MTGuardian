@@ -1,26 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "/Users/josegarcia/Desktop/MTGuardian/backend/medication/medication.csproj": {}
+    "/Users/tommylay/Desktop/MTGuardian/backend/medication/medication.csproj": {}
   },
   "projects": {
-    "/Users/josegarcia/Desktop/MTGuardian/backend/medication/medication.csproj": {
+    "/Users/tommylay/Desktop/MTGuardian/backend/medication/medication.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/josegarcia/Desktop/MTGuardian/backend/medication/medication.csproj",
+        "projectUniqueName": "/Users/tommylay/Desktop/MTGuardian/backend/medication/medication.csproj",
         "projectName": "medication",
-        "projectPath": "/Users/josegarcia/Desktop/MTGuardian/backend/medication/medication.csproj",
-        "packagesPath": "/Users/josegarcia/.nuget/packages/",
-        "outputPath": "/Users/josegarcia/Desktop/MTGuardian/backend/medication/obj/",
+        "projectPath": "/Users/tommylay/Desktop/MTGuardian/backend/medication/medication.csproj",
+        "packagesPath": "/Users/tommylay/.nuget/packages/",
+        "outputPath": "/Users/tommylay/Desktop/MTGuardian/backend/medication/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/josegarcia/.nuget/NuGet/NuGet.Config"
+          "/Users/tommylay/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "/usr/local/share/dotnet/sdk/7.0.308/Sdks/Microsoft.NET.Sdk.Web/library-packs": {},
+          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -40,6 +40,26 @@
           "targetAlias": "net7.0",
           "dependencies": {
             "Microsoft.AspNetCore.OpenApi": {
+              "target": "Package",
+              "version": "[7.0.11, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[7.0.11, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[7.0.11, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[7.0.11, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[7.0.11, )"
             },
@@ -67,7 +87,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.308/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.401/RuntimeIdentifierGraph.json"
         }
       }
     }
