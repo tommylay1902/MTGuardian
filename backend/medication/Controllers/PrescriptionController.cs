@@ -43,21 +43,21 @@ namespace prescription.Controllers
         /// <summary>
         /// Creates a new item.
         /// </summary>
-        /// <param name="prescirption">The prescription to create.</param>
+        /// <param name="prescription">The prescription to create.</param>
         /// <returns>The created prescription.</returns>
         /// <response code="201">Returns the created prescription.</response>
         /// <response code="400">If the request is invalid or the item creation fails.</response>
         [HttpPost]
         [ProducesResponseType(typeof(Prescription), 201)] // 201 Created
         [ProducesResponseType(400)] // 400 Bad Request
-        public ActionResult<PrescriptionDTO> Post([FromBody] Prescription prescription)
+        public ActionResult Post([FromBody] Prescription prescription)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             Guid id = _prescriptionService.CreatePrescription(prescription);
-            return CreatedAtAction(nameof(GetById), new { id = id }, prescription );
+            return CreatedAtAction(nameof(GetById), new { id = id }, id );
         }
 
         // PUT api/values/5
