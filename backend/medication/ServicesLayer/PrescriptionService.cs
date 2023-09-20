@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using prescription.Entities;
 using prescription.Interfaces;
 
@@ -12,9 +13,10 @@ namespace prescription.ServicesLayer
             _prescriptionRepository = prescriptionRepository;
 		}
 
-        public void CreatePrescription(Prescription prescription)
+        public Guid CreatePrescription(Prescription prescription)
         {
-            _prescriptionRepository.Add(prescription);
+            Guid id = _prescriptionRepository.Add(prescription);
+            return id;
         }
     }
 }

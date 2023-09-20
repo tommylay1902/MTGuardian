@@ -15,10 +15,11 @@ namespace prescription.Repositories
             _context = context;
 		}
 
-        public void Add(Prescription prescription)
+        public Guid Add(Prescription prescription)
         {
             _context.Add(prescription);
             _context.SaveChanges();
+            return prescription.Id;
         }
     }
 }

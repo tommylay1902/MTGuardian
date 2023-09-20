@@ -5,7 +5,7 @@ namespace prescription.Interfaces
 {
 	public interface IPrescriptionRepository
 	{
-		void Add(Prescription prescription);
+		Guid Add(Prescription prescription);
 	}
 }
 
