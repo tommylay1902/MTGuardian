@@ -13,6 +13,13 @@ namespace prescription.Data
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<Prescription>()
+                .HasIndex(p => p.Medication)
+                .IsUnique();
+        }
+
     }
 }
 

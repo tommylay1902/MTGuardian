@@ -103,4 +103,58 @@ public class PrescriptionServiceTest
         Assert.Equal("Prescription not found", exception.Message);
     }
 
+
+    [Fact]
+    public void GetAllPrescriptions_ReturnsAllPrescriptions()
+    {
+        // Arrange: Create a list of test prescriptions.
+        var expectedPrescriptions = new List<Prescription>
+        {
+            new Prescription
+            {
+          
+                Medication = "Medication1",
+                Doseage = "10 mg Daily",
+                Notes = "Note1",
+                PrescribedAt = System.DateTime.UtcNow
+            },
+            new Prescription
+            {
+            
+                Medication = "Medication2",
+                Doseage = "20 mg Daily",
+                Notes = "Note2",
+                PrescribedAt = System.DateTime.UtcNow
+            }
+        };
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        mockPrescriptionRepository.Setup(repo => repo.GetAllPrescriptions())
+            .Returns(expectedPrescriptions);
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object);
+
+        // Act: Retrieve all prescriptions using the service method.
+        var actualPrescriptions = prescriptionService.GetAllPrescriptions();
+
+        // Assert: Verify that all expected prescriptions are retrieved.
+        Assert.NotNull(actualPrescriptions);
+
+        // Compare the count first to quickly catch mismatches.
+        Assert.Equal(expectedPrescriptions.Count, actualPrescriptions.Count);
+
+        foreach (var expectedPrescription in expectedPrescriptions)
+        {
+            // Find the actual prescription by Medication, as IDs may not be predictable.
+            var actualPrescription = actualPrescriptions.First(p =>
+                (p.Medication == expectedPrescription.Medication
+                && p.PrescribedAt == expectedPrescription.PrescribedAt));
+
+            Assert.NotNull(actualPrescription);
+            Assert.Equal(expectedPrescription.Medication, actualPrescription.Medication);
+            Assert.Equal(expectedPrescription.Doseage, actualPrescription.Doseage);
+            Assert.Equal(expectedPrescription.Notes, actualPrescription.Notes);
+            Assert.Equal(expectedPrescription.PrescribedAt, actualPrescription.PrescribedAt);
+        }
+    }
 }

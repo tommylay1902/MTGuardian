@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace prescription.Entities
@@ -12,7 +13,7 @@ namespace prescription.Entities
         public Guid Id { get; set; }
 
 		[Required]
-		public String Medication { get; set; }
+        public String Medication { get; set; }
 
 		[Required]
 		public String Doseage { get; set; }

@@ -112,7 +112,6 @@ public sealed class PrescriptionDAOTest : IAsyncLifetime
                 // Act & Assert: Verify that an exception of type ResourceNotFoundException is thrown.
                 var ex = Assert.Throws<ResourceNotFoundException>(() => _prescriptionRepository.GetPrescriptionById(invalidId));
 
-                // Optionally, you can also assert the error message or other details of the exception.
                 Assert.Equal("Prescription not found", ex.Message);
             }
         }
@@ -121,6 +120,64 @@ public sealed class PrescriptionDAOTest : IAsyncLifetime
             Assert.Fail("_context and/or _prescriptionRepository is null");
         }
     }
+
+    [Fact]
+    public void GetAllPrescriptions_ReturnsAllPrescriptions()
+    {
+        if(_context != null && _prescriptionRepository != null)
+        {
+            // Arrange: Create a list of test prescriptions.
+            var expectedPrescriptions = new List<Prescription>
+            {
+                new Prescription
+                {
+                    Id = new Guid(),
+                    Medication = "Medication1",
+                    Doseage = "10 mg Daily",
+                    Notes = "Note1",
+                    PrescribedAt = DateTime.UtcNow
+                },
+                new Prescription
+                {
+                    Id = new Guid(),
+                    Medication = "Medication2",
+                    Doseage = "20 mg Daily",
+                    Notes = "Note2",
+                    PrescribedAt = DateTime.UtcNow
+                }
+            };
+
+            foreach (var prescription in expectedPrescriptions)
+            {
+                _context.Prescriptions.Add(prescription);
+            }
+            _context.SaveChanges();
+
+            // Act: Retrieve all prescriptions using the DAO method.
+            var actualPrescriptions = _prescriptionRepository.GetAllPrescriptions();
+
+            // Assert: Verify that all expected prescriptions are retrieved.
+            Assert.NotNull(actualPrescriptions);
+            Assert.Equal(expectedPrescriptions.Count, actualPrescriptions.Count);
+
+
+            foreach (var expectedPrescription in expectedPrescriptions)
+            {
+                var actualPrescription = actualPrescriptions.SingleOrDefault(p => p.Id == expectedPrescription.Id);
+                Assert.NotNull(actualPrescription);
+                Assert.Equal(expectedPrescription.Medication, actualPrescription.Medication);
+                Assert.Equal(expectedPrescription.Doseage, actualPrescription.Doseage);
+                Assert.Equal(expectedPrescription.Notes, actualPrescription.Notes);
+                Assert.Equal(expectedPrescription.PrescribedAt, actualPrescription.PrescribedAt);
+            }
+        }
+        else
+        {
+            Assert.Fail("_context or _prescriptionRepository is null");
+        }
+        
+    }
+
 
 
 }
