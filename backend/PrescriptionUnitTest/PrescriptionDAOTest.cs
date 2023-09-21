@@ -1,12 +1,10 @@
-﻿using System.Data.Common;
-using Npgsql;
-using prescription.Interfaces;
-using Testcontainers.PostgreSql;
+﻿using Testcontainers.PostgreSql;
 using prescription.Repositories;
 using prescription.Data;
 using Microsoft.EntityFrameworkCore;
 using prescription.Entities;
-using Xunit.Abstractions;
+using prescription.ErrorHandling.Exceptions;
+
 
 namespace PrescriptionUnitTest;
 
@@ -44,6 +42,7 @@ public sealed class PrescriptionDAOTest : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
+
         if(_context != null)
         {
             await _context.DisposeAsync();
@@ -73,8 +72,59 @@ public sealed class PrescriptionDAOTest : IAsyncLifetime
             // Assert: Verify that the prescription was created successfully and has an ID.
             Assert.IsType<Guid>(prescriptionId);
         }
+        else
+        {
+            Assert.Fail("_prescriptionRepository is null");
+        }
 
 
     }
+
+    [Theory]
+    [InlineData(true, "Dexamethasone", "20 mg Daily", "A steroid used to help inflamed areas of the body", "2023-09-21T00:59:37.942Z")]
+    [InlineData(false, "Nonexistent Medication", "10 mg Daily", "Description", "2023-09-21T01:00:00.000Z")]
+    public void GetPrescriptionById_ValidOrInvalidId_ReturnsPrescriptionOrThrowsException(bool validId, string medication, string dosage, string notes, string prescribedAt)
+    {
+        if (_context != null && _prescriptionRepository != null)
+        {
+            // Arrange
+            var prescriptionId = Guid.NewGuid(); // Use a valid or invalid ID
+            var expectedPrescription = new Prescription
+            {
+                Id = prescriptionId,
+                Medication = medication,
+                Doseage = dosage,
+                Notes = notes,
+                PrescribedAt = DateTime.Parse(prescribedAt).ToUniversalTime()
+            };
+
+            _context.Prescriptions.Add(expectedPrescription);
+            _context.SaveChanges();
+
+            if (validId)
+            {
+                // Act
+                var result = _prescriptionRepository.GetPrescriptionById(prescriptionId);
+
+                // Assert
+                Assert.NotNull(result);
+                Assert.Equal(prescriptionId, result.Id);
+            }
+            else
+            {
+                var invalidId = Guid.NewGuid();
+                // Act & Assert: Verify that an exception of type ResourceNotFoundException is thrown.
+                var ex = Assert.Throws<ResourceNotFoundException>(() => _prescriptionRepository.GetPrescriptionById(invalidId));
+
+                // Optionally, you can also assert the error message or other details of the exception.
+                Assert.Equal("Prescription not found", ex.Message);
+            }
+        }
+        else
+        {
+            Assert.Fail("_context and/or _prescriptionRepository is null");
+        }
+    }
+
 
 }
