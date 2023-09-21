@@ -42,12 +42,10 @@ public sealed class PrescriptionDAOTest : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-
         if(_context != null)
         {
             await _context.DisposeAsync();
         }
-       
         await _postgreSqlContainer.DisposeAsync().AsTask();
     }
 
@@ -76,8 +74,6 @@ public sealed class PrescriptionDAOTest : IAsyncLifetime
         {
             Assert.Fail("_prescriptionRepository is null");
         }
-
-
     }
 
     [Theory]

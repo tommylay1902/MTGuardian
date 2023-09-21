@@ -1,6 +1,5 @@
 using prescription.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using prescription.Interfaces;
 using prescription.ServicesLayer;
 using prescription.Repositories;

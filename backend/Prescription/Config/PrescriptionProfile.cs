@@ -11,7 +11,6 @@ namespace prescription.Config
 		{
 			CreateMap<Prescription, PrescriptionDTO>();
             CreateMap<PrescriptionDTO, Prescription>();
-
         }
     }
 }
