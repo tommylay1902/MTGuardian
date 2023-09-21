@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using prescription.Interfaces;
 using prescription.ServicesLayer;
 using prescription.Repositories;
+using prescription.ErrorHandling.ExceptionsFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,13 @@ builder.Services.AddDbContext<PrescriptionContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 
+// Add automapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+// Add exception filters
+builder.Services.AddSingleton<ResourceNotFoundExceptionFilterAttribute>();
+
+// Add repos and services
 builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
 builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
 

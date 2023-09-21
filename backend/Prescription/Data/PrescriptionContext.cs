@@ -13,7 +13,6 @@ namespace prescription.Data
         {
         }
 
-
     }
 }
 

@@ -5,7 +5,7 @@ using prescription.Interfaces;
 
 namespace prescription.ServicesLayer
 {
-	public class PrescriptionService:IPrescriptionService
+    public class PrescriptionService : IPrescriptionService
 	{
         private readonly IPrescriptionRepository _prescriptionRepository;
 		public PrescriptionService(IPrescriptionRepository prescriptionRepository)
@@ -17,6 +17,16 @@ namespace prescription.ServicesLayer
         {
             Guid id = _prescriptionRepository.Add(prescription);
             return id;
+        }
+
+        public List<Prescription> GetAllPrescriptions()
+        {
+            return _prescriptionRepository.GetAllPrescriptions();
+        }
+
+        public Prescription GetPrescription(Guid id)
+        {
+            return _prescriptionRepository.GetPrescriptionById(id);
         }
     }
 }

@@ -35,6 +35,9 @@
     <None Remove="Interfaces\" />
     <None Remove="services\" />
     <None Remove="ServicesLayer\" />
+    <None Remove="ErrorHandling\" />
+    <None Remove="ErrorHandling\ExceptionFilters\" />
+    <None Remove="ErrorHandling\Exceptions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
@@ -46,5 +49,8 @@
     <Folder Include="Interfaces\" />
     <Folder Include="ServicesLayer\" />
     <Folder Include="ServicesLayer\" />
+    <Folder Include="ErrorHandling\" />
+    <Folder Include="ErrorHandling\ExceptionFilters\" />
+    <Folder Include="ErrorHandling\Exceptions\" />
   </ItemGroup>
 </Project>

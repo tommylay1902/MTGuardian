@@ -5,7 +5,6 @@ namespace prescription.DTO
 	public class PrescriptionDTO
 	{
 
-
         public String Medication { get; set; }
 
         public String Doseage { get; set; }

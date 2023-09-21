@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using prescription.DTO;
 using prescription.Entities;
+using prescription.ErrorHandling.ExceptionsFilters;
 using prescription.Interfaces;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace prescription.Controllers
 {
@@ -24,19 +19,37 @@ namespace prescription.Controllers
             _prescriptionService = prescriptionService;
         }
 
-
         // GET: api/values
+        /// <summary>
+        /// Gets all prescriptions
+        /// </summary>
+        /// <returns>The corresponding prescription.</returns>
+        /// <response code="200">an array of all prescriptions</response>
+        /// <response code="400">If the request is invalid.</response>
         [HttpGet]
-        public IEnumerable<string> Get()
+        [ProducesResponseType(typeof(PrescriptionDTO), 200)] // 200 Created
+        [ProducesResponseType(400)] // 400 Bad Request
+        public List<PrescriptionDTO> GetAllPrescriptions()
         {
-            return new string[] { "value1", "value2" };
+            List<Prescription> prescriptions = _prescriptionService.GetAllPrescriptions();
+            return _mapper.Map<List<Prescription>, List<PrescriptionDTO>>(prescriptions);
         }
 
         // GET api/values/5
+        /// <summary>
+        /// Gets a prescription by its id
+        /// </summary>
+        /// <param name="id">The id of the prescription to get.</param>
+        /// <returns>The corresponding prescription.</returns>
+        /// <response code="200">Returns the prescription information of the corresponding id.</response>
+        /// <response code="400">If the request is invalid.</response>
         [HttpGet("{id}")]
-        public string GetById(int id)
+        [ProducesResponseType(typeof(PrescriptionDTO), 200)] // 200 Created
+        [ProducesResponseType(400)] // 400 Bad Request
+        [ResourceNotFoundExceptionFilter]
+        public PrescriptionDTO GetById(Guid id)
         {
-            return "value";
+            return _mapper.Map<PrescriptionDTO>(_prescriptionService.GetPrescription(id));
         }
 
         // POST api/values

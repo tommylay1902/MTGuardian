@@ -22,8 +22,6 @@ namespace prescription.Entities
 		[Required]
 		public DateTime PrescribedAt {get; set;}
 
-		
-
         public Prescription(Guid id, string medication, string doseage, string notes, DateTime prescribedAt)
         {
             Id = id;
@@ -32,7 +30,6 @@ namespace prescription.Entities
             Notes = notes;
             PrescribedAt = prescribedAt;
         }
-
 
         public Prescription(Guid id, string medication, string doseage,DateTime prescribedAt)
         {

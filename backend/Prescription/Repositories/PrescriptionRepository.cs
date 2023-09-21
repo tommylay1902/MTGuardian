@@ -1,6 +1,7 @@
 ﻿using System;
 using prescription.Data;
 using prescription.Entities;
+using prescription.ErrorHandling.Exceptions;
 using prescription.Interfaces;
 
 namespace prescription.Repositories
@@ -21,6 +22,23 @@ namespace prescription.Repositories
             _context.SaveChanges();
             return prescription.Id;
         }
+
+        public List<Prescription> GetAllPrescriptions()
+        {
+            return _context.Prescriptions.ToList();
+        }
+
+        public Prescription GetPrescriptionById(Guid id)
+        {
+            var prescription = _context.Prescriptions.Find(id);
+            if(prescription == null)
+            {
+                throw new ResourceNotFoundException("Prescription not found");
+            }
+            return prescription;
+        }
+
+     
     }
 }
 
