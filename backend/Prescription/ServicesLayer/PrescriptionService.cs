@@ -1,6 +1,6 @@
-﻿using System;
-using System.Net;
+﻿
 using prescription.Entities;
+using prescription.ErrorHandling.Exceptions;
 using prescription.Interfaces;
 
 namespace prescription.ServicesLayer
@@ -15,8 +15,17 @@ namespace prescription.ServicesLayer
 
         public Guid CreatePrescription(Prescription prescription)
         {
-            Guid id = _prescriptionRepository.Add(prescription);
-            return id;
+            if (_prescriptionRepository.PrescriptionExistsByMedication(prescription.Medication) == null)
+            {
+                Guid id = _prescriptionRepository.Add(prescription);
+                return id;
+            }
+            else
+            {
+                throw new ResourceConflictException("You already have this medication prescribed");
+            }
+
+           
         }
 
         public List<Prescription> GetAllPrescriptions()

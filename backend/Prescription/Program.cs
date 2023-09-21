@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using prescription.Interfaces;
 using prescription.ServicesLayer;
 using prescription.Repositories;
-using prescription.ErrorHandling.ExceptionsFilters;
+using prescription.ErrorHandling.ExceptionFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +23,7 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 // Add exception filters
 builder.Services.AddSingleton<ResourceNotFoundExceptionFilterAttribute>();
+builder.Services.AddSingleton<ResourceConflictExceptionFilterAttribute>();
 
 // Add repos and services
 builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();

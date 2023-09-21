@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using prescription.DTO;
 using prescription.Entities;
-using prescription.ErrorHandling.ExceptionsFilters;
+using prescription.ErrorHandling.ExceptionFilters;
 using prescription.Interfaces;
 
 namespace prescription.Controllers
@@ -63,6 +63,7 @@ namespace prescription.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(Guid), 201)] // 201 Created
         [ProducesResponseType(400)] // 400 Bad Request
+        [ResourceConflictExceptionFilter]
         public IActionResult CreatePrescription([FromBody] Prescription prescription)
         {
             if (!ModelState.IsValid)
