@@ -6,12 +6,12 @@ namespace prescription.Interfaces
 {
 	public interface IPrescriptionRepository
 	{
-		Guid Add(Prescription prescription);
-		Prescription GetPrescriptionById(Guid id);
-		List<Prescription> GetAllPrescriptions();
-		Prescription? PrescriptionExistsByMedication(String medication);
-		void UpdatePrescriptionById(Prescription p);
-		void DeletePrescriptionByEntity(Prescription p);
+		Task<Guid> AddAsync(Prescription prescription);
+		Task<Prescription> GetPrescriptionByIdAsync(Guid id);
+		Task<List<Prescription>> GetAllPrescriptionsAsync();
+		Task<Prescription?> PrescriptionExistsByMedicationAsync(String medication);
+		Task UpdatePrescriptionByIdAsync(Prescription p);
+		Task DeletePrescriptionByEntityAsync(Prescription p);
 	}
 }
 

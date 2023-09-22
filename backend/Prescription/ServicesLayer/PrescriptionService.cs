@@ -18,12 +18,13 @@ namespace prescription.ServicesLayer
             
 		}
 
-        public Guid CreatePrescription(PrescriptionDTO prescription)
+        public async Task<Guid> CreatePrescriptionAsync(PrescriptionDTO prescription)
         {
-            if (_prescriptionRepository.PrescriptionExistsByMedication(prescription.Medication) == null)
+            
+            if (await _prescriptionRepository.PrescriptionExistsByMedicationAsync(prescription.Medication) == null)
             {
                 var p = _mapper.Map<PrescriptionDTO, Prescription>(prescription);
-                Guid id = _prescriptionRepository.Add(p);
+                Guid id = await _prescriptionRepository.AddAsync(p);
                 return id;
             }
             else
@@ -32,12 +33,12 @@ namespace prescription.ServicesLayer
             }
         }
 
-        public void DeletePrescription(Guid id)
+        public async Task DeletePrescriptionAsync(Guid id)
         {
-            Prescription p = _prescriptionRepository.GetPrescriptionById(id);
+            Prescription p = await _prescriptionRepository.GetPrescriptionByIdAsync(id);
             if(p != null)
             {
-                _prescriptionRepository.DeletePrescriptionByEntity(p);
+                await _prescriptionRepository.DeletePrescriptionByEntityAsync(p);
             }
             else
             {
@@ -45,25 +46,25 @@ namespace prescription.ServicesLayer
             }
         }
 
-        public List<Prescription> GetAllPrescriptions()
+        public async Task<List<Prescription>> GetAllPrescriptionsAsync()
         {
-            return _prescriptionRepository.GetAllPrescriptions();
+            return await _prescriptionRepository.GetAllPrescriptionsAsync();
         }
 
-        public Prescription GetPrescription(Guid id)
+        public async Task<Prescription> GetPrescriptionAsync(Guid id)
         {
-            return _prescriptionRepository.GetPrescriptionById(id);
+            return await _prescriptionRepository.GetPrescriptionByIdAsync(id);
         }
 
-        public void UpdatePrescription(Guid id, PrescriptionDTO p)
+        public async Task UpdatePrescriptionAsync(Guid id, PrescriptionDTO p)
         {
             //will throw 404 from database if id not found
-            Prescription pToUpdate = _prescriptionRepository.GetPrescriptionById(id);
+            Prescription pToUpdate = await _prescriptionRepository.GetPrescriptionByIdAsync(id);
 
             bool hasChanges = false;
             if(p.Medication != null && p.Medication != pToUpdate.Medication )
             {
-                if(_prescriptionRepository.PrescriptionExistsByMedication(p.Medication) == null)
+                if(await _prescriptionRepository.PrescriptionExistsByMedicationAsync(p.Medication) == null)
                 {
                     pToUpdate.Medication = p.Medication;
                     hasChanges = true;
@@ -96,7 +97,7 @@ namespace prescription.ServicesLayer
                 throw new BadRequestException("no changes found");
             }
 
-            _prescriptionRepository.UpdatePrescriptionById(pToUpdate);
+            await _prescriptionRepository.UpdatePrescriptionByIdAsync(pToUpdate);
 
 
         }

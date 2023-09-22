@@ -30,9 +30,9 @@ namespace prescription.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(PrescriptionDTO), 200)] // 200 Created
         [ProducesResponseType(400)] // 400 Bad Request
-        public List<PrescriptionDTO> GetAllPrescriptions()
+        public async  Task<List<PrescriptionDTO>> GetAllPrescriptions()
         {
-            List<Prescription> prescriptions = _prescriptionService.GetAllPrescriptions();
+            List<Prescription> prescriptions = await _prescriptionService.GetAllPrescriptionsAsync();
             return _mapper.Map<List<Prescription>, List<PrescriptionDTO>>(prescriptions);
         }
 
@@ -48,9 +48,9 @@ namespace prescription.Controllers
         [ProducesResponseType(typeof(PrescriptionDTO), 200)] // 200 Created
         [ProducesResponseType(400)] // 400 Bad Request
         [ResourceNotFoundExceptionFilter]
-        public PrescriptionDTO GetById(Guid id)
+        public async Task<PrescriptionDTO> GetById(Guid id)
         {
-            return _mapper.Map<PrescriptionDTO>(_prescriptionService.GetPrescription(id));
+            return _mapper.Map<PrescriptionDTO>(await _prescriptionService.GetPrescriptionAsync(id));
         }
 
         // POST api/values
@@ -66,13 +66,13 @@ namespace prescription.Controllers
         [ProducesResponseType(400)] // 400 Bad Request
         [ProducesResponseType(409)]
         [ResourceConflictExceptionFilter]
-        public IActionResult CreatePrescription([FromBody] PrescriptionDTO prescription)
+        public async Task<IActionResult> CreatePrescription([FromBody] PrescriptionDTO prescription)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            Guid id = _prescriptionService.CreatePrescription(prescription);
+            Guid id = await _prescriptionService.CreatePrescriptionAsync(prescription);
             return CreatedAtAction(nameof(GetById), new { id = id }, id );
         }
 
@@ -81,9 +81,9 @@ namespace prescription.Controllers
         [ProducesResponseType(200)] // 200 Created
         [ProducesResponseType(400)] // 400 Bad Request
         [BadRequestExceptionFilter]
-        public IActionResult Put(Guid id, [FromBody]PrescriptionDTO p)
+        public async Task<IActionResult> Put(Guid id, [FromBody]PrescriptionDTO p)
         {
-            _prescriptionService.UpdatePrescription(id, p);
+            await _prescriptionService.UpdatePrescriptionAsync(id, p);
             return NoContent();
         }
 
@@ -91,9 +91,9 @@ namespace prescription.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(200)] // 200 Created
         [ResourceNotFoundExceptionFilter]
-        public IActionResult Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            _prescriptionService.DeletePrescription(id);
+            await _prescriptionService.DeletePrescriptionAsync(id);
             return NoContent();
         }
     }
