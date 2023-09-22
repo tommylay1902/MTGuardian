@@ -1,4 +1,5 @@
 ﻿using System;
+using prescription.DTO;
 using prescription.Entities;
 
 namespace prescription.Interfaces

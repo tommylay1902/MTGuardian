@@ -17,6 +17,5 @@ namespace prescription.ErrorHandling.ExceptionFilters
             }
         }
     }
-
 }
 

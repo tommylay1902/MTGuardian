@@ -1,4 +1,5 @@
 ﻿
+using AutoMapper;
 using prescription.DTO;
 using prescription.Entities;
 using prescription.ErrorHandling.Exceptions;
@@ -9,16 +10,20 @@ namespace prescription.ServicesLayer
     public class PrescriptionService : IPrescriptionService
 	{
         private readonly IPrescriptionRepository _prescriptionRepository;
-		public PrescriptionService(IPrescriptionRepository prescriptionRepository)
+        private readonly IMapper _mapper;
+		public PrescriptionService(IPrescriptionRepository prescriptionRepository, IMapper mapper)
 		{
             _prescriptionRepository = prescriptionRepository;
+            _mapper = mapper;
+            
 		}
 
-        public Guid CreatePrescription(Prescription prescription)
+        public Guid CreatePrescription(PrescriptionDTO prescription)
         {
             if (_prescriptionRepository.PrescriptionExistsByMedication(prescription.Medication) == null)
             {
-                Guid id = _prescriptionRepository.Add(prescription);
+                var p = _mapper.Map<PrescriptionDTO, Prescription>(prescription);
+                Guid id = _prescriptionRepository.Add(p);
                 return id;
             }
             else

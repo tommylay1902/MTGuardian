@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using prescription.Data;
+using prescription.DTO;
 using prescription.Entities;
 using prescription.ErrorHandling.Exceptions;
 using prescription.Interfaces;
@@ -18,6 +19,7 @@ namespace prescription.Repositories
 
         public Guid Add(Prescription prescription)
         {
+            
             _context.Add(prescription);
             _context.SaveChanges();
             return prescription.Id;
