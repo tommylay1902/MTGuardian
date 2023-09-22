@@ -6,32 +6,52 @@ using prescription.ServicesLayer;
 
 public class PrescriptionServiceTest
 {
-    [Fact]
-    public void CreatePrescription_ValidInput_ReturnsGuid()
+    [Theory]
+    [InlineData(true)] // Test for a valid prescription
+    [InlineData(false)] // Test for an invalid prescription
+    public void CreatePrescription_ValidInput_ReturnsGuidOrThrowsException(bool isValidPrescription)
     {
         // Arrange
         var prescriptionRepositoryMock = new Mock<IPrescriptionRepository>();
-
         var prescriptionService = new PrescriptionService(prescriptionRepositoryMock.Object);
 
-        var expectedGuid = Guid.NewGuid();
-        prescriptionRepositoryMock.Setup(repo => repo.Add(It.IsAny<Prescription>()))
-            .Returns(expectedGuid);
-
-        var prescription = new Prescription
+        if (isValidPrescription)
         {
-            Medication = "Dexamethasone",
-            Doseage = "20 mg Daily",
-            Notes = "A steroid used to help inflamed areas of the body",
-            PrescribedAt = DateTime.Parse("2023-09-21T00:59:37.942Z").ToUniversalTime()
-        };
+            var expectedGuid = Guid.NewGuid();
+            prescriptionRepositoryMock.Setup(repo => repo.Add(It.IsAny<Prescription>()))
+                .Returns(expectedGuid);
 
-        // Act
-        var result = prescriptionService.CreatePrescription(prescription);
+            var prescription = new Prescription
+            {
+                Medication = "Dexamethasone",
+                Doseage = "20 mg Daily",
+                Notes = "A steroid used to help inflamed areas of the body",
+                PrescribedAt = DateTime.Parse("2023-09-21T00:59:37.942Z").ToUniversalTime()
+            };
 
-        // Assert
-        Assert.Equal(expectedGuid, result);
+            // Act
+            var result = prescriptionService.CreatePrescription(prescription);
+
+            // Assert
+            Assert.Equal(expectedGuid, result);
+        }
+        else
+        {
+            var prescriptionWithDuplicateMedication = new Prescription
+            {
+                Medication = "Dexamethasone", // Create a prescription with the same medication value
+                                              // ... set other properties as needed
+            };
+
+            // Set up the mock to throw an exception when Add is called with a duplicate Medication value
+            prescriptionRepositoryMock.Setup(repo => repo.Add(It.Is<Prescription>(p => p.Medication == prescriptionWithDuplicateMedication.Medication)))
+                .Throws<ResourceConflictException>(); // Replace with the appropriate exception type for a unique constraint violation
+
+            // Act and Assert (for exception)
+            Assert.Throws<ResourceConflictException>(() => prescriptionService.CreatePrescription(prescriptionWithDuplicateMedication));
+        }
     }
+
 
     [Fact]
     public void GetPrescription_Returns_Prescription_When_IdExists()
@@ -75,7 +95,7 @@ public class PrescriptionServiceTest
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
         mockPrescriptionRepository
             .Setup(repo => repo.GetPrescriptionById(nonExistentPrescriptionId))
-            .Returns((Prescription)null);
+            .Returns( (Prescription)null);
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object);
 

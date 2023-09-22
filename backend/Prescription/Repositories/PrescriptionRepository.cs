@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using prescription.Data;
+﻿using prescription.Data;
 using prescription.Entities;
 using prescription.ErrorHandling.Exceptions;
 using prescription.Interfaces;
@@ -39,7 +37,7 @@ namespace prescription.Repositories
             return prescription;
         }
 
-        public Prescription PrescriptionExistsByMedication(string medication)
+        public Prescription? PrescriptionExistsByMedication(string medication)
         {
             return _context.Prescriptions
             .FirstOrDefault(p => p.Medication == medication);
