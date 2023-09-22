@@ -27,6 +27,19 @@ namespace prescription.ServicesLayer
             }
         }
 
+        public void DeletePrescription(Guid id)
+        {
+            Prescription p = _prescriptionRepository.GetPrescriptionById(id);
+            if(p != null)
+            {
+                _prescriptionRepository.DeletePrescriptionByEntity(p);
+            }
+            else
+            {
+                throw new ResourceNotFoundException("Prescription was not found");
+            }
+        }
+
         public List<Prescription> GetAllPrescriptions()
         {
             return _prescriptionRepository.GetAllPrescriptions();
@@ -42,14 +55,7 @@ namespace prescription.ServicesLayer
             //will throw 404 from database if id not found
             Prescription pToUpdate = _prescriptionRepository.GetPrescriptionById(id);
 
-            Boolean hasChanges = false;
-        //            public String Medication { get; set; }
-
-        //public String Doseage { get; set; }
-
-        //public String? Notes { get; set; }
-
-        //public DateTime PrescribedAt { get; set; }
+            bool hasChanges = false;
             if(p.Medication != null && p.Medication != pToUpdate.Medication )
             {
                 if(_prescriptionRepository.PrescriptionExistsByMedication(p.Medication) == null)

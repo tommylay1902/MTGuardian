@@ -77,18 +77,23 @@ namespace prescription.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        [ProducesResponseType(200)] // 201 Created
+        [ProducesResponseType(200)] // 200 Created
         [ProducesResponseType(400)] // 400 Bad Request
         [BadRequestExceptionFilter]
-        public void Put(Guid id, [FromBody]PrescriptionDTO p)
+        public IActionResult Put(Guid id, [FromBody]PrescriptionDTO p)
         {
             _prescriptionService.UpdatePrescription(id, p);
+            return NoContent();
         }
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [ProducesResponseType(200)] // 200 Created
+        [ResourceNotFoundExceptionFilter]
+        public IActionResult Delete(Guid id)
         {
+            _prescriptionService.DeletePrescription(id);
+            return NoContent();
         }
     }
 }

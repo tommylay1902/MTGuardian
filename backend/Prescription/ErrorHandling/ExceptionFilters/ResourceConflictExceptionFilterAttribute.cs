@@ -9,7 +9,7 @@ namespace prescription.ErrorHandling.ExceptionFilters
 	{
 		public override void OnException(ExceptionContext context)
         {
-            if (context.Exception is ResourceNotFoundException)
+            if (context.Exception is ResourceConflictException)
             {
                 context.Result = new ObjectResult(new { error = context.Exception.Message })
                 {

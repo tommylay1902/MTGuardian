@@ -10,6 +10,7 @@ namespace prescription.Interfaces
 		List<Prescription> GetAllPrescriptions();
 		Prescription? PrescriptionExistsByMedication(String medication);
 		void UpdatePrescriptionById(Prescription p);
+		void DeletePrescriptionByEntity(Prescription p);
 	}
 }
 

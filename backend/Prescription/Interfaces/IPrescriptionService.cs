@@ -10,6 +10,7 @@ namespace prescription.Interfaces
 		public Prescription GetPrescription(Guid id);
 		public List<Prescription> GetAllPrescriptions();
 		public void UpdatePrescription(Guid id, PrescriptionDTO p);
+		public void DeletePrescription(Guid id);
 	}
 }
 

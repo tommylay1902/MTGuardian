@@ -23,6 +23,12 @@ namespace prescription.Repositories
             return prescription.Id;
         }
 
+        public void DeletePrescriptionByEntity(Prescription p)
+        {
+            _context.Prescriptions.Remove(p);
+            _context.SaveChanges();
+        }
+
         public List<Prescription> GetAllPrescriptions()
         {
             return _context.Prescriptions.ToList();
