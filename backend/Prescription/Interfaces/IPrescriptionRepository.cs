@@ -1,4 +1,5 @@
 ﻿using System;
+using prescription.DTO;
 using prescription.Entities;
 
 namespace prescription.Interfaces
@@ -9,6 +10,8 @@ namespace prescription.Interfaces
 		Prescription GetPrescriptionById(Guid id);
 		List<Prescription> GetAllPrescriptions();
 		Prescription? PrescriptionExistsByMedication(String medication);
+		void UpdatePrescriptionById(Prescription p);
+		void DeletePrescriptionByEntity(Prescription p);
 	}
 }
 

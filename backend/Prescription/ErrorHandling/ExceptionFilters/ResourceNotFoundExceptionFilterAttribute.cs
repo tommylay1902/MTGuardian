@@ -10,13 +10,12 @@ namespace prescription.ErrorHandling.ExceptionFilters
 		
 		public override void OnException(ExceptionContext context)
         {
-            if (context.Exception is ResourceConflictException)
+            if (context.Exception is ResourceNotFoundException)
             {
                 context.Result = new NotFoundObjectResult(new { error = context.Exception.Message });
                 context.ExceptionHandled = true;
             }
         }
     }
-
 }
 

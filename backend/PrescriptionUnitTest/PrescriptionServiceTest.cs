@@ -1,4 +1,7 @@
-﻿using Moq;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Moq;
+using prescription.DTO;
 using prescription.Entities;
 using prescription.ErrorHandling.Exceptions;
 using prescription.Interfaces;
@@ -13,7 +16,8 @@ public class PrescriptionServiceTest
     {
         // Arrange
         var prescriptionRepositoryMock = new Mock<IPrescriptionRepository>();
-        var prescriptionService = new PrescriptionService(prescriptionRepositoryMock.Object);
+        var mapperMock = new Mock<IMapper>();
+        var prescriptionService = new PrescriptionService(prescriptionRepositoryMock.Object, mapperMock.Object);
 
         if (isValidPrescription)
         {
@@ -21,7 +25,7 @@ public class PrescriptionServiceTest
             prescriptionRepositoryMock.Setup(repo => repo.Add(It.IsAny<Prescription>()))
                 .Returns(expectedGuid);
 
-            var prescription = new Prescription
+            var prescription = new PrescriptionDTO
             {
                 Medication = "Dexamethasone",
                 Doseage = "20 mg Daily",
@@ -37,18 +41,25 @@ public class PrescriptionServiceTest
         }
         else
         {
-            var prescriptionWithDuplicateMedication = new Prescription
+            var prescriptionWithDuplicateMedicationDto = new PrescriptionDTO
             {
                 Medication = "Dexamethasone", // Create a prescription with the same medication value
-                                              // ... set other properties as needed
+                Doseage = "20 mg Daily",
+                Notes = "A steroid used to help inflamed areas of the body",
+                PrescribedAt = DateTime.Parse("2023-09-21T00:59:37.942Z").ToUniversalTime()
             };
 
+            // Mock AutoMapper behavior to simulate mapping
+            mapperMock.Setup(mapper => mapper.Map<PrescriptionDTO, Prescription>(It.IsAny<PrescriptionDTO>()))
+                .Returns(new Prescription());
+
+
             // Set up the mock to throw an exception when Add is called with a duplicate Medication value
-            prescriptionRepositoryMock.Setup(repo => repo.Add(It.Is<Prescription>(p => p.Medication == prescriptionWithDuplicateMedication.Medication)))
+            prescriptionRepositoryMock.Setup(repo => repo.Add(It.IsAny<Prescription>()))
                 .Throws<ResourceConflictException>(); // Replace with the appropriate exception type for a unique constraint violation
 
             // Act and Assert (for exception)
-            Assert.Throws<ResourceConflictException>(() => prescriptionService.CreatePrescription(prescriptionWithDuplicateMedication));
+            Assert.Throws<ResourceConflictException>(() => prescriptionService.CreatePrescription(prescriptionWithDuplicateMedicationDto));
         }
     }
 
@@ -68,11 +79,12 @@ public class PrescriptionServiceTest
         };
 
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
         mockPrescriptionRepository
             .Setup(repo => repo.GetPrescriptionById(existingPrescriptionId))
             .Returns(expectedPrescription);
 
-        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object);
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act
         Prescription result = prescriptionService.GetPrescription(existingPrescriptionId);
@@ -93,11 +105,13 @@ public class PrescriptionServiceTest
         Guid nonExistentPrescriptionId = Guid.NewGuid();
 
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
         mockPrescriptionRepository
             .Setup(repo => repo.GetPrescriptionById(nonExistentPrescriptionId))
             .Returns( (Prescription)null);
 
-        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object);
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act
         Prescription result = prescriptionService.GetPrescription(nonExistentPrescriptionId);
@@ -112,11 +126,13 @@ public class PrescriptionServiceTest
         // Arrange
         Guid prescriptionId = Guid.NewGuid();
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
         mockPrescriptionRepository
             .Setup(repo => repo.GetPrescriptionById(prescriptionId))
             .Throws(new ResourceNotFoundException("Prescription not found")); // Customize the exception as per your actual implementation
 
-        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object);
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act & Assert
         var exception = Assert.Throws<ResourceNotFoundException>(() => prescriptionService.GetPrescription(prescriptionId));
@@ -149,10 +165,12 @@ public class PrescriptionServiceTest
         };
 
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
         mockPrescriptionRepository.Setup(repo => repo.GetAllPrescriptions())
             .Returns(expectedPrescriptions);
 
-        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object);
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act: Retrieve all prescriptions using the service method.
         var actualPrescriptions = prescriptionService.GetAllPrescriptions();
@@ -177,4 +195,169 @@ public class PrescriptionServiceTest
             Assert.Equal(expectedPrescription.PrescribedAt, actualPrescription.PrescribedAt);
         }
     }
+
+    [Fact]
+    public void UpdatePrescription_UpdatesPrescription_WhenValidInputProvided()
+    {
+        // Arrange
+        Guid prescriptionId = Guid.NewGuid();
+        var prescriptionToUpdate = new Prescription
+        {
+            Id = prescriptionId,
+            Medication = "Original Medication",
+            Doseage = "10 mg Daily",
+            Notes = "Note1",
+            PrescribedAt = DateTime.UtcNow
+        };
+
+        var updatedPrescriptionDTO = new PrescriptionDTO
+        {
+            Medication = "Updated Medication",
+            Doseage = "20 mg Daily",
+            Notes = "Updated Note",
+            PrescribedAt = DateTime.UtcNow.AddDays(1)
+        };
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
+            .Returns(prescriptionToUpdate);
+        mockPrescriptionRepository.Setup(repo => repo.PrescriptionExistsByMedication(updatedPrescriptionDTO.Medication))
+            .Returns((Prescription)null); // Medication doesn't exist
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
+
+        // Act
+        prescriptionService.UpdatePrescription(prescriptionId, updatedPrescriptionDTO);
+
+        // Assert
+        Assert.Equal(updatedPrescriptionDTO.Medication, prescriptionToUpdate.Medication);
+        Assert.Equal(updatedPrescriptionDTO.Doseage, prescriptionToUpdate.Doseage);
+        Assert.Equal(updatedPrescriptionDTO.Notes, prescriptionToUpdate.Notes);
+        Assert.Equal(updatedPrescriptionDTO.PrescribedAt, prescriptionToUpdate.PrescribedAt);
+    }
+
+    [Fact]
+    public void UpdatePrescription_ThrowsConflictException_WhenMedicationExists()
+    {
+        // Arrange
+        Guid prescriptionId = Guid.NewGuid();
+        var prescriptionToUpdate = new Prescription
+        {
+            Id = prescriptionId,
+            Medication = "Original Medication",
+            Doseage = "10 mg Daily",
+            Notes = "Note1",
+            PrescribedAt = DateTime.UtcNow
+        };
+
+        var updatedPrescriptionDTO = new PrescriptionDTO
+        {
+            Medication = "Updated Medication",
+            Doseage = "20 mg Daily",
+            Notes = "Updated Note",
+            PrescribedAt = DateTime.UtcNow.AddDays(1)
+        };
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
+            .Returns(prescriptionToUpdate);
+        mockPrescriptionRepository.Setup(repo => repo.PrescriptionExistsByMedication(updatedPrescriptionDTO.Medication))
+            .Returns(new Prescription()); // Medication already exists
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
+
+        // Act and Assert
+        var exception = Assert.Throws<ResourceConflictException>(() => prescriptionService.UpdatePrescription(prescriptionId, updatedPrescriptionDTO));
+        Assert.Equal("Medication already exists", exception.Message);
+    }
+
+    [Fact]
+    public void UpdatePrescription_ThrowsBadRequestException_WhenNoChangesFound()
+    {
+        // Arrange
+        Guid prescriptionId = Guid.NewGuid();
+        var prescriptionToUpdate = new Prescription
+        {
+            Id = prescriptionId,
+            Medication = "Original Medication",
+            Doseage = "10 mg Daily",
+            Notes = "Note1",
+            PrescribedAt = DateTime.UtcNow
+        };
+
+        var updatedPrescriptionDTO = new PrescriptionDTO
+        {
+            Medication = "Original Medication", // No changes
+            Doseage = "10 mg Daily", // No changes
+            Notes = "Note1", // No changes
+            PrescribedAt = prescriptionToUpdate.PrescribedAt // No changes
+        };
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
+            .Returns(prescriptionToUpdate);
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
+
+        // Act and Assert
+        var exception = Assert.Throws<BadRequestException>(() => prescriptionService.UpdatePrescription(prescriptionId, updatedPrescriptionDTO));
+        Assert.Equal("no changes found", exception.Message);
+    }
+
+    [Fact]
+    public void DeletePrescription_DeletesPrescription_WhenIdExists()
+    {
+        // Arrange
+        Guid prescriptionId = Guid.NewGuid();
+
+        var prescriptionToDelete = new Prescription
+        {
+            Id = prescriptionId,
+            Medication = "MedicationToDelete",
+            Doseage = "10 mg Daily",
+            Notes = "Note1",
+            PrescribedAt = DateTime.UtcNow
+        };
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
+            .Returns(prescriptionToDelete);
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
+
+        // Act
+        prescriptionService.DeletePrescription(prescriptionId);
+
+        // Assert
+        mockPrescriptionRepository.Verify(repo => repo.DeletePrescriptionByEntity(prescriptionToDelete), Times.Once);
+    }
+
+    [Fact]
+    public void DeletePrescription_ThrowsResourceNotFoundException_WhenIdDoesNotExist()
+    {
+        // Arrange
+        Guid nonExistentPrescriptionId = Guid.NewGuid();
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(nonExistentPrescriptionId))
+            .Returns((Prescription)null);
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
+
+        // Act and Assert
+        var exception = Assert.Throws<ResourceNotFoundException>(() => prescriptionService.DeletePrescription(nonExistentPrescriptionId));
+        Assert.Equal("Prescription was not found", exception.Message);
+    }
+
+
 }

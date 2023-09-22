@@ -24,6 +24,7 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 // Add exception filters
 builder.Services.AddSingleton<ResourceNotFoundExceptionFilterAttribute>();
 builder.Services.AddSingleton<ResourceConflictExceptionFilterAttribute>();
+builder.Services.AddSingleton<BadRequestExceptionFilterAttribute>();
 
 // Add repos and services
 builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();

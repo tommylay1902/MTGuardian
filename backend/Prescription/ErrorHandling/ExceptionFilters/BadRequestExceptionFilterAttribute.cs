@@ -1,23 +1,26 @@
-﻿using System.Net;
+﻿
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using prescription.ErrorHandling.Exceptions;
 
 namespace prescription.ErrorHandling.ExceptionFilters
 {
-    public class ResourceConflictExceptionFilterAttribute : ExceptionFilterAttribute
-	{
-		public override void OnException(ExceptionContext context)
+    public class BadRequestExceptionFilterAttribute : ExceptionFilterAttribute
+    {
+
+        public override void OnException(ExceptionContext context)
         {
-            if (context.Exception is ResourceConflictException)
+            if (context.Exception is BadRequestException)
             {
                 context.Result = new ObjectResult(new { error = context.Exception.Message })
                 {
-                    StatusCode = (int)HttpStatusCode.Conflict
+                    StatusCode = (int)HttpStatusCode.BadRequest
                 };
                 context.ExceptionHandled = true;
             }
         }
+
     }
 }
 

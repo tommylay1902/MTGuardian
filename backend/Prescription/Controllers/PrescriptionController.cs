@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using prescription.DTO;
 using prescription.Entities;
 using prescription.ErrorHandling.ExceptionFilters;
+using prescription.ErrorHandling.Exceptions;
 using prescription.Interfaces;
 
 namespace prescription.Controllers
@@ -63,9 +64,9 @@ namespace prescription.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(Guid), 201)] // 201 Created
         [ProducesResponseType(400)] // 400 Bad Request
-        [ProducesResponseType(typeof(ResourceConflictExceptionFilterAttribute), 409)]
+        [ProducesResponseType(409)]
         [ResourceConflictExceptionFilter]
-        public IActionResult CreatePrescription([FromBody] Prescription prescription)
+        public IActionResult CreatePrescription([FromBody] PrescriptionDTO prescription)
         {
             if (!ModelState.IsValid)
             {
@@ -77,14 +78,23 @@ namespace prescription.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        [ProducesResponseType(200)] // 200 Created
+        [ProducesResponseType(400)] // 400 Bad Request
+        [BadRequestExceptionFilter]
+        public IActionResult Put(Guid id, [FromBody]PrescriptionDTO p)
         {
+            _prescriptionService.UpdatePrescription(id, p);
+            return NoContent();
         }
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [ProducesResponseType(200)] // 200 Created
+        [ResourceNotFoundExceptionFilter]
+        public IActionResult Delete(Guid id)
         {
+            _prescriptionService.DeletePrescription(id);
+            return NoContent();
         }
     }
 }
