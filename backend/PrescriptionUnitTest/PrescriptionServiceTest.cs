@@ -6,13 +6,18 @@ using prescription.Entities;
 using prescription.ErrorHandling.Exceptions;
 using prescription.Interfaces;
 using prescription.ServicesLayer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
 
 public class PrescriptionServiceTest
 {
     [Theory]
     [InlineData(true)] // Test for a valid prescription
     [InlineData(false)] // Test for an invalid prescription
-    public void CreatePrescription_ValidInput_ReturnsGuidOrThrowsException(bool isValidPrescription)
+    public async Task CreatePrescription_ValidInput_ReturnsGuidOrThrowsException(bool isValidPrescription)
     {
         // Arrange
         var prescriptionRepositoryMock = new Mock<IPrescriptionRepository>();
@@ -22,8 +27,8 @@ public class PrescriptionServiceTest
         if (isValidPrescription)
         {
             var expectedGuid = Guid.NewGuid();
-            prescriptionRepositoryMock.Setup(repo => repo.Add(It.IsAny<Prescription>()))
-                .Returns(expectedGuid);
+            prescriptionRepositoryMock.Setup(repo => repo.AddAsync(It.IsAny<Prescription>()))
+                .ReturnsAsync(expectedGuid);
 
             var prescription = new PrescriptionDTO
             {
@@ -34,7 +39,7 @@ public class PrescriptionServiceTest
             };
 
             // Act
-            var result = prescriptionService.CreatePrescription(prescription);
+            var result = await prescriptionService.CreatePrescriptionAsync(prescription);
 
             // Assert
             Assert.Equal(expectedGuid, result);
@@ -53,19 +58,17 @@ public class PrescriptionServiceTest
             mapperMock.Setup(mapper => mapper.Map<PrescriptionDTO, Prescription>(It.IsAny<PrescriptionDTO>()))
                 .Returns(new Prescription());
 
-
             // Set up the mock to throw an exception when Add is called with a duplicate Medication value
-            prescriptionRepositoryMock.Setup(repo => repo.Add(It.IsAny<Prescription>()))
+            prescriptionRepositoryMock.Setup(repo => repo.AddAsync(It.IsAny<Prescription>()))
                 .Throws<ResourceConflictException>(); // Replace with the appropriate exception type for a unique constraint violation
 
             // Act and Assert (for exception)
-            Assert.Throws<ResourceConflictException>(() => prescriptionService.CreatePrescription(prescriptionWithDuplicateMedicationDto));
+            await Assert.ThrowsAsync<ResourceConflictException>(() => prescriptionService.CreatePrescriptionAsync(prescriptionWithDuplicateMedicationDto));
         }
     }
 
-
     [Fact]
-    public void GetPrescription_Returns_Prescription_When_IdExists()
+    public async Task GetPrescription_Returns_Prescription_When_IdExists()
     {
         // Arrange
         Guid existingPrescriptionId = Guid.NewGuid();
@@ -81,13 +84,13 @@ public class PrescriptionServiceTest
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
         var mockMapper = new Mock<IMapper>();
         mockPrescriptionRepository
-            .Setup(repo => repo.GetPrescriptionById(existingPrescriptionId))
-            .Returns(expectedPrescription);
+            .Setup(repo => repo.GetPrescriptionByIdAsync(existingPrescriptionId))
+            .ReturnsAsync(expectedPrescription);
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act
-        Prescription result = prescriptionService.GetPrescription(existingPrescriptionId);
+        Prescription result = await prescriptionService.GetPrescriptionAsync(existingPrescriptionId);
 
         // Assert
         Assert.NotNull(result);
@@ -99,7 +102,7 @@ public class PrescriptionServiceTest
     }
 
     [Fact]
-    public void GetPrescription_Returns_Null_When_IdDoesNotExist()
+    public async Task GetPrescription_Returns_Null_When_IdDoesNotExist()
     {
         // Arrange
         Guid nonExistentPrescriptionId = Guid.NewGuid();
@@ -108,20 +111,20 @@ public class PrescriptionServiceTest
         var mockMapper = new Mock<IMapper>();
 
         mockPrescriptionRepository
-            .Setup(repo => repo.GetPrescriptionById(nonExistentPrescriptionId))
-            .Returns( (Prescription)null);
+            .Setup(repo => repo.GetPrescriptionByIdAsync(nonExistentPrescriptionId))
+            .ReturnsAsync((Prescription)null);
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act
-        Prescription result = prescriptionService.GetPrescription(nonExistentPrescriptionId);
+        Prescription result = await prescriptionService.GetPrescriptionAsync(nonExistentPrescriptionId);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetPrescription_Throws_Exception_When_DaoLayerFails()
+    public async Task GetPrescription_Throws_Exception_When_DaoLayerFails()
     {
         // Arrange
         Guid prescriptionId = Guid.NewGuid();
@@ -129,51 +132,50 @@ public class PrescriptionServiceTest
         var mockMapper = new Mock<IMapper>();
 
         mockPrescriptionRepository
-            .Setup(repo => repo.GetPrescriptionById(prescriptionId))
+            .Setup(repo => repo.GetPrescriptionByIdAsync(prescriptionId))
             .Throws(new ResourceNotFoundException("Prescription not found")); // Customize the exception as per your actual implementation
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act & Assert
-        var exception = Assert.Throws<ResourceNotFoundException>(() => prescriptionService.GetPrescription(prescriptionId));
+        var exception = await Assert.ThrowsAsync<ResourceNotFoundException>(() => prescriptionService.GetPrescriptionAsync(prescriptionId));
         Assert.Equal("Prescription not found", exception.Message);
     }
 
+    // ... (Previous code)
 
     [Fact]
-    public void GetAllPrescriptions_ReturnsAllPrescriptions()
+    public async Task GetAllPrescriptions_ReturnsAllPrescriptions()
     {
         // Arrange: Create a list of test prescriptions.
         var expectedPrescriptions = new List<Prescription>
+    {
+        new Prescription
         {
-            new Prescription
-            {
-          
-                Medication = "Medication1",
-                Doseage = "10 mg Daily",
-                Notes = "Note1",
-                PrescribedAt = System.DateTime.UtcNow
-            },
-            new Prescription
-            {
-            
-                Medication = "Medication2",
-                Doseage = "20 mg Daily",
-                Notes = "Note2",
-                PrescribedAt = System.DateTime.UtcNow
-            }
-        };
+            Medication = "Medication1",
+            Doseage = "10 mg Daily",
+            Notes = "Note1",
+            PrescribedAt = System.DateTime.UtcNow
+        },
+        new Prescription
+        {
+            Medication = "Medication2",
+            Doseage = "20 mg Daily",
+            Notes = "Note2",
+            PrescribedAt = System.DateTime.UtcNow
+        }
+    };
 
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
         var mockMapper = new Mock<IMapper>();
 
-        mockPrescriptionRepository.Setup(repo => repo.GetAllPrescriptions())
-            .Returns(expectedPrescriptions);
+        mockPrescriptionRepository.Setup(repo => repo.GetAllPrescriptionsAsync())
+            .ReturnsAsync(expectedPrescriptions);
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act: Retrieve all prescriptions using the service method.
-        var actualPrescriptions = prescriptionService.GetAllPrescriptions();
+        var actualPrescriptions = await prescriptionService.GetAllPrescriptionsAsync();
 
         // Assert: Verify that all expected prescriptions are retrieved.
         Assert.NotNull(actualPrescriptions);
@@ -197,7 +199,7 @@ public class PrescriptionServiceTest
     }
 
     [Fact]
-    public void UpdatePrescription_UpdatesPrescription_WhenValidInputProvided()
+    public async Task UpdatePrescription_UpdatesPrescription_WhenValidInputProvided()
     {
         // Arrange
         Guid prescriptionId = Guid.NewGuid();
@@ -221,15 +223,15 @@ public class PrescriptionServiceTest
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
         var mockMapper = new Mock<IMapper>();
 
-        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
-            .Returns(prescriptionToUpdate);
-        mockPrescriptionRepository.Setup(repo => repo.PrescriptionExistsByMedication(updatedPrescriptionDTO.Medication))
-            .Returns((Prescription)null); // Medication doesn't exist
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionByIdAsync(prescriptionId))
+            .ReturnsAsync(prescriptionToUpdate);
+        mockPrescriptionRepository.Setup(repo => repo.PrescriptionExistsByMedicationAsync(updatedPrescriptionDTO.Medication))
+            .ReturnsAsync((Prescription)null); // Medication doesn't exist
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act
-        prescriptionService.UpdatePrescription(prescriptionId, updatedPrescriptionDTO);
+        await prescriptionService.UpdatePrescriptionAsync(prescriptionId, updatedPrescriptionDTO);
 
         // Assert
         Assert.Equal(updatedPrescriptionDTO.Medication, prescriptionToUpdate.Medication);
@@ -239,7 +241,7 @@ public class PrescriptionServiceTest
     }
 
     [Fact]
-    public void UpdatePrescription_ThrowsConflictException_WhenMedicationExists()
+    public async Task UpdatePrescription_ThrowsConflictException_WhenMedicationExists()
     {
         // Arrange
         Guid prescriptionId = Guid.NewGuid();
@@ -263,20 +265,20 @@ public class PrescriptionServiceTest
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
         var mockMapper = new Mock<IMapper>();
 
-        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
-            .Returns(prescriptionToUpdate);
-        mockPrescriptionRepository.Setup(repo => repo.PrescriptionExistsByMedication(updatedPrescriptionDTO.Medication))
-            .Returns(new Prescription()); // Medication already exists
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionByIdAsync(prescriptionId))
+            .ReturnsAsync(prescriptionToUpdate);
+        mockPrescriptionRepository.Setup(repo => repo.PrescriptionExistsByMedicationAsync(updatedPrescriptionDTO.Medication))
+            .ReturnsAsync(new Prescription()); // Medication already exists
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act and Assert
-        var exception = Assert.Throws<ResourceConflictException>(() => prescriptionService.UpdatePrescription(prescriptionId, updatedPrescriptionDTO));
+        var exception = await Assert.ThrowsAsync<ResourceConflictException>(() => prescriptionService.UpdatePrescriptionAsync(prescriptionId, updatedPrescriptionDTO));
         Assert.Equal("Medication already exists", exception.Message);
     }
 
     [Fact]
-    public void UpdatePrescription_ThrowsBadRequestException_WhenNoChangesFound()
+    public async Task UpdatePrescription_ThrowsBadRequestException_WhenNoChangesFound()
     {
         // Arrange
         Guid prescriptionId = Guid.NewGuid();
@@ -300,18 +302,18 @@ public class PrescriptionServiceTest
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
         var mockMapper = new Mock<IMapper>();
 
-        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
-            .Returns(prescriptionToUpdate);
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionByIdAsync(prescriptionId))
+            .ReturnsAsync(prescriptionToUpdate);
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act and Assert
-        var exception = Assert.Throws<BadRequestException>(() => prescriptionService.UpdatePrescription(prescriptionId, updatedPrescriptionDTO));
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() => prescriptionService.UpdatePrescriptionAsync(prescriptionId, updatedPrescriptionDTO));
         Assert.Equal("no changes found", exception.Message);
     }
 
     [Fact]
-    public void DeletePrescription_DeletesPrescription_WhenIdExists()
+    public async Task DeletePrescription_DeletesPrescription_WhenIdExists()
     {
         // Arrange
         Guid prescriptionId = Guid.NewGuid();
@@ -328,20 +330,20 @@ public class PrescriptionServiceTest
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
         var mockMapper = new Mock<IMapper>();
 
-        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
-            .Returns(prescriptionToDelete);
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionByIdAsync(prescriptionId))
+            .ReturnsAsync(prescriptionToDelete);
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act
-        prescriptionService.DeletePrescription(prescriptionId);
+        await prescriptionService.DeletePrescriptionAsync(prescriptionId);
 
         // Assert
-        mockPrescriptionRepository.Verify(repo => repo.DeletePrescriptionByEntity(prescriptionToDelete), Times.Once);
+        mockPrescriptionRepository.Verify(repo => repo.DeletePrescriptionByEntityAsync(prescriptionToDelete), Times.Once);
     }
 
     [Fact]
-    public void DeletePrescription_ThrowsResourceNotFoundException_WhenIdDoesNotExist()
+    public async Task DeletePrescription_ThrowsResourceNotFoundException_WhenIdDoesNotExist()
     {
         // Arrange
         Guid nonExistentPrescriptionId = Guid.NewGuid();
@@ -349,13 +351,13 @@ public class PrescriptionServiceTest
         var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
         var mockMapper = new Mock<IMapper>();
 
-        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(nonExistentPrescriptionId))
-            .Returns((Prescription)null);
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionByIdAsync(nonExistentPrescriptionId))
+            .ReturnsAsync((Prescription)null);
 
         var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
 
         // Act and Assert
-        var exception = Assert.Throws<ResourceNotFoundException>(() => prescriptionService.DeletePrescription(nonExistentPrescriptionId));
+        var exception = await Assert.ThrowsAsync<ResourceNotFoundException>(() => prescriptionService.DeletePrescriptionAsync(nonExistentPrescriptionId));
         Assert.Equal("Prescription was not found", exception.Message);
     }
 

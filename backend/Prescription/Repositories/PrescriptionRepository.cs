@@ -17,28 +17,28 @@ namespace prescription.Repositories
             _context = context;
         }
 
-        public Guid Add(Prescription prescription)
+        public async Task<Guid> AddAsync(Prescription prescription)
         {
             
-            _context.Add(prescription);
-            _context.SaveChanges();
+            await _context.AddAsync(prescription);
+            await _context.SaveChangesAsync();
             return prescription.Id;
         }
 
-        public void DeletePrescriptionByEntity(Prescription p)
+        public async Task DeletePrescriptionByEntityAsync(Prescription p)
         {
             _context.Prescriptions.Remove(p);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public List<Prescription> GetAllPrescriptions()
+        public async Task<List<Prescription>> GetAllPrescriptionsAsync()
         {
-            return _context.Prescriptions.ToList();
+            return await _context.Prescriptions.ToListAsync();
         }
 
-        public Prescription GetPrescriptionById(Guid id)
+        public async Task<Prescription> GetPrescriptionByIdAsync(Guid id)
         {
-            var prescription = _context.Prescriptions.Find(id);
+            var prescription = await _context.Prescriptions.FindAsync(id);
             if (prescription == null)
             {
                 throw new ResourceNotFoundException("Prescription not found");
@@ -46,13 +46,13 @@ namespace prescription.Repositories
             return prescription;
         }
 
-        public Prescription? PrescriptionExistsByMedication(string medication)
+        public async Task<Prescription?> PrescriptionExistsByMedicationAsync(string medication)
         {
-            return _context.Prescriptions
-            .FirstOrDefault(p => p.Medication == medication);
+            return await _context.Prescriptions
+            .FirstOrDefaultAsync(p => p.Medication == medication);
         }
 
-        public void UpdatePrescriptionById(Prescription p)
+        public async Task UpdatePrescriptionByIdAsync(Prescription p)
         {
 
             // Attach the object to the context and mark it as modified.
@@ -60,8 +60,10 @@ namespace prescription.Repositories
             _context.Entry(p).State = EntityState.Modified;
 
             // Save changes to persist the update.
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
+
+       
     }
 }
 
