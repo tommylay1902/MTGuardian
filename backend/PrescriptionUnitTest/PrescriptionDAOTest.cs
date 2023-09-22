@@ -219,6 +219,37 @@ public sealed class PrescriptionDAOTest : IAsyncLifetime
 
     }
 
+    [Fact]
+    public void DeletePrescriptionByEntity_DeletesPrescription()
+    {
+        if (_context != null && _prescriptionRepository != null)
+        {
+            // Arrange: Create a test prescription and add it to the database.
+            var prescription = new Prescription
+            {
+                Medication = "Dexamethasone",
+                Doseage = "20 mg Daily",
+                Notes = "A steroid used to help inflamed areas of the body",
+                PrescribedAt = DateTime.UtcNow
+            };
+
+            _context.Prescriptions.Add(prescription);
+            _context.SaveChanges();
+
+            // Act: Delete the prescription using the DAO method.
+            _prescriptionRepository.DeletePrescriptionByEntity(prescription);
+
+            // Assert: Verify that the prescription has been deleted from the database.
+            var deletedPrescription = _context.Prescriptions.Find(prescription.Id);
+            Assert.Null(deletedPrescription);
+        }
+        else
+        {
+            Assert.Fail("_context or _prescriptionRepository is null");
+        }
+    }
+
+
 
 
 }

@@ -310,5 +310,54 @@ public class PrescriptionServiceTest
         Assert.Equal("no changes found", exception.Message);
     }
 
+    [Fact]
+    public void DeletePrescription_DeletesPrescription_WhenIdExists()
+    {
+        // Arrange
+        Guid prescriptionId = Guid.NewGuid();
+
+        var prescriptionToDelete = new Prescription
+        {
+            Id = prescriptionId,
+            Medication = "MedicationToDelete",
+            Doseage = "10 mg Daily",
+            Notes = "Note1",
+            PrescribedAt = DateTime.UtcNow
+        };
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
+            .Returns(prescriptionToDelete);
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
+
+        // Act
+        prescriptionService.DeletePrescription(prescriptionId);
+
+        // Assert
+        mockPrescriptionRepository.Verify(repo => repo.DeletePrescriptionByEntity(prescriptionToDelete), Times.Once);
+    }
+
+    [Fact]
+    public void DeletePrescription_ThrowsResourceNotFoundException_WhenIdDoesNotExist()
+    {
+        // Arrange
+        Guid nonExistentPrescriptionId = Guid.NewGuid();
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        var mockMapper = new Mock<IMapper>();
+
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(nonExistentPrescriptionId))
+            .Returns((Prescription)null);
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object, mockMapper.Object);
+
+        // Act and Assert
+        var exception = Assert.Throws<ResourceNotFoundException>(() => prescriptionService.DeletePrescription(nonExistentPrescriptionId));
+        Assert.Equal("Prescription was not found", exception.Message);
+    }
+
 
 }
