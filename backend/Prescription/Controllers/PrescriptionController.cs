@@ -77,8 +77,12 @@ namespace prescription.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        [ProducesResponseType(200)] // 201 Created
+        [ProducesResponseType(400)] // 400 Bad Request
+        [BadRequestExceptionFilter]
+        public void Put(Guid id, [FromBody]PrescriptionDTO p)
         {
+            _prescriptionService.UpdatePrescription(id, p);
         }
 
         // DELETE api/values/5

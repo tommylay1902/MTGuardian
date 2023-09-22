@@ -1,19 +1,20 @@
-﻿using prescription.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using prescription.Data;
 using prescription.Entities;
 using prescription.ErrorHandling.Exceptions;
 using prescription.Interfaces;
 
 namespace prescription.Repositories
 {
-	public class PrescriptionRepository:IPrescriptionRepository
+    public class PrescriptionRepository : IPrescriptionRepository
 
-	{
+    {
         private readonly PrescriptionContext _context;
 
-		public PrescriptionRepository(PrescriptionContext context)
-		{
+        public PrescriptionRepository(PrescriptionContext context)
+        {
             _context = context;
-		}
+        }
 
         public Guid Add(Prescription prescription)
         {
@@ -30,7 +31,7 @@ namespace prescription.Repositories
         public Prescription GetPrescriptionById(Guid id)
         {
             var prescription = _context.Prescriptions.Find(id);
-            if(prescription == null)
+            if (prescription == null)
             {
                 throw new ResourceNotFoundException("Prescription not found");
             }
@@ -41,6 +42,17 @@ namespace prescription.Repositories
         {
             return _context.Prescriptions
             .FirstOrDefault(p => p.Medication == medication);
+        }
+
+        public void UpdatePrescriptionById(Prescription p)
+        {
+
+            // Attach the object to the context and mark it as modified.
+            _context.Attach(p);
+            _context.Entry(p).State = EntityState.Modified;
+
+            // Save changes to persist the update.
+            _context.SaveChanges();
         }
     }
 }

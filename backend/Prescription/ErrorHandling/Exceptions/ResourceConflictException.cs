@@ -1,9 +1,9 @@
-﻿using System;
+﻿
 namespace prescription.ErrorHandling.Exceptions
 {
 	public class ResourceConflictException: Exception
 	{
-        public ResourceConflictException() : base("Resource not found.")
+        public ResourceConflictException() : base("Resource has conflicts.")
         {
         }
 

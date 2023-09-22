@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using Microsoft.EntityFrameworkCore;
+using Moq;
+using prescription.DTO;
 using prescription.Entities;
 using prescription.ErrorHandling.Exceptions;
 using prescription.Interfaces;
@@ -177,4 +179,114 @@ public class PrescriptionServiceTest
             Assert.Equal(expectedPrescription.PrescribedAt, actualPrescription.PrescribedAt);
         }
     }
+
+    [Fact]
+    public void UpdatePrescription_UpdatesPrescription_WhenValidInputProvided()
+    {
+        // Arrange
+        Guid prescriptionId = Guid.NewGuid();
+        var prescriptionToUpdate = new Prescription
+        {
+            Id = prescriptionId,
+            Medication = "Original Medication",
+            Doseage = "10 mg Daily",
+            Notes = "Note1",
+            PrescribedAt = DateTime.UtcNow
+        };
+
+        var updatedPrescriptionDTO = new PrescriptionDTO
+        {
+            Medication = "Updated Medication",
+            Doseage = "20 mg Daily",
+            Notes = "Updated Note",
+            PrescribedAt = DateTime.UtcNow.AddDays(1)
+        };
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
+            .Returns(prescriptionToUpdate);
+        mockPrescriptionRepository.Setup(repo => repo.PrescriptionExistsByMedication(updatedPrescriptionDTO.Medication))
+            .Returns((Prescription)null); // Medication doesn't exist
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object);
+
+        // Act
+        prescriptionService.UpdatePrescription(prescriptionId, updatedPrescriptionDTO);
+
+        // Assert
+        Assert.Equal(updatedPrescriptionDTO.Medication, prescriptionToUpdate.Medication);
+        Assert.Equal(updatedPrescriptionDTO.Doseage, prescriptionToUpdate.Doseage);
+        Assert.Equal(updatedPrescriptionDTO.Notes, prescriptionToUpdate.Notes);
+        Assert.Equal(updatedPrescriptionDTO.PrescribedAt, prescriptionToUpdate.PrescribedAt);
+    }
+
+    [Fact]
+    public void UpdatePrescription_ThrowsConflictException_WhenMedicationExists()
+    {
+        // Arrange
+        Guid prescriptionId = Guid.NewGuid();
+        var prescriptionToUpdate = new Prescription
+        {
+            Id = prescriptionId,
+            Medication = "Original Medication",
+            Doseage = "10 mg Daily",
+            Notes = "Note1",
+            PrescribedAt = DateTime.UtcNow
+        };
+
+        var updatedPrescriptionDTO = new PrescriptionDTO
+        {
+            Medication = "Updated Medication",
+            Doseage = "20 mg Daily",
+            Notes = "Updated Note",
+            PrescribedAt = DateTime.UtcNow.AddDays(1)
+        };
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
+            .Returns(prescriptionToUpdate);
+        mockPrescriptionRepository.Setup(repo => repo.PrescriptionExistsByMedication(updatedPrescriptionDTO.Medication))
+            .Returns(new Prescription()); // Medication already exists
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object);
+
+        // Act and Assert
+        var exception = Assert.Throws<ResourceConflictException>(() => prescriptionService.UpdatePrescription(prescriptionId, updatedPrescriptionDTO));
+        Assert.Equal("Medication already exists", exception.Message);
+    }
+
+    [Fact]
+    public void UpdatePrescription_ThrowsBadRequestException_WhenNoChangesFound()
+    {
+        // Arrange
+        Guid prescriptionId = Guid.NewGuid();
+        var prescriptionToUpdate = new Prescription
+        {
+            Id = prescriptionId,
+            Medication = "Original Medication",
+            Doseage = "10 mg Daily",
+            Notes = "Note1",
+            PrescribedAt = DateTime.UtcNow
+        };
+
+        var updatedPrescriptionDTO = new PrescriptionDTO
+        {
+            Medication = "Original Medication", // No changes
+            Doseage = "10 mg Daily", // No changes
+            Notes = "Note1", // No changes
+            PrescribedAt = prescriptionToUpdate.PrescribedAt // No changes
+        };
+
+        var mockPrescriptionRepository = new Mock<IPrescriptionRepository>();
+        mockPrescriptionRepository.Setup(repo => repo.GetPrescriptionById(prescriptionId))
+            .Returns(prescriptionToUpdate);
+
+        var prescriptionService = new PrescriptionService(mockPrescriptionRepository.Object);
+
+        // Act and Assert
+        var exception = Assert.Throws<BadRequestException>(() => prescriptionService.UpdatePrescription(prescriptionId, updatedPrescriptionDTO));
+        Assert.Equal("no changes found", exception.Message);
+    }
+
+
 }

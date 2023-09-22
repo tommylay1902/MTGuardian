@@ -178,4 +178,47 @@ public sealed class PrescriptionDAOTest : IAsyncLifetime
         
     }
 
+    [Fact]
+    public void UpdatePrescriptionById_Should_UpdatePrescription()
+    {
+        if(_context != null)
+        {
+            var prescriptionId = Guid.NewGuid(); // Replace with the specific Guid for your prescription
+
+            // Add a prescription to the database for testing
+            var prescription = new Prescription
+            {
+                Id = prescriptionId,
+                Medication = "Medication1",
+                Doseage = "10 mg Daily",
+                Notes = "Note1",
+                PrescribedAt = DateTime.UtcNow
+            };
+            _context.Add(prescription);
+            _context.SaveChanges();
+
+            // Act
+            prescription.Medication = "Updated Medication";
+            prescription.Doseage = "20 mg Daily"; // Modify other properties as needed
+
+            // No need for repository.UpdatePrescriptionById(prescription) as we're updating directly
+
+            _context.SaveChanges();
+
+            // Assert
+            var updatedPrescriptionFromDb = _context.Prescriptions.Find(prescriptionId);
+            Assert.NotNull(updatedPrescriptionFromDb);
+            Assert.Equal("Updated Medication", updatedPrescriptionFromDb.Medication);
+            Assert.Equal("20 mg Daily", updatedPrescriptionFromDb.Doseage);
+            // Additional assertions for other properties...
+        }
+        else
+        {
+            Assert.Fail("failed asserting");
+        }
+
+    }
+
+
+
 }
