@@ -19,7 +19,6 @@ namespace prescription.Data
                 .HasIndex(p => p.Medication)
                 .IsUnique();
         }
-
     }
 }
 

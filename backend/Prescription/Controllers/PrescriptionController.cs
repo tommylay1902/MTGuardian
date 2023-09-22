@@ -63,6 +63,7 @@ namespace prescription.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(Guid), 201)] // 201 Created
         [ProducesResponseType(400)] // 400 Bad Request
+        [ProducesResponseType(typeof(ResourceConflictExceptionFilterAttribute), 409)]
         [ResourceConflictExceptionFilter]
         public IActionResult CreatePrescription([FromBody] Prescription prescription)
         {

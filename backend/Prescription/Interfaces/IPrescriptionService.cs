@@ -8,7 +8,6 @@ namespace prescription.Interfaces
 		public Guid CreatePrescription(Prescription prescription);
 		public Prescription GetPrescription(Guid id);
 		public List<Prescription> GetAllPrescriptions();
-
 	}
 }
 
