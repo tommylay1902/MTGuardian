@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { PrescriptionDTO } from 'src/app/models/prescriptionDTO';
 
 import { PrescriptionService } from 'src/app/services/prescription/prescription.service';
 
@@ -7,11 +8,14 @@ import { PrescriptionService } from 'src/app/services/prescription/prescription.
   templateUrl: './prescription.component.html',
   styleUrls: ['./prescription.component.css'],
 })
-export class PrescriptionComponent {
-  prescriptions: [] = [];
+export class PrescriptionComponent implements OnInit {
+  prescriptions: PrescriptionDTO[] = [];
 
   constructor(private prescription: PrescriptionService) {}
+
   ngOnInit() {
-    this.prescription.getPrescription().subscribe((res) => console.log(res));
+    this.prescription.getPrescription().subscribe((res) => {
+      this.prescriptions = res;
+    });
   }
 }
