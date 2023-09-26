@@ -8,7 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { MenuBarComponent } from './components/menu-bar/menu-bar.component';
 import { MenuItemComponent } from './components/menu-item/menu-item.component';
-import { TreeTableModule } from 'primeng/treetable';
+import { Table, TableModule } from 'primeng/table';
 
 @NgModule({
   declarations: [
@@ -22,7 +22,7 @@ import { TreeTableModule } from 'primeng/treetable';
     AppRoutingModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    TreeTableModule,
+    TableModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
