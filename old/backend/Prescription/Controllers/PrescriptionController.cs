@@ -66,6 +66,7 @@ namespace prescription.Controllers
         [ProducesResponseType(400)] // 400 Bad Request
         [ProducesResponseType(409)]
         [ResourceConflictExceptionFilter]
+        [AnotherExceptionFilters]
         public async Task<IActionResult> CreatePrescription([FromBody] PrescriptionDTO prescription)
         {
             if (!ModelState.IsValid)
@@ -81,6 +82,7 @@ namespace prescription.Controllers
         [ProducesResponseType(200)] // 200 Created
         [ProducesResponseType(400)] // 400 Bad Request
         [BadRequestExceptionFilter]
+        [ResourceNoFoundExceptionFilter]
         public async Task<IActionResult> Put(Guid id, [FromBody]PrescriptionDTO p)
         {
             await _prescriptionService.UpdatePrescriptionAsync(id, p);
