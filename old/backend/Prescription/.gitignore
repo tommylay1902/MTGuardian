@@ -1,0 +1,45 @@
+﻿
+# .gitignore for a .NET Web API project
+
+# Build and bin directories
+bin/
+obj/
+
+# User-specific files and settings
+*.suo
+*.user
+*.sln.docstates
+
+# Visual Studio files
+.vscode/
+.vs/
+*.suo
+*.user
+*.userprefs
+*.sln.docstates
+*.suo
+*.user
+
+# Rider files
+.idea/
+
+# NuGet package directories
+packages/
+*.nupkg
+*.paket/paket.exe
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Visual Studio Code files
+.vscode/
+
+# User-specific files and directories
+*.suo
+*.user
+*.userprefs
+*.sln.docstates
+bin/
+obj/
