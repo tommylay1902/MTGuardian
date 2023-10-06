@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/tommylay1902/prescriptionmicro/api/handlers"
 )
 
