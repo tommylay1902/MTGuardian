@@ -6,6 +6,6 @@ import (
 )
 
 func SetupRoutes(app *fiber.App, prescriptionHandler *handlers.PrescriptionHandler) {
-	app.Group("api/v1/prescription")
-
+	apiRoutes := app.Group("api/v1/prescription")
+	apiRoutes.Post("", prescriptionHandler.CreatePrescription)
 }

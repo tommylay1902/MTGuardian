@@ -1,6 +1,11 @@
 package dataaccess
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"github.com/tommylay1902/prescriptionmicro/internal/models"
+	"gorm.io/gorm"
+)
 
 type PrescriptionDAO struct {
 	DB *gorm.DB
@@ -8,4 +13,13 @@ type PrescriptionDAO struct {
 
 func InitalizePrescriptionService(db *gorm.DB) *PrescriptionDAO {
 	return &PrescriptionDAO{DB: db}
+}
+
+func (dao *PrescriptionDAO) CreatePrescription(prescription *models.Prescription) error {
+	fmt.Println(*prescription)
+	err := dao.DB.Create(&prescription).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
