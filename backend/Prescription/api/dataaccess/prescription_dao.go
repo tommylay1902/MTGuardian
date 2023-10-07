@@ -32,12 +32,12 @@ func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescript
 }
 
 func (dao *PrescriptionDAO) GetAllPrescriptions() ([]models.Prescription, error) {
-	var prescription []models.Prescription
-	err := dao.DB.Find(&prescription).Error
+	var prescriptions []models.Prescription
+	err := dao.DB.Find(&prescriptions).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	return prescription, nil
+	return prescriptions, nil
 }
