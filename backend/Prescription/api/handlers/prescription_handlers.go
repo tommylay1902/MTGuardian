@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/tommylay1902/prescriptionmicro/api/services"
 	"github.com/tommylay1902/prescriptionmicro/internal/dtos"
+	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/errorhandler"
 )
 
@@ -21,8 +20,11 @@ func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 	var requestBody dtos.PrescriptionDTO
 
 	if err := c.BodyParser(&requestBody); err != nil {
-		fmt.Println(err.Error())
-		return errorhandler.HandleError(err, c)
+		badErr := &customerrors.BadRequestError{
+			Message: err.Error(),
+			Code:    400,
+		}
+		return errorhandler.HandleError(badErr, c)
 	}
 
 	if err := ph.PrescriptionService.CreatePrescription(&requestBody); err != nil {

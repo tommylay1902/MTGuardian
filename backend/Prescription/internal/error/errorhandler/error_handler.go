@@ -3,15 +3,25 @@ package errorhandler
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
 )
 
 func HandleError(err error, c *fiber.Ctx) error {
+	var psqlErr *pgconn.PgError
+	code := ""
+
+	if errors.As(err, &psqlErr) {
+		fmt.Println(psqlErr.Code)
+		code = psqlErr.Code
+	}
 
 	switch {
-	case errors.Is(err, &customerrors.ResourceConflictError{Code: 409}):
+	case errors.Is(err, &customerrors.ResourceConflictError{Code: 409}) ||
+		code == "23505":
 		return c.Status(fiber.StatusConflict).JSON(
 			fiber.Map{
 				"error": err.Error(),
