@@ -5,7 +5,6 @@ import (
 	"github.com/tommylay1902/prescriptionmicro/api/dataaccess"
 	dto "github.com/tommylay1902/prescriptionmicro/internal/dtos/prescription"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
-	"github.com/tommylay1902/prescriptionmicro/internal/models"
 )
 
 type PrescriptionService struct {
@@ -28,12 +27,16 @@ func (ps *PrescriptionService) CreatePrescription(prescription *dto.Prescription
 	return nil
 }
 
-func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*models.Prescription, error) {
+func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*dto.PrescriptionDTO, error) {
 	p, err := ps.PrescriptionDAO.GetPrescriptionById(id)
 	if err != nil {
 		return nil, err
 	}
-	return p, nil
+	resultMapping, mappingErr := dto.MapPrescriptionModelToDTO(p)
+	if mappingErr != nil {
+		return nil, mappingErr
+	}
+	return resultMapping, nil
 }
 
 func (ps *PrescriptionService) GetPrescriptions() ([]dto.PrescriptionDTO, error) {

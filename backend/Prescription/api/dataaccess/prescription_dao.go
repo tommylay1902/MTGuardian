@@ -1,7 +1,10 @@
 package dataaccess
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
+	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
 	"github.com/tommylay1902/prescriptionmicro/internal/models"
 	"gorm.io/gorm"
 )
@@ -24,11 +27,18 @@ func (dao *PrescriptionDAO) CreatePrescription(prescription *models.Prescription
 
 func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescription, error) {
 	prescription := new(models.Prescription)
-	err := dao.DB.Find(&prescription, id).Error
+	err := dao.DB.First(&prescription, id).Error
+
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, &customerrors.ResourceNotFound{
+				Message: "prescription not found",
+				Code:    404,
+			}
+		}
 		return nil, err
 	}
-	return prescription, err
+	return prescription, nil
 }
 
 func (dao *PrescriptionDAO) GetAllPrescriptions() ([]models.Prescription, error) {

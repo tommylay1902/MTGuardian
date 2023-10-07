@@ -52,7 +52,7 @@ func (ph *PrescriptionHandler) GetPrescription(c *fiber.Ctx) error {
 	p, sErr := ph.PrescriptionService.GetPrescriptionById(id)
 
 	if sErr != nil {
-		return errorhandler.HandleError(err, c)
+		return errorhandler.HandleError(sErr, c)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(p)
