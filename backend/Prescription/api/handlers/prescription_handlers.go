@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/tommylay1902/prescriptionmicro/api/services"
-	"github.com/tommylay1902/prescriptionmicro/internal/dtos"
+	dto "github.com/tommylay1902/prescriptionmicro/internal/dtos/prescription"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/errorhandler"
 )
@@ -18,7 +18,7 @@ func InitializePrescriptionHandler(prescriptionService *services.PrescriptionSer
 }
 
 func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
-	var requestBody dtos.PrescriptionDTO
+	var requestBody dto.PrescriptionDTO
 
 	if err := c.BodyParser(&requestBody); err != nil {
 		badErr := &customerrors.BadRequestError{
@@ -66,4 +66,23 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(prescriptions)
+}
+
+func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+
+	id, err := uuid.Parse(idParam)
+
+	if err != nil {
+		badErr := &customerrors.BadRequestError{
+			Message: err.Error(),
+			Code:    400,
+		}
+		return errorhandler.HandleError(badErr, c)
+	}
+	sErr := ph.PrescriptionService.DeletePrescription(id)
+	if sErr != nil {
+		return errorhandler.HandleError(sErr, c)
+	}
+	return nil
 }

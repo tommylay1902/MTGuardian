@@ -41,3 +41,11 @@ func (dao *PrescriptionDAO) GetAllPrescriptions() ([]models.Prescription, error)
 
 	return prescriptions, nil
 }
+
+func (dao *PrescriptionDAO) DeletePrescription(p *models.Prescription) error {
+	err := dao.DB.Delete(&p).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
