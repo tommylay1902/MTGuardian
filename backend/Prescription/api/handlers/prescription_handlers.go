@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/tommylay1902/prescriptionmicro/api/services"
 	"github.com/tommylay1902/prescriptionmicro/internal/dtos"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
@@ -33,4 +34,36 @@ func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": "successfully created prescription",
 	})
+}
+
+func (ph *PrescriptionHandler) GetPrescription(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+
+	id, err := uuid.Parse(idParam)
+
+	if err != nil {
+		custErr := &customerrors.BadRequestError{
+			Message: err.Error(),
+			Code:    400,
+		}
+		return errorhandler.HandleError(custErr, c)
+	}
+
+	p, sErr := ph.PrescriptionService.GetPrescriptionById(id)
+
+	if sErr != nil {
+		return errorhandler.HandleError(err, c)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(p)
+}
+
+func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
+	prescriptions, err := ph.PrescriptionService.GetPrescriptions()
+
+	if err != nil {
+		return errorhandler.HandleError(err, c)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(prescriptions)
 }

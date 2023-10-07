@@ -1,10 +1,10 @@
 package services
 
 import (
-	"fmt"
-
+	"github.com/google/uuid"
 	"github.com/tommylay1902/prescriptionmicro/api/dataaccess"
 	"github.com/tommylay1902/prescriptionmicro/internal/dtos"
+	"github.com/tommylay1902/prescriptionmicro/internal/models"
 )
 
 type PrescriptionService struct {
@@ -20,10 +20,27 @@ func (ps *PrescriptionService) CreatePrescription(prescription *dtos.Prescriptio
 	if dtoErr != nil {
 		return dtoErr
 	}
-	fmt.Println("id", create.ID)
 	err := ps.PrescriptionDAO.CreatePrescription(create)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*models.Prescription, error) {
+	p, err := ps.PrescriptionDAO.GetPrescriptionById(id)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func (ps *PrescriptionService) GetPrescriptions() ([]models.Prescription, error) {
+	prescriptions, err := ps.PrescriptionDAO.GetAllPrescriptions()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return prescriptions, nil
 }
