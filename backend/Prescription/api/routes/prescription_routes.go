@@ -11,4 +11,5 @@ func SetupRoutes(app *fiber.App, prescriptionHandler *handlers.PrescriptionHandl
 	apiRoutes.Get("/:id", prescriptionHandler.GetPrescription)
 	apiRoutes.Get("", prescriptionHandler.GetPrescriptions)
 	apiRoutes.Delete("/:id", prescriptionHandler.DeletePrescription)
+	apiRoutes.Put("/:id", prescriptionHandler.UpdatePrescription)
 }

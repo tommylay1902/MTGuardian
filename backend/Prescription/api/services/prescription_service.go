@@ -67,3 +67,35 @@ func (ps *PrescriptionService) DeletePrescription(id uuid.UUID) error {
 
 	return nil
 }
+
+func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id uuid.UUID) error {
+	pUpdate, err := ps.PrescriptionDAO.GetPrescriptionById(id)
+	if err != nil {
+		return err
+	}
+	hasUpdate := false
+	if pDTO.Dosage != nil && *pDTO.Dosage != *pUpdate.Dosage {
+		hasUpdate = true
+		*pUpdate.Dosage = *pDTO.Dosage
+	}
+
+	if pDTO.Medication != nil && *pDTO.Medication != *pUpdate.Medication {
+		hasUpdate = true
+		*pUpdate.Medication = *pDTO.Medication
+	}
+
+	if pDTO.Notes != nil && *pDTO.Notes != *pUpdate.Notes {
+		hasUpdate = true
+		*pUpdate.Notes = *pDTO.Notes
+	}
+
+	if pDTO.Started != nil && *pDTO.Started != *pUpdate.Started {
+		hasUpdate = true
+		*pUpdate.Started = *pDTO.Started
+	}
+
+	if hasUpdate {
+		return ps.PrescriptionDAO.UpdatePrescription(pUpdate)
+	}
+	return &customerrors.BadRequestError{Message: "No updates found for the prescription", Code: 400}
+}

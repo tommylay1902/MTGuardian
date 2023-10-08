@@ -86,3 +86,38 @@ func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
 	}
 	return nil
 }
+
+func (ph *PrescriptionHandler) UpdatePrescription(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+
+	id, err := uuid.Parse(idParam)
+
+	if err != nil {
+		badErr := &customerrors.BadRequestError{
+			Message: err.Error(),
+			Code:    400,
+		}
+		return errorhandler.HandleError(badErr, c)
+	}
+
+	var requestBody dto.PrescriptionDTO
+	if err := c.BodyParser(&requestBody); err != nil {
+		bodyParseErr := &customerrors.BadRequestError{
+			Message: err.Error(),
+			Code:    400,
+		}
+		return errorhandler.HandleError(bodyParseErr, c)
+	}
+
+	sErr := ph.PrescriptionService.UpdatePrescription(&requestBody, id)
+
+	if sErr != nil {
+
+		return errorhandler.HandleError(sErr, c)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": "successfully updated prescription",
+	})
+
+}

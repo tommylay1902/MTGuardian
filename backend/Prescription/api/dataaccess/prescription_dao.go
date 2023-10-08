@@ -59,3 +59,14 @@ func (dao *PrescriptionDAO) DeletePrescription(p *models.Prescription) error {
 	}
 	return nil
 }
+
+func (dao *PrescriptionDAO) UpdatePrescription(p *models.Prescription) error {
+	err := dao.DB.Save(&p).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
