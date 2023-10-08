@@ -7,9 +7,9 @@ import (
 )
 
 type Prescription struct {
-	Id         *uuid.UUID `json:"id"`
+	ID         uuid.UUID  `json:"id" gorm:"type:uuid;primaryKey"`
 	Medication *string    `json:"medication"  gorm:"uniqueIndex"`
-	Dosage     *bool      `json:"dosage"`
+	Dosage     *string    `json:"dosage"`
 	Notes      *string    `json:"notes"`
 	Started    *time.Time `json:"Started"`
 }
