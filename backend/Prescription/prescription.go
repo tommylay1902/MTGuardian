@@ -24,5 +24,5 @@ func main() {
 	prescriptionHandler := handlers.InitializePrescriptionHandler(prescriptionService)
 
 	routes.SetupRoutes(app, prescriptionHandler)
-	app.Listen(":" + port)
+	app.Listen("0.0.0.0:" + port)
 }

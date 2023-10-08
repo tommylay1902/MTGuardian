@@ -8,11 +8,15 @@ import (
 
 func SetupDB() *gorm.DB {
 
-	dsn := "host=localhost user=postgres password=mysecretpassword dbname=postgres port=5432 sslmode=disable"
+	dsn := "host=db user=postgres password=password dbname=prescription port=5432 sslmode=disable"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("Failed to connect to the database")
+		dsnRetry := "host=localhost user=postgres password=password dbname=prescription port=5432 sslmode=disable"
+		db, err = gorm.Open(postgres.Open(dsnRetry), &gorm.Config{})
+		if err != nil {
+			panic("error connecting to database")
+		}
 	}
 
 	db.AutoMigrate(&models.Prescription{})

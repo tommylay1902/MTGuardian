@@ -97,5 +97,6 @@ func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id 
 	if hasUpdate {
 		return ps.PrescriptionDAO.UpdatePrescription(pUpdate)
 	}
+
 	return &customerrors.BadRequestError{Message: "No updates found for the prescription", Code: 400}
 }
