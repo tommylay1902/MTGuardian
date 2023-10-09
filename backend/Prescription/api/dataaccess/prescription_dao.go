@@ -67,5 +67,4 @@ func (dao *PrescriptionDAO) UpdatePrescription(p *models.Prescription) error {
 		return err
 	}
 	return nil
-
 }

@@ -64,7 +64,6 @@ func (ps *PrescriptionService) DeletePrescription(id uuid.UUID) error {
 	if daoError != nil {
 		return daoError
 	}
-
 	return nil
 }
 
