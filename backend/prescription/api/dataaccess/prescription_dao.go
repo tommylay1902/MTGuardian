@@ -13,7 +13,6 @@ type PrescriptionDAO struct {
 	DB *gorm.DB
 }
 
-// asfd
 func InitalizePrescriptionService(db *gorm.DB) *PrescriptionDAO {
 	return &PrescriptionDAO{DB: db}
 }

@@ -13,7 +13,6 @@ type PrescriptionHandler struct {
 	PrescriptionService *services.PrescriptionService
 }
 
-// more comments
 func InitializePrescriptionHandler(prescriptionService *services.PrescriptionService) *PrescriptionHandler {
 	return &PrescriptionHandler{PrescriptionService: prescriptionService}
 }
