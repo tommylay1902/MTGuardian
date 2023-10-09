@@ -41,6 +41,7 @@ func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescript
 	return prescription, nil
 }
 
+// test
 func (dao *PrescriptionDAO) GetAllPrescriptions() ([]models.Prescription, error) {
 	var prescriptions []models.Prescription
 	err := dao.DB.Find(&prescriptions).Error
