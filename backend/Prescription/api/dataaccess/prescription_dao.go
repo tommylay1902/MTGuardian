@@ -42,7 +42,6 @@ func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescript
 	return prescription, nil
 }
 
-// test 2
 func (dao *PrescriptionDAO) GetAllPrescriptions() ([]models.Prescription, error) {
 	var prescriptions []models.Prescription
 	err := dao.DB.Find(&prescriptions).Error
@@ -53,8 +52,6 @@ func (dao *PrescriptionDAO) GetAllPrescriptions() ([]models.Prescription, error)
 
 	return prescriptions, nil
 }
-
-//hello 2
 
 func (dao *PrescriptionDAO) DeletePrescription(p *models.Prescription) error {
 	err := dao.DB.Delete(&p).Error
