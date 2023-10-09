@@ -65,7 +65,6 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 	if err != nil {
 		return errorhandler.HandleError(err, c)
 	}
-
 	return c.Status(fiber.StatusOK).JSON(prescriptions)
 }
 

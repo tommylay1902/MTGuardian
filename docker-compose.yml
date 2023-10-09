@@ -17,15 +17,15 @@ services:
     networks: 
       - db
     depends_on:
-      db:
+      dbprescription: #connects to the service 'dbprescription' over the 'db' network
         condition: service_healthy
     restart: unless-stopped
   
-  db:
-    container_name: db
+  dbprescription:
+    container_name: dbprescription
     image: postgres:15.3 # Use the official PostgreSQL image
     ports:
-      - "5432:5432" 
+      - "8001:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password 
@@ -40,7 +40,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
 
 networks:
   db:
