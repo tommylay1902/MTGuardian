@@ -4,12 +4,12 @@ on:
     branches:
       - main
     paths:
-      - backend/prescription/**
+      - backend/**
   pull_request:
     branches:
       - main
     paths:
-      - backend/prescription/**
+      - backend/**
 jobs:
   build:
     runs-on: ubuntu-latest
