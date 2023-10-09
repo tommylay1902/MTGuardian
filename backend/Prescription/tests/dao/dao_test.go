@@ -195,7 +195,72 @@ func TestGetPrescriptionByIdInvalidId(t *testing.T) {
 	assert.Nil(t, result)
 
 	assert.Error(t, err)
+}
 
+func TestGetAllPrescriptions(t *testing.T) {
+	// Initialize the PrescriptionDAO with the GORM DB
+	dao := dataaccess.InitalizePrescriptionService(gormDB)
+
+	// Create two sample Prescription instances
+	id1 := uuid.New()
+	expectedOne := &models.Prescription{
+		ID:         id1,
+		Medication: StringPointer("Sample Medication"),
+		Dosage:     StringPointer("Sample Dosage"),
+		Notes:      StringPointer("Sample Notes"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	id2 := uuid.New()
+	expectedTwo := &models.Prescription{
+		ID:         id2,
+		Medication: StringPointer("Sample Medication 2"),
+		Dosage:     StringPointer("Sample Dosage 2"),
+		Notes:      StringPointer("Sample Notes 2"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	// Set up the expected SQL query and its result in the mock to return both expectedOne and expectedTwo
+	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
+		WillReturnRows(sqlmock.NewRows([]string{"id", "medication", "dosage", "notes", "started"}).
+			AddRow(expectedTwo.ID, *expectedTwo.Medication, *expectedTwo.Dosage, *expectedTwo.Notes, *expectedTwo.Started).
+			AddRow(expectedOne.ID, *expectedOne.Medication, *expectedOne.Dosage, *expectedOne.Notes, *expectedOne.Started),
+		)
+
+	// Call the GetAllPrescriptions method of the DAO
+	results, err := dao.GetAllPrescriptions()
+
+	// Check for any errors from the mock expectations
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock: %v", err)
+	}
+
+	// Assert that there was no error returned from GetAllPrescriptions
+	assert.NoError(t, err)
+
+	// Assert that the results contain both expectedOne and expectedTwo
+	assert.Contains(t, results, *expectedOne)
+	assert.Contains(t, results, *expectedTwo)
+}
+
+func TestGetAllPrescriptionsWithError(t *testing.T) {
+	// Initialize the PrescriptionDAO with the GORM DB
+	dao := dataaccess.InitalizePrescriptionService(gormDB)
+
+	// Set up the mock to expect an error when querying for prescriptions
+	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
+		WillReturnError(fmt.Errorf("database error"))
+
+	// Call the GetAllPrescriptions method of the DAO
+	_, err := dao.GetAllPrescriptions()
+
+	// Check for any errors from the mock expectations
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock: %v", err)
+	}
+
+	// Assert that there was an error returned from GetAllPrescriptions
+	assert.Error(t, err)
 }
 
 // Helper functions for creating pointers to string and time values
