@@ -146,6 +146,58 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestGetPrescriptionById(t *testing.T) {
+	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	id := uuid.New()
+	expected := &models.Prescription{
+		ID:         id,
+		Medication: StringPointer("Sample Medication"),
+		Dosage:     StringPointer("Sample Dosage"),
+		Notes:      StringPointer("Sample Notes"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
+		WithArgs(id).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "medication", "dosage", "notes", "started"}).
+			AddRow(expected.ID, *expected.Medication, *expected.Dosage, *expected.Notes, *expected.Started))
+
+	result, err := dao.GetPrescriptionById(id)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock %v", err)
+	}
+	assert.NoError(t, err)
+
+	assert.Equal(t, expected, result)
+}
+
+func TestGetPrescriptionByIdInvalidId(t *testing.T) {
+	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	id := uuid.New()
+	// expected := &models.Prescription{
+	// 	ID:         id,
+	// 	Medication: StringPointer("Sample Medication"),
+	// 	Dosage:     StringPointer("Sample Dosage"),
+	// 	Notes:      StringPointer("Sample Notes"),
+	// 	Started:    TimePointer(time.Now()),
+	// }
+
+	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
+		WithArgs(id).WillReturnError(fmt.Errorf("database will throw error"))
+
+	result, err := dao.GetPrescriptionById(id)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock %v", err)
+	}
+
+	assert.Nil(t, result)
+
+	assert.Error(t, err)
+
+}
+
 // Helper functions for creating pointers to string and time values
 func StringPointer(s string) *string {
 	return &s
