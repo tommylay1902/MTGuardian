@@ -263,6 +263,62 @@ func TestGetAllPrescriptionsWithError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestDeletePrescription(t *testing.T) {
+	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	id := uuid.New()
+
+	expected := &models.Prescription{
+		ID:         id,
+		Medication: StringPointer("Sample Medication"),
+		Dosage:     StringPointer("Sample Dosage"),
+		Notes:      StringPointer("Sample Notes"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	mock.ExpectBegin()
+	// Set up the expected SQL query for DELETE using ExpectExec
+	mock.ExpectExec("DELETE FROM \"prescriptions\" WHERE \"prescriptions\".\"id\" = ?").
+		WithArgs(id).
+		WillReturnResult(sqlmock.NewResult(0, 1)) // Indicate that one row was affected
+	mock.ExpectCommit()
+	// Call the DeletePrescription method of the DAO
+	err := dao.DeletePrescription(expected)
+
+	// Check for any errors from the mock expectations
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock: %v", err)
+	}
+
+	// Assert that there was no error returned from DeletePrescription
+	assert.NoError(t, err)
+}
+
+func TestDeletePrescriptionWithError(t *testing.T) {
+	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	id := uuid.New()
+
+	expected := &models.Prescription{
+		ID:         id,
+		Medication: StringPointer("Sample Medication"),
+		Dosage:     StringPointer("Sample Dosage"),
+		Notes:      StringPointer("Sample Notes"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	mock.ExpectBegin()
+	mock.ExpectExec("DELETE FROM \"prescriptions\" WHERE \"prescriptions\".\"id\" = ?").
+		WithArgs(id).
+		WillReturnError(fmt.Errorf("Database Error"))
+	mock.ExpectRollback()
+	err := dao.DeletePrescription(expected)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock: %v", err)
+	}
+
+	assert.Error(t, err)
+}
+
 // Helper functions for creating pointers to string and time values
 func StringPointer(s string) *string {
 	return &s
