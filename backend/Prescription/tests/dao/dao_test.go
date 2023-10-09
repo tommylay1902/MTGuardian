@@ -319,6 +319,50 @@ func TestDeletePrescriptionWithError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestUpdatePrescription(t *testing.T) {
+	// Initialize the PrescriptionDAO with the GORM DB
+	dao := dataaccess.InitalizePrescriptionService(gormDB)
+
+	// Create a sample Prescription
+	prescription := &models.Prescription{
+		ID:         uuid.New(),
+		Medication: StringPointer("Sample Medication"),
+		Dosage:     StringPointer("Sample Dosage"),
+		Notes:      StringPointer("Sample Notes"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	// Insert the initial prescription into the database
+	dao.CreatePrescription(prescription)
+
+	// Update the prescription with new values
+	updatedPrescription := &models.Prescription{
+		ID:         prescription.ID,
+		Medication: StringPointer("Updated Medication"),
+		Dosage:     StringPointer("Updated Dosage"),
+		Notes:      StringPointer("Updated Notes"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	mock.ExpectBegin()
+	// Set up the expected SQL query for the update operation
+	mock.ExpectExec("UPDATE \"prescriptions\" SET .* WHERE \"id\" = ?").
+		WithArgs(*updatedPrescription.Medication, *updatedPrescription.Dosage, *updatedPrescription.Notes, *updatedPrescription.Started, prescription.ID).
+		WillReturnResult(sqlmock.NewResult(0, 1)) // Indicate that one row was updated
+	mock.ExpectCommit()
+
+	fmt.Println("Before UpdatePrescription call")
+	err := dao.UpdatePrescription(updatedPrescription)
+	fmt.Println("After UpdatePrescription call")
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock: %v", err)
+	}
+
+	// Assert that there was no error returned from UpdatePrescription
+	assert.NoError(t, err)
+}
+
 // Helper functions for creating pointers to string and time values
 func StringPointer(s string) *string {
 	return &s
