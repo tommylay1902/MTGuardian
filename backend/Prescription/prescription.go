@@ -16,7 +16,7 @@ func main() {
 		dbInstance, _ := db.DB()
 		_ = dbInstance.Close()
 	}()
-
+	//test
 	app := fiber.New()
 
 	prescriptionDAO := dataaccess.InitalizePrescriptionService(db)
