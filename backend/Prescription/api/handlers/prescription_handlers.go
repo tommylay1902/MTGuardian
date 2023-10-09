@@ -69,7 +69,7 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(prescriptions)
 }
 
-// hello 4
+// hello 6
 func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 
