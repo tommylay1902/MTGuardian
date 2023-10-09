@@ -21,10 +21,10 @@ jobs:
         with:
           go-version: 1.21.1
       - name: Install dependencies
-        run: go install ./backend/prescription
+        run: go install ./backend/Prescription
       - name: get depdencies
-        run: go get ./backend/prescription
+        run: go get ./backend/Prescription
       - name: Build
-        run: go build ./backend/prescription
+        run: go build ./backend/Prescription
       - name: Test with the Go CLI
-        run: go test ./backend/prescription/... -v
+        run: go test ./backend/Prescription/... -v
