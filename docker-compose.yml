@@ -1,0 +1,49 @@
+version: '3'
+services:
+  prescription:
+    container_name: prescription
+    build:
+      context: ./backend/prescription
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/prescription/.env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: prescription
+      GORM_HOST: DB
+    ports:
+      - "8000:8080" 
+    networks: 
+      - db
+    depends_on:
+      dbprescription: #connects to the service 'dbprescription' over the 'db' network
+        condition: service_healthy
+    restart: unless-stopped
+  
+  dbprescription:
+    container_name: dbprescription
+    image: postgres:15.3 # Use the official PostgreSQL image
+    ports:
+      - "8001:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password 
+      POSTGRES_DB: prescription
+      GORM_HOST: DB
+    networks:
+      - db
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d prescription"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  postgres-db:

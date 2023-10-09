@@ -1,4 +1,4 @@
-package dtos
+package prescriptiondto
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 
 type PrescriptionDTO struct {
 	Medication *string    `json:"medication"`
-	Dosage     *bool      `json:"dosage"`
+	Dosage     *string    `json:"dosage"`
 	Notes      *string    `json:"notes"`
-	Started    *time.Time `json:"Started"`
+	Started    *time.Time `json:"started"`
 }
