@@ -363,7 +363,7 @@ func TestUpdatePrescription(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// Helper functions for creating pointers to string and time values
+// Helper functions for creating pointers to string and time values 2
 func StringPointer(s string) *string {
 	return &s
 }
