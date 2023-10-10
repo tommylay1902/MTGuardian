@@ -181,6 +181,35 @@ func TestGetAllPrescriptions(t *testing.T) {
 	dao.AssertExpectations(t)
 }
 
+func TestDeletePrescription(t *testing.T) {
+	// Create a mock for the DAO layer
+	dao := &MockPrescriptionDAO{}
+
+	// Create a PrescriptionService using the mock DAO
+	service := services.InitalizePrescriptionService(dao)
+
+	// Define a sample prescription and its associated ID
+	id := uuid.New()
+
+	prescription := &models.Prescription{
+		ID:         id,
+		Medication: StringPointer("Sample Medication"),
+		Dosage:     StringPointer("Sample Dosage"),
+		Notes:      StringPointer("Sample Notes"),
+		Started:    TimePointer(time.Now()),
+	}
+	// Mock the GetPrescriptionById method of the DAO to return a sample prescription
+	dao.On("GetPrescriptionById", id).Return(prescription, nil)
+
+	dao.On("DeletePrescription", prescription).Return(nil)
+	// Call the GetPrescriptionById method of the service
+	err := service.DeletePrescription(id)
+
+	// Your assertions here
+	assert.NoError(t, err)
+	dao.AssertExpectations(t)
+}
+
 // Helper functions for creating pointers to string and time values
 func StringPointer(s string) *string {
 	return &s
