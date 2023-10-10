@@ -2,6 +2,7 @@ package dataaccess_test
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/tommylay1902/prescriptionmicro/api/dataaccess"
+	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
 	"github.com/tommylay1902/prescriptionmicro/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -56,7 +58,7 @@ func TestMain(m *testing.M) {
 func TestCreatePrescriptionWithMock(t *testing.T) {
 
 	// Initialize the PrescriptionDAO with the GORM DB
-	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
 	// Create a sample Prescription
 	prescription := &models.Prescription{
@@ -92,7 +94,7 @@ func TestCreatePrescriptionWithMock(t *testing.T) {
 }
 
 func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
-	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
 	// Create a sample Prescription
 	prescription := &models.Prescription{
@@ -147,7 +149,7 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 }
 
 func TestGetPrescriptionById(t *testing.T) {
-	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 	id := uuid.New()
 	expected := &models.Prescription{
 		ID:         id,
@@ -173,7 +175,7 @@ func TestGetPrescriptionById(t *testing.T) {
 }
 
 func TestGetPrescriptionByIdInvalidId(t *testing.T) {
-	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 	id := uuid.New()
 	// expected := &models.Prescription{
 	// 	ID:         id,
@@ -184,7 +186,7 @@ func TestGetPrescriptionByIdInvalidId(t *testing.T) {
 	// }
 
 	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
-		WithArgs(id).WillReturnError(fmt.Errorf("database will throw error"))
+		WithArgs(id).WillReturnError(gorm.ErrRecordNotFound)
 
 	result, err := dao.GetPrescriptionById(id)
 
@@ -195,11 +197,14 @@ func TestGetPrescriptionByIdInvalidId(t *testing.T) {
 	assert.Nil(t, result)
 
 	assert.Error(t, err)
+	// expectedErr := &customerrors.ResourceNotFound{Code: 404}
+
+	assert.True(t, errors.Is(err, &customerrors.ResourceNotFound{Code: 404}))
 }
 
 func TestGetAllPrescriptions(t *testing.T) {
 	// Initialize the PrescriptionDAO with the GORM DB
-	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
 	// Create two sample Prescription instances
 	id1 := uuid.New()
@@ -245,7 +250,7 @@ func TestGetAllPrescriptions(t *testing.T) {
 
 func TestGetAllPrescriptionsWithError(t *testing.T) {
 	// Initialize the PrescriptionDAO with the GORM DB
-	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
 	// Set up the mock to expect an error when querying for prescriptions
 	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
@@ -264,7 +269,7 @@ func TestGetAllPrescriptionsWithError(t *testing.T) {
 }
 
 func TestDeletePrescription(t *testing.T) {
-	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 	id := uuid.New()
 
 	expected := &models.Prescription{
@@ -294,7 +299,7 @@ func TestDeletePrescription(t *testing.T) {
 }
 
 func TestDeletePrescriptionWithError(t *testing.T) {
-	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 	id := uuid.New()
 
 	expected := &models.Prescription{
@@ -321,7 +326,7 @@ func TestDeletePrescriptionWithError(t *testing.T) {
 
 func TestUpdatePrescription(t *testing.T) {
 	// Initialize the PrescriptionDAO with the GORM DB
-	dao := dataaccess.InitalizePrescriptionService(gormDB)
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
 	// Create a sample Prescription
 	prescription := &models.Prescription{
@@ -351,9 +356,7 @@ func TestUpdatePrescription(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(0, 1)) // Indicate that one row was updated
 	mock.ExpectCommit()
 
-	fmt.Println("Before UpdatePrescription call")
 	err := dao.UpdatePrescription(updatedPrescription)
-	fmt.Println("After UpdatePrescription call")
 
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatalf("Error in SQL mock: %v", err)
@@ -361,6 +364,48 @@ func TestUpdatePrescription(t *testing.T) {
 
 	// Assert that there was no error returned from UpdatePrescription
 	assert.NoError(t, err)
+
+}
+
+func TestUpdatePrescriptionWithError(t *testing.T) {
+	// Initialize the PrescriptionDAO with the GORM DB
+	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
+
+	// Create a sample Prescription
+	prescription := &models.Prescription{
+		ID:         uuid.New(),
+		Medication: StringPointer("Sample Medication"),
+		Dosage:     StringPointer("Sample Dosage"),
+		Notes:      StringPointer("Sample Notes"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	// Insert the initial prescription into the database
+	dao.CreatePrescription(prescription)
+
+	// Update the prescription with new values
+	updatedPrescription := &models.Prescription{
+		ID:         prescription.ID,
+		Medication: StringPointer("Sample Medication"),
+		Dosage:     StringPointer("Sample Dosage"),
+		Notes:      StringPointer("Sample Notes"),
+		Started:    prescription.Started,
+	}
+
+	mock.ExpectBegin()
+	// Set up the expected SQL query for the update operation
+	mock.ExpectExec("UPDATE \"prescriptions\" SET .* WHERE \"id\" = ?").
+		WithArgs(*updatedPrescription.Medication, *updatedPrescription.Dosage, *updatedPrescription.Notes, *updatedPrescription.Started, prescription.ID).
+		WillReturnError(fmt.Errorf("data base error"))
+	mock.ExpectRollback()
+
+	err := dao.UpdatePrescription(updatedPrescription)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock: %v", err)
+	}
+
+	assert.Error(t, err)
 }
 
 // Helper functions for creating pointers to string and time values 2
