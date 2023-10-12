@@ -1,7 +1,6 @@
 package services_test
 
 import (
-	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -17,17 +16,32 @@ import (
 // MockPrescriptionDAO is a mock implementation of PrescriptionDAO for testing purposes.
 type MockPrescriptionDAO struct {
 	mock.Mock
+	Generated uuid.UUID
 }
 
-// CreatePrescription mocks the CreatePrescription method of PrescriptionDAO.
+func (m *MockPrescriptionDAO) GenerateUUID() {
+	m.Generated = uuid.New()
+}
+
+// Mock CreatePrescription method
 func (m *MockPrescriptionDAO) CreatePrescription(prescription *models.Prescription) (*uuid.UUID, error) {
 	args := m.Called(prescription)
-	uuidValue, ok := args.Get(0).(uuid.UUID)
-	if !ok {
-		// Handle the case where the type assertion fails, e.g., return a default UUID
-		return nil, args.Error(1)
+
+	// Extract the returned values from the mock
+	result := args.Get(0)
+	err := args.Error(1)
+
+	if result == nil {
+		return nil, err
 	}
-	return &uuidValue, args.Error(1)
+
+	// Cast the result to the correct type
+	id, ok := result.(*uuid.UUID)
+	if !ok {
+		return nil, err
+	}
+
+	return id, err
 }
 
 // GetPrescriptionById mocks the GetPrescriptionById method of PrescriptionDAO.
@@ -78,23 +92,22 @@ func TestCreatePrescription(t *testing.T) {
 	}
 
 	prescription, mapErr := dto.MapPrescriptionDTOToModel(prescriptionDTO)
-	fmt.Println("testing", prescription.ID)
 	if mapErr != nil {
 		//fail test
 		log.Panic("Error mapping")
 	}
 
+	dao.GenerateUUID()
+
 	// Mock the CreatePrescription method of the DAO
-	dao.On("CreatePrescription", MatchPrescriptionExceptUUID(prescription)).Return(nil)
+	dao.On("CreatePrescription", MatchPrescriptionExceptUUID(prescription)).Return(&dao.Generated, nil)
 
 	// Call the CreatePrescription method of the service
 	id, err := service.CreatePrescription(prescriptionDTO)
-
 	// Your assertions here
 	assert.NoError(t, err)
-	fmt.Println("ID from service:", *id)
-	fmt.Println("ID from prescription:", prescription.ID)
-	assert.Equal(t, *id, prescription.ID)
+
+	assert.Equal(t, *id, dao.Generated)
 	dao.AssertExpectations(t)
 }
 

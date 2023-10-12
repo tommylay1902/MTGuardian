@@ -103,7 +103,7 @@ func TestMain(m *testing.M) {
 func TestCreatePrescriptionIntegration(t *testing.T) {
 
 	db := SetupGormConnection(t, dbContainer)
-	defer dbContainer.Terminate(context.Background())
+	// defer dbContainer.Terminate(context.Background())
 
 	defer func() {
 		dbInstance, _ := db.DB()
