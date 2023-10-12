@@ -15,16 +15,17 @@ func InitalizePrescriptionService(prescriptionDAO dataaccess.IPrescriptionDao) *
 	return &PrescriptionService{dao: prescriptionDAO}
 }
 
-func (ps *PrescriptionService) CreatePrescription(prescription *dto.PrescriptionDTO) error {
+func (ps *PrescriptionService) CreatePrescription(prescription *dto.PrescriptionDTO) (*uuid.UUID, error) {
 	create, dtoErr := dto.MapPrescriptionDTOToModel(prescription)
+
 	if dtoErr != nil {
-		return dtoErr
+		return nil, dtoErr
 	}
-	err := ps.dao.CreatePrescription(create)
+	id, err := ps.dao.CreatePrescription(create)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return id, nil
 }
 
 func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*dto.PrescriptionDTO, error) {

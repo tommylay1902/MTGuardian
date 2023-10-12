@@ -82,7 +82,7 @@ func TestCreatePrescriptionWithMock(t *testing.T) {
 	mock.ExpectCommit()
 
 	// Call the CreatePrescription method of the DAO
-	err := dao.CreatePrescription(prescription)
+	id, err := dao.CreatePrescription(prescription)
 
 	// // Check for any errors from the mock expectations
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -91,6 +91,7 @@ func TestCreatePrescriptionWithMock(t *testing.T) {
 
 	// Assert that there was no error returned from CreatePrescription
 	assert.NoError(t, err)
+	assert.Equal(t, *id, prescription.ID)
 }
 
 func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
@@ -137,7 +138,7 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 	).WillReturnError(fmt.Errorf("database will throw error"))
 	mock.ExpectRollback()
 
-	err := dao.CreatePrescription(prescription2)
+	_, err := dao.CreatePrescription(prescription2)
 
 	// Check for any errors from the mock expectations
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -146,6 +147,7 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 
 	// Assert that there was an error returned from CreatePrescription
 	assert.Error(t, err)
+
 }
 
 func TestGetPrescriptionById(t *testing.T) {

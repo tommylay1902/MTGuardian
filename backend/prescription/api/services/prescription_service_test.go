@@ -1,6 +1,7 @@
 package services_test
 
 import (
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -19,9 +20,14 @@ type MockPrescriptionDAO struct {
 }
 
 // CreatePrescription mocks the CreatePrescription method of PrescriptionDAO.
-func (m *MockPrescriptionDAO) CreatePrescription(prescription *models.Prescription) error {
+func (m *MockPrescriptionDAO) CreatePrescription(prescription *models.Prescription) (*uuid.UUID, error) {
 	args := m.Called(prescription)
-	return args.Error(0)
+	uuidValue, ok := args.Get(0).(uuid.UUID)
+	if !ok {
+		// Handle the case where the type assertion fails, e.g., return a default UUID
+		return nil, args.Error(1)
+	}
+	return &uuidValue, args.Error(1)
 }
 
 // GetPrescriptionById mocks the GetPrescriptionById method of PrescriptionDAO.
@@ -72,6 +78,7 @@ func TestCreatePrescription(t *testing.T) {
 	}
 
 	prescription, mapErr := dto.MapPrescriptionDTOToModel(prescriptionDTO)
+	fmt.Println("testing", prescription.ID)
 	if mapErr != nil {
 		//fail test
 		log.Panic("Error mapping")
@@ -81,10 +88,13 @@ func TestCreatePrescription(t *testing.T) {
 	dao.On("CreatePrescription", MatchPrescriptionExceptUUID(prescription)).Return(nil)
 
 	// Call the CreatePrescription method of the service
-	err := service.CreatePrescription(prescriptionDTO)
+	id, err := service.CreatePrescription(prescriptionDTO)
 
 	// Your assertions here
 	assert.NoError(t, err)
+	fmt.Println("ID from service:", *id)
+	fmt.Println("ID from prescription:", prescription.ID)
+	assert.Equal(t, *id, prescription.ID)
 	dao.AssertExpectations(t)
 }
 
@@ -208,6 +218,39 @@ func TestDeletePrescription(t *testing.T) {
 	// Your assertions here
 	assert.NoError(t, err)
 	dao.AssertExpectations(t)
+}
+
+func TestUpdatePrescription(t *testing.T) {
+	// Create a mock for the DAO layer
+	dao := &MockPrescriptionDAO{}
+
+	// Create a PrescriptionService using the mock DAO
+	service := services.InitalizePrescriptionService(dao)
+
+	// Define a sample prescription and its associated ID
+	id := uuid.New()
+
+	prescription := &models.Prescription{
+		ID:         id,
+		Medication: StringPointer("Sample Medication"),
+		Dosage:     StringPointer("Sample Dosage"),
+		Notes:      StringPointer("Sample Notes"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	expectedDTO := &dto.PrescriptionDTO{
+		Medication: StringPointer("Sample Medication 2"),
+		Dosage:     StringPointer("Sample Dosage 2"),
+		Notes:      StringPointer("Sample Notes 2"),
+		Started:    TimePointer(time.Now()),
+	}
+
+	dao.On("GetPrescriptionById", id).Return(prescription, nil)
+	dao.On("UpdatePrescription", prescription).Return(nil)
+
+	err := service.UpdatePrescription(expectedDTO, id)
+
+	assert.NoError(t, err)
 }
 
 // Helper functions for creating pointers to string and time values

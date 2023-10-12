@@ -12,7 +12,7 @@ func SetupDB() *gorm.DB {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		dsnRetry := "host=localhost user=postgres password=password dbname=prescription port=5432 sslmode=disable"
+		dsnRetry := "host=localhost user=postgres password=password dbname=prescription port=8001 sslmode=disable"
 		db, err = gorm.Open(postgres.Open(dsnRetry), &gorm.Config{})
 		if err != nil {
 			panic("error connecting to database")

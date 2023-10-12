@@ -6,7 +6,7 @@ import (
 )
 
 type IPrescriptionDao interface {
-	CreatePrescription(prescription *models.Prescription) error
+	CreatePrescription(prescription *models.Prescription) (*uuid.UUID, error)
 	GetPrescriptionById(id uuid.UUID) (*models.Prescription, error)
 	GetAllPrescriptions() ([]models.Prescription, error)
 	DeletePrescription(p *models.Prescription) error
