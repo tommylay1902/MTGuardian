@@ -13,6 +13,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15.3
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: prescription
+        ports:
+          - 8001:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     defaults:
       run:
         working-directory: ./backend/prescription
@@ -22,14 +34,6 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.21.1
-      - name: restart docker
-        run: docker compose down
-      - name: Start Docker services with docker-compose
-        run: docker compose up -d
-      - name: debug docker port
-        run: docker ps
-      - name: debug curl
-        run: curl -X GET localhost:8000/api/v1/prescription
       - name: Install dependencies
         run: go install .
       - name: get depdencies
