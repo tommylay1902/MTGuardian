@@ -28,5 +28,7 @@ jobs:
         run: go get .
       - name: Build
         run: go build .
+      - name: Install richgo
+        run: go get -u github.com/kyoh86/richgo
       - name: Test with the Go CLI
         run: richgo test ./... -v

@@ -288,7 +288,7 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 	respDelete, respErr := client.Do(req)
 
 	if respErr != nil {
-		fmt.Println("Error sending DELETE request:", deleteErr)
+		log.Panic("Error sending DELETE request:", deleteErr)
 		return
 	}
 	defer respDelete.Body.Close()
