@@ -17,7 +17,6 @@ jobs:
       dbprescription:
         image: postgres:15.3
         env:
-          POSTGRES_HOST: dbprescription
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: prescription
