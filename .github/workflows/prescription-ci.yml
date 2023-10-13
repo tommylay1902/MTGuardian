@@ -31,6 +31,12 @@ jobs:
       run:
         working-directory: ./backend/prescription
     steps:
+      - name: "Create env file"
+        run: |
+          touch .env
+          echo PORT=8080 >> .env
+          echo TESTPORT=172.17.0.1 >> .env
+          cat .env
       - uses: actions/checkout@v4
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -38,7 +44,7 @@ jobs:
           go-version: 1.21.1
       # - name: Install dependencies
       #   run: go install .
-      # - name: get depdencies
+      # - name: get dependencies
       #   run: go get .
       - name: Build
         run: go build .
