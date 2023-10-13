@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env: # Define your environment variables here
       PORT: 8080
-      TESTPORT: 172.17.0.1
+      TESTPORT: 172.17.0.1:8080
     services:
       dbprescription:
         image: postgres:15.3
