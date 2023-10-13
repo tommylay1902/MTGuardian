@@ -13,16 +13,16 @@ type PrescriptionDAO struct {
 	DB *gorm.DB
 }
 
-func InitalizePrescriptionService(db *gorm.DB) *PrescriptionDAO {
+func InitalizePrescriptionDAO(db *gorm.DB) *PrescriptionDAO {
 	return &PrescriptionDAO{DB: db}
 }
 
-func (dao *PrescriptionDAO) CreatePrescription(prescription *models.Prescription) error {
+func (dao *PrescriptionDAO) CreatePrescription(prescription *models.Prescription) (*uuid.UUID, error) {
 	err := dao.DB.Create(&prescription).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &prescription.ID, nil
 }
 
 func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescription, error) {

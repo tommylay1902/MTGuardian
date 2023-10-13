@@ -2,3 +2,4 @@
 prescriptionmicro
 .env
 build
+coverage.out

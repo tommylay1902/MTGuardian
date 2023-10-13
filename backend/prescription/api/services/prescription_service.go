@@ -8,27 +8,28 @@ import (
 )
 
 type PrescriptionService struct {
-	PrescriptionDAO *dataaccess.PrescriptionDAO
+	dao dataaccess.IPrescriptionDao
 }
 
-func InitalizePrescriptionService(prescriptionDAO *dataaccess.PrescriptionDAO) *PrescriptionService {
-	return &PrescriptionService{PrescriptionDAO: prescriptionDAO}
+func InitalizePrescriptionService(prescriptionDAO dataaccess.IPrescriptionDao) *PrescriptionService {
+	return &PrescriptionService{dao: prescriptionDAO}
 }
 
-func (ps *PrescriptionService) CreatePrescription(prescription *dto.PrescriptionDTO) error {
+func (ps *PrescriptionService) CreatePrescription(prescription *dto.PrescriptionDTO) (*uuid.UUID, error) {
 	create, dtoErr := dto.MapPrescriptionDTOToModel(prescription)
+
 	if dtoErr != nil {
-		return dtoErr
+		return nil, dtoErr
 	}
-	err := ps.PrescriptionDAO.CreatePrescription(create)
+	id, err := ps.dao.CreatePrescription(create)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return id, nil
 }
 
 func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*dto.PrescriptionDTO, error) {
-	p, err := ps.PrescriptionDAO.GetPrescriptionById(id)
+	p, err := ps.dao.GetPrescriptionById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +41,7 @@ func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*dto.Prescript
 }
 
 func (ps *PrescriptionService) GetPrescriptions() ([]dto.PrescriptionDTO, error) {
-	prescriptions, err := ps.PrescriptionDAO.GetAllPrescriptions()
+	prescriptions, err := ps.dao.GetAllPrescriptions()
 
 	if err != nil {
 		return nil, err
@@ -53,14 +54,14 @@ func (ps *PrescriptionService) GetPrescriptions() ([]dto.PrescriptionDTO, error)
 }
 
 func (ps *PrescriptionService) DeletePrescription(id uuid.UUID) error {
-	p, err := ps.PrescriptionDAO.GetPrescriptionById(id)
+	p, err := ps.dao.GetPrescriptionById(id)
 	if err != nil {
 		return &customerrors.ResourceNotFound{
 			Message: err.Error(),
 			Code:    404,
 		}
 	}
-	daoError := ps.PrescriptionDAO.DeletePrescription(p)
+	daoError := ps.dao.DeletePrescription(p)
 	if daoError != nil {
 		return daoError
 	}
@@ -68,7 +69,7 @@ func (ps *PrescriptionService) DeletePrescription(id uuid.UUID) error {
 }
 
 func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id uuid.UUID) error {
-	pUpdate, err := ps.PrescriptionDAO.GetPrescriptionById(id)
+	pUpdate, err := ps.dao.GetPrescriptionById(id)
 	if err != nil {
 		return err
 	}
@@ -94,7 +95,7 @@ func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id 
 	}
 
 	if hasUpdate {
-		return ps.PrescriptionDAO.UpdatePrescription(pUpdate)
+		return ps.dao.UpdatePrescription(pUpdate)
 	}
 
 	return &customerrors.BadRequestError{Message: "No updates found for the prescription", Code: 400}

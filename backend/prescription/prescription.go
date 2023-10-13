@@ -19,7 +19,7 @@ func main() {
 	//test 2
 	app := fiber.New()
 
-	prescriptionDAO := dataaccess.InitalizePrescriptionService(db)
+	prescriptionDAO := dataaccess.InitalizePrescriptionDAO(db)
 	prescriptionService := services.InitalizePrescriptionService(prescriptionDAO)
 	prescriptionHandler := handlers.InitializePrescriptionHandler(prescriptionService)
 

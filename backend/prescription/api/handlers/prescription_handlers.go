@@ -28,11 +28,13 @@ func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 		return errorhandler.HandleError(badErr, c)
 	}
 
-	if err := ph.PrescriptionService.CreatePrescription(&requestBody); err != nil {
+	id, err := ph.PrescriptionService.CreatePrescription(&requestBody)
+	if err != nil {
 		return errorhandler.HandleError(err, c)
 	}
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": "successfully created prescription",
+		"success": id.String(),
 	})
 }
 
