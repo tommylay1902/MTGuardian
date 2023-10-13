@@ -27,6 +27,8 @@ jobs:
           echo "PORT=8000" >> $GITHUB_ENV
       - name: Start Docker services with docker-compose
         run: docker compose up -d
+      - name: debug curl
+        run: curl -X GET http://localhost:8000/api/v1/prescription
       - name: Install dependencies
         run: go install .
       - name: get depdencies
