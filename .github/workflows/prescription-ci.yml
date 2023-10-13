@@ -29,10 +29,8 @@ jobs:
 
     defaults:
       run:
-        working-directory: backend/prescription
+        working-directory: MTGuardian/backend/prescription
     steps:
-      - name: "debug path"
-        run: ls -a
       - name: "Create env file"
         run: |
           touch .env
