@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -24,6 +25,7 @@ import (
 var (
 	dbContainer testcontainers.Container
 	ctx         context.Context
+	testPort    string
 )
 
 type PrescriptionModel struct {
@@ -99,6 +101,18 @@ func TestMain(m *testing.M) {
 	db, err := SetupTestDatabase()
 	dbContainer = db
 
+	envErr := godotenv.Load("../../.env")
+	if envErr != nil {
+		log.Fatal("Error loading .env file", envErr)
+	}
+	testPort = os.Getenv("TESTPORT")
+
+	if testPort == "" {
+		log.Fatal("Port is not specified")
+	}
+
+	fmt.Println("running tests with", testPort)
+
 	ctx = context.Background()
 	if err != nil {
 		log.Println("error connecting")
@@ -122,10 +136,9 @@ func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
 	// Setup your database connection, similar to other integration tests
 
 	// Define the API endpoint for creating a prescription
-	createEndpoint := "http://localhost:8000/api/v1/prescription"
-
+	createEndpoint := "http://" + testPort + "/api/v1/prescription"
 	// Define the API endpoint for getting a prescription by ID
-	getEndpoint := "http://localhost:8000/api/v1/prescription/"
+	getEndpoint := "http://" + testPort + "/api/v1/prescription/"
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()
@@ -203,10 +216,10 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 	// Setup your database connection, similar to other integration tests
 
 	// Define the API endpoint for creating a prescription
-	createEndpoint := "http://localhost:8000/api/v1/prescription"
+	createEndpoint := "http://" + testPort + "/api/v1/prescription"
 
 	// Define the API endpoint for getting a prescription by ID
-	getDeleteEndpoint := "http://localhost:8000/api/v1/prescription/"
+	getDeleteEndpoint := "http://" + testPort + "/api/v1/prescription/"
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()
@@ -307,9 +320,9 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 
 func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
 	// Define the API endpoints
-	createEndpoint := "http://localhost:8000/api/v1/prescription"
-	updateEndpoint := "http://localhost:8000/api/v1/prescription/"
-	getEndpoint := "http://localhost:8000/api/v1/prescription/"
+	createEndpoint := "http://" + testPort + "/api/v1/prescription"
+	updateEndpoint := "http://" + testPort + "/api/v1/prescription/"
+	getEndpoint := "http://" + testPort + "/api/v1/prescription/"
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()
