@@ -14,10 +14,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     services:
-      postgres:
+      dbprescription:
         image: postgres:15.3
         env:
-          POSTGRES_HOST: localhost
+          POSTGRES_HOST: dbprescription
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: prescription
@@ -34,6 +34,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.21.1
+      - name: get runner ip addresses
+        id: ip
+        uses: haythem/public-ip@v1.2
       - name: Install dependencies
         run: go install .
       - name: get depdencies
