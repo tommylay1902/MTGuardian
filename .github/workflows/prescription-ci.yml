@@ -30,5 +30,7 @@ jobs:
         run: go build .
       - name: Install richgo
         run: go get -u github.com/kyoh86/richgo
+      - name: Find richgo path
+        run: echo "::set-env name=RICHGO_PATH::$(go env GOPATH)/bin/richgo"
       - name: Test with the Go CLI
-        run: richgo test ./... -v
+        run: ${{ env.RICHGO_PATH }} test ./... -v
