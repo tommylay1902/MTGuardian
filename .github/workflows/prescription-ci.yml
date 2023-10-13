@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env: # Define your environment variables here
       PORT: 8080
-      TESTPORT: 172.17.0.1:8080
+      TESTPORT: 0.0.0.0:8080
     # services:
     #   dbprescription:
     #     image: postgres:15.3
@@ -58,5 +58,4 @@ jobs:
       - name: Build and Run Tests
         run: |
           docker compose up -d
-          docker ps
-          docker exec -it prescription go test ./...
+          go test ./...
