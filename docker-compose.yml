@@ -15,6 +15,7 @@ services:
       PORT: 8080
     ports:
       - "8000:8080" 
+    tty: true
     networks: 
       - db
     depends_on:
