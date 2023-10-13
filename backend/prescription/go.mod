@@ -25,6 +25,8 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/schema v1.1.0 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/kyoh86/richgo v0.3.12 // indirect
+	github.com/kyoh86/xdg v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/moby/patternmatcher v0.5.0 // indirect
@@ -45,6 +47,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.25.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
+	github.com/wacul/ptr v1.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 	golang.org/x/mod v0.9.0 // indirect
@@ -55,6 +58,7 @@ require (
 	google.golang.org/grpc v1.57.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/resty.v1 v1.12.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

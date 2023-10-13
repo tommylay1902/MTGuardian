@@ -1,7 +1,6 @@
 package journeys
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -118,51 +117,6 @@ func TestMain(m *testing.M) {
 	// Exit with the test exit code
 	os.Exit(exitCode)
 }
-func TestCreatePrescriptionIntegration(t *testing.T) {
-
-	db := SetupGormConnection(t, dbContainer)
-	// defer dbContainer.Terminate(context.Background())
-
-	defer func() {
-		dbInstance, _ := db.DB()
-		_ = dbInstance.Close()
-	}()
-
-	// Define the API endpoint and HTTP method
-	endpoint := "http://localhost:8000/api/v1/prescription" // Change to your actual endpoint
-
-	started := time.Now().Format("2006-01-02T15:04:05.999999-07:00")
-	medString := "Medication " + uuid.New().String()
-	payload := []byte(`{
-		"medication": "` + medString + `",
-		"dosage": "Sample Dosage",
-		"notes":"Sample Notes",
-		"started":"` + started + `"
-	}`)
-
-	// Make the POST request
-	resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(payload))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var responseBody struct {
-		Success uuid.UUID `json:"success"`
-	}
-	// Decode the response body
-	decoder := json.NewDecoder(resp.Body)
-	if err := decoder.Decode(&responseBody); err != nil {
-		t.Fatal("Failed to decode response body:", err)
-	}
-	defer resp.Body.Close()
-
-	// Check the response status code and perform assertions on the response
-	if resp.StatusCode != http.StatusCreated {
-		t.Fatalf("Expected status code %d, got %d", http.StatusCreated, resp.StatusCode)
-	}
-
-	assert.Equal(t, resp.StatusCode, http.StatusCreated)
-}
 
 func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
 	// Setup your database connection, similar to other integration tests
@@ -233,8 +187,6 @@ func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to parse prescriptionData: ")
 	}
-	fmt.Println(*expected.Medication)
-	fmt.Println(*retrievedPrescription.Medication)
 
 	assert.Equal(t, *expected.Medication, *retrievedPrescription.Medication)
 	assert.Equal(t, *expected.Dosage, *retrievedPrescription.Dosage)
@@ -245,4 +197,229 @@ func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
 
 	// Compare the Started time
 	assert.True(t, expectedStarted.Equal(*retrievedPrescription.Started))
+}
+
+func TestCreateGetDeleteGetPrescription(t *testing.T) {
+	// Setup your database connection, similar to other integration tests
+
+	// Define the API endpoint for creating a prescription
+	createEndpoint := "http://localhost:8000/api/v1/prescription"
+
+	// Define the API endpoint for getting a prescription by ID
+	getDeleteEndpoint := "http://localhost:8000/api/v1/prescription/"
+
+	// Define the prescription data (you can customize this data)
+	randomMed := "Medication " + uuid.NewString()
+	started := time.Now().Format("2006-01-02T15:04:05.999999-07:00")
+
+	prescriptionData := `{
+        "medication": "` + randomMed + `",
+        "dosage": "Sample Dosage",
+        "notes": "Sample Notes",
+        "started": "` + started + `"
+    }`
+
+	// Step 1: Create the prescription
+	createResp, createErr := http.Post(createEndpoint, "application/json", strings.NewReader(prescriptionData))
+	if createErr != nil {
+		t.Fatal(createErr)
+	}
+	defer createResp.Body.Close()
+
+	// Check the response status code for creating a prescription
+	if createResp.StatusCode != http.StatusCreated {
+		t.Fatalf("Expected status code %d for creating a prescription, got %d", http.StatusCreated, createResp.StatusCode)
+	}
+
+	// Decode the response body to retrieve the created prescription ID
+	var createdPrescriptionID struct {
+		Success uuid.UUID `json:"success"`
+	}
+	createDecoder := json.NewDecoder(createResp.Body)
+	if err := createDecoder.Decode(&createdPrescriptionID); err != nil {
+		t.Fatal("Failed to decode create response body:", err)
+	}
+
+	// Step 2: Get the prescription by its ID
+	getResp, getErr := http.Get(getDeleteEndpoint + createdPrescriptionID.Success.String())
+	if getErr != nil {
+		t.Fatal(getErr)
+	}
+	defer getResp.Body.Close()
+
+	// Check the response status code for getting a prescription by ID
+	if getResp.StatusCode != http.StatusOK {
+		t.Fatalf("Expected status code %d for getting a prescription, got %d", http.StatusOK, getResp.StatusCode)
+	}
+
+	// Decode the response body to process the retrieved prescription
+	var retrievedPrescription prescriptiondto.PrescriptionDTO // Define a struct matching the format of the response
+	getDecoder := json.NewDecoder(getResp.Body)
+	if err := getDecoder.Decode(&retrievedPrescription); err != nil {
+		t.Fatal("Failed to decode get response body:", err)
+	}
+
+	// Perform assertions on the retrieved prescription
+	// Check properties of the prescription based on your actual data structure
+
+	assert.NotEmpty(t, retrievedPrescription.Medication)
+
+	expected, err := parsePrescriptionDataToDTO(prescriptionData)
+	if err != nil {
+		t.Fatal("Failed to parse prescriptionData: ")
+	}
+
+	assert.Equal(t, *expected.Medication, *retrievedPrescription.Medication)
+	assert.Equal(t, *expected.Dosage, *retrievedPrescription.Dosage)
+	assert.Equal(t, *expected.Notes, *retrievedPrescription.Notes)
+
+	// Convert the expected Started time to UTC
+	expectedStarted := expected.Started.In(time.UTC)
+
+	// Compare the Started time
+	assert.True(t, expectedStarted.Equal(*retrievedPrescription.Started))
+
+	req, deleteErr := http.NewRequest("DELETE", getDeleteEndpoint+createdPrescriptionID.Success.String(), nil)
+	if deleteErr != nil {
+		t.Fatal(deleteErr)
+	}
+
+	client := &http.Client{}
+	respDelete, respErr := client.Do(req)
+
+	if respErr != nil {
+		fmt.Println("Error sending DELETE request:", deleteErr)
+		return
+	}
+	defer respDelete.Body.Close()
+
+	assert.True(t, respDelete.StatusCode == http.StatusOK)
+
+	getAfterDeleteResp, getAfterDeleteErr := http.Get(getDeleteEndpoint + createdPrescriptionID.Success.String())
+	if getAfterDeleteErr != nil {
+		t.Fatal(getErr)
+	}
+	defer getAfterDeleteResp.Body.Close()
+
+	assert.True(t, getAfterDeleteResp.StatusCode == http.StatusNotFound)
+
+}
+
+func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
+	// Define the API endpoints
+	createEndpoint := "http://localhost:8000/api/v1/prescription"
+	updateEndpoint := "http://localhost:8000/api/v1/prescription/"
+	getEndpoint := "http://localhost:8000/api/v1/prescription/"
+
+	// Define the prescription data (you can customize this data)
+	randomMed := "Medication " + uuid.NewString()
+	started := time.Now().Format("2006-01-02T15:04:05.999999-07:00")
+
+	prescriptionData := `{
+        "medication": "` + randomMed + `",
+        "dosage": "Sample Dosage",
+        "notes": "Sample Notes",
+        "started": "` + started + `"
+    }`
+
+	// Step 1: Create the prescription
+	createResp, createErr := http.Post(createEndpoint, "application/json", strings.NewReader(prescriptionData))
+	if createErr != nil {
+		t.Fatal(createErr)
+	}
+	defer createResp.Body.Close()
+
+	// Check the response status code for creating a prescription
+	if createResp.StatusCode != http.StatusCreated {
+		t.Fatalf("Expected status code %d for creating a prescription, got %d", http.StatusCreated, createResp.StatusCode)
+	}
+
+	// Decode the response body to retrieve the created prescription ID
+	var createdPrescriptionID struct {
+		Success uuid.UUID `json:"success"`
+	}
+	createDecoder := json.NewDecoder(createResp.Body)
+	if err := createDecoder.Decode(&createdPrescriptionID); err != nil {
+		t.Fatal("Failed to decode create response body:", err)
+	}
+
+	// Step 2: Get the prescription by its ID
+	getResp, getErr := http.Get(getEndpoint + createdPrescriptionID.Success.String())
+	if getErr != nil {
+		t.Fatal(getErr)
+	}
+	defer getResp.Body.Close()
+
+	// Check the response status code for getting a prescription by ID
+	if getResp.StatusCode != http.StatusOK {
+		t.Fatalf("Expected status code %d for getting a prescription, got %d", http.StatusOK, getResp.StatusCode)
+	}
+
+	// Decode the response body to process the retrieved prescription
+	var retrievedPrescription prescriptiondto.PrescriptionDTO // Define a struct matching the format of the response
+	getDecoder := json.NewDecoder(getResp.Body)
+	if err := getDecoder.Decode(&retrievedPrescription); err != nil {
+		t.Fatal("Failed to decode get response body:", err)
+	}
+
+	// Perform assertions on the retrieved prescription (check properties)
+
+	// Step 3: Update the prescription
+	// You should define updated prescription data
+	updateId := uuid.New()
+	updatedPrescriptionData := `{
+        "medication": "Updated Medication ` + updateId.String() + `",
+        "dosage": "Updated Dosage ` + updateId.String() + `",
+        "notes": "Updated Notes ` + updateId.String() + `",
+        "started": "` + started + `"
+    }`
+
+	putReq, putErr := http.NewRequest("PUT", updateEndpoint+createdPrescriptionID.Success.String(), strings.NewReader(updatedPrescriptionData))
+	if putErr != nil {
+		t.Fatal(putErr)
+	}
+	// Set the content type header to indicate JSON data
+	putReq.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	respPut, updateErr := client.Do(putReq)
+
+	if updateErr != nil {
+		t.Fatal(updateErr)
+	}
+	defer respPut.Body.Close()
+
+	assert.True(t, respPut.StatusCode == http.StatusOK)
+
+	// Step 4: Get the prescription again by its ID after the update
+	updatedGetResp, updatedGetErr := http.Get(getEndpoint + createdPrescriptionID.Success.String())
+	if updatedGetErr != nil {
+		t.Fatal(updatedGetErr)
+	}
+	defer updatedGetResp.Body.Close()
+
+	// Check the response status code for getting a prescription by ID
+	if updatedGetResp.StatusCode != http.StatusOK {
+		t.Fatalf("Expected status code %d for getting a prescription, got %d", http.StatusOK, updatedGetResp.StatusCode)
+	}
+
+	// Decode the response body to process the updated retrieved prescription
+	var updatedRetrievedPrescription prescriptiondto.PrescriptionDTO // Define a struct matching the format of the response
+	updatedGetDecoder := json.NewDecoder(updatedGetResp.Body)
+	if err := updatedGetDecoder.Decode(&updatedRetrievedPrescription); err != nil {
+		t.Fatal("Failed to decode updated get response body:", err)
+	}
+
+	// Perform assertions on the updated retrieved prescription (check properties)
+
+	assert.Equal(t, "Updated Medication "+updateId.String(), *updatedRetrievedPrescription.Medication)
+	assert.Equal(t, "Updated Dosage "+updateId.String(), *updatedRetrievedPrescription.Dosage)
+	assert.Equal(t, "Updated Notes "+updateId.String(), *updatedRetrievedPrescription.Notes)
+	expected, err := parsePrescriptionDataToDTO(prescriptionData)
+	if err != nil {
+		log.Panic("error converting dto")
+	}
+	expectedStarted := expected.Started.In(time.UTC)
+	assert.Equal(t, expectedStarted, *updatedRetrievedPrescription.Started)
+
 }
