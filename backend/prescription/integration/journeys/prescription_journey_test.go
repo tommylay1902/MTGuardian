@@ -135,7 +135,7 @@ func TestMain(m *testing.M) {
 func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
 	// Setup your database connection, similar to other integration tests
 
-	// Define the API endpoint for creating a prescription
+	// Define the API endpoint for creating a prescriptions
 	createEndpoint := "http://" + testPort + "/api/v1/prescription"
 	// Define the API endpoint for getting a prescription by ID
 	getEndpoint := "http://" + testPort + "/api/v1/prescription/"
