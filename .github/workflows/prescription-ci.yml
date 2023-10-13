@@ -25,6 +25,10 @@ jobs:
       - name: Set environment variables
         run: |
           echo "PORT=8080" >> $GITHUB_ENV
+      - name: Install Docker
+        run: |
+          sudo apt update
+          sudo apt install -y docker.io
       - name: Start Docker services with docker-compose
         run: docker compose up -d
       - name: debug docker port
