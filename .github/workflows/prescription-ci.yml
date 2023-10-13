@@ -16,17 +16,6 @@ jobs:
     env: # Define your environment variables here
       PORT: 8080
       TESTPORT: 0.0.0.0:8000
-    # services:
-    #   dbprescription:
-    #     image: postgres:15.3
-    #     env:
-    #       POSTGRES_USER: postgres
-    #       POSTGRES_PASSWORD: password
-    #       POSTGRES_DB: prescription
-    #     ports:
-    #       - 8002:5432
-    #     options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     defaults:
       run:
         working-directory: backend/prescription
@@ -40,22 +29,9 @@ jobs:
         run: |
           touch .env
           echo PORT=8080 >> .env
-          echo TESTPORT=172.17.0.1:8080 >> .env
+          echo TESTPORT=0.0.0.0:8000 >> .env
           cat .env
-      # - name: Install dependencies
-      #   run: go install .
-      # - name: get dependencies
-      #   run: go get .
-      # - name: Build
-      #   run: go build .
-      # - name: run build
-      #   run: ./prescriptionmicro
-      # - name: Run Tests
-      #   run: go test -v ./...
-
-      # - name: Test with the Go CLI
-      #   run: go test ./... -v
       - name: Build and Run Tests
         run: |
           docker compose up -d
-          go test ./...
+          go test ./... -v
