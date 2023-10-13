@@ -40,7 +40,7 @@ jobs:
         run: |
           touch .env
           echo PORT=8080 >> .env
-          echo TESTPORT=172.17.0.1 >> .env
+          echo TESTPORT=172.17.0.1:8080 >> .env
           cat .env
       # - name: Install dependencies
       #   run: go install .
@@ -48,7 +48,8 @@ jobs:
       #   run: go get .
       - name: Build
         run: go build .
-
+      - name: run build
+        run: ./prescriptionmicro
       - name: Run Tests
         run: go test -v ./...
 
