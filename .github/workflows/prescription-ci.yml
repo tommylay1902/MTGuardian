@@ -37,14 +37,15 @@ jobs:
       #   run: go install .
       # - name: get depdencies
       #   run: go get .
-      # - name: Build
-      #   run: go build .
+      - name: Build
+        run: go build .
+
+      - name: Run Tests
+        run: go test -v ./...
 
       # - name: Test with the Go CLI
       #   run: go test ./... -v
-      - name: Build and Run Tests
-        run: |
-          docker build -t prescription .
-          docker run -e DATABASE_URL=postgres://postgres:password@dbprescription:5432/prescriptoin -e PORT=8000 
-          ls -a
-          prescription go test -v ./..
+      # - name: Build and Run Tests
+      #   run: |
+      #     docker build -t prescription .
+      #     docker run -e PORT=8000 prescription go test -v ./...
