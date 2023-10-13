@@ -5,13 +5,14 @@ services:
     build:
       context: ./backend/prescription
       dockerfile: Dockerfile
-    env_file:
-      - ./backend/prescription/.env
+    # env_file:
+    #   - ./backend/prescription/.env
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: prescription
       GORM_HOST: DB
+      PORT: 8000
     ports:
       - "8000:8080" 
     networks: 
