@@ -27,6 +27,8 @@ jobs:
           echo "PORT=8080" >> $GITHUB_ENV
       - name: Start Docker services with docker-compose
         run: docker compose up -d
+      - name: debug docker port
+        run: docker ps
       - name: debug curl
         run: curl -X GET http://localhost:8000/api/v1/prescription
       - name: Install dependencies
