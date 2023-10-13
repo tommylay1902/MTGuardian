@@ -46,16 +46,17 @@ jobs:
       #   run: go install .
       # - name: get dependencies
       #   run: go get .
-      - name: Build
-        run: go build .
-      - name: run build
-        run: ./prescriptionmicro
-      - name: Run Tests
-        run: go test -v ./...
+      # - name: Build
+      #   run: go build .
+      # - name: run build
+      #   run: ./prescriptionmicro
+      # - name: Run Tests
+      #   run: go test -v ./...
 
       # - name: Test with the Go CLI
       #   run: go test ./... -v
-      # - name: Build and Run Tests
-      #   run: |
-      #     docker build -t prescription .
-      #     docker run -e PORT=8000 prescription go test -v ./...
+      - name: Build and Run Tests
+        run: |
+          docker compose up -d
+          docker ps
+          docker exec -it prescription go test ./...
