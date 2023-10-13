@@ -31,6 +31,8 @@ jobs:
       run:
         working-directory: backend/prescription
     steps:
+      - name: "debug path"
+        run: ls -a
       - name: "Create env file"
         run: |
           touch .env
