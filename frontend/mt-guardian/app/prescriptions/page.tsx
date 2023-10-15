@@ -15,7 +15,10 @@ const PrescriptionPage = async () => {
   const prescriptions:Prescription[] = await res.json();
   
   return (
+    
     <PrescriptionTableView prescriptions={prescriptions}/>
+
+   
   )
 }
 
