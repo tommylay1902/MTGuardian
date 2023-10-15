@@ -1,6 +1,7 @@
 import React from 'react'
+import PrescriptionTableView from '../components/PrescriptionTableView'
 
-interface Prescription{
+export interface Prescription{
   medication: string,
   dosage: string,
   notes: string,
@@ -14,7 +15,7 @@ const PrescriptionPage = async () => {
   const prescriptions:Prescription[] = await res.json();
   
   return (
-    <div>{prescriptions.map(p => <p key={p.medication}>{p.medication}</p>)}</div>
+    <PrescriptionTableView prescriptions={prescriptions}/>
   )
 }
 
