@@ -2,6 +2,7 @@ import React from 'react'
 import PrescriptionTableView from '../components/PrescriptionTableView'
 
 export interface Prescription{
+  id :string,
   medication: string,
   dosage: string,
   notes: string,

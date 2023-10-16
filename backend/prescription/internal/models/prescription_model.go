@@ -11,5 +11,5 @@ type Prescription struct {
 	Medication *string    `json:"medication"  gorm:"uniqueIndex"`
 	Dosage     *string    `json:"dosage"`
 	Notes      *string    `json:"notes"`
-	Started    *time.Time `json:"Started"`
+	Started    *time.Time `json:"started"`
 }
