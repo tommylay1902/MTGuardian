@@ -1,4 +1,6 @@
 import { Prescription } from "@/app/prescriptions/page";
+import { useRouter } from "next/navigation";
+import { Router } from "next/router";
 import React, { Dispatch, SetStateAction } from "react";
 type Props = {
   prescription: Prescription | null;
@@ -10,11 +12,16 @@ const EditPrescriptionModal: React.FC<Props> = ({
   setShowModal,
   setPrescription,
 }) => {
+  const router = useRouter();
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
     setPrescription((prevPrescription) => {
+      if (name === "started") {
+        value = new Date(value).toISOString();
+        console.log(value);
+      }
       if (prevPrescription === null) {
         return {
           id: "", // Provide default values for other properties
@@ -33,10 +40,26 @@ const EditPrescriptionModal: React.FC<Props> = ({
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Submitted Prescription:", prescription);
+    try {
+      if (prescription != null && prescription?.id !== null) {
+        const res = await fetch(
+          `http://0.0.0.0:8000/api/v1/prescription/${prescription.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ...prescription }),
+          }
+        );
+        setShowModal(false);
+        router.refresh();
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const convertDate = (date: Date) => {

@@ -14,7 +14,6 @@ const PrescriptionPage = async () => {
     cache: "no-cache",
   });
   const prescriptions: Prescription[] = await res.json();
-  console.log("printing from server");
 
   return <PrescriptionTableView prescriptions={prescriptions} />;
 };
