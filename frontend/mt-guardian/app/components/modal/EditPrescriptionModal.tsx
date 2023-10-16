@@ -3,23 +3,60 @@ import React, { Dispatch, SetStateAction } from "react";
 type Props = {
   prescription: Prescription | null;
   setShowModal: Dispatch<SetStateAction<boolean>>;
+  setPrescription: Dispatch<SetStateAction<Prescription | null>>;
 };
 const EditPrescriptionModal: React.FC<Props> = ({
   prescription,
   setShowModal,
+  setPrescription,
 }) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setPrescription((prevPrescription) => {
+      if (prevPrescription === null) {
+        return {
+          id: "", // Provide default values for other properties
+          medication: "",
+          dosage: "",
+          notes: "",
+          started: "",
+          [name]: value,
+        };
+      } else {
+        return {
+          ...prevPrescription,
+          [name]: value,
+        };
+      }
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission here
+    console.log("Submitted Prescription:", prescription);
+  };
+
+  const convertDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-based
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   return (
     <div
-      id="staticModal"
       aria-hidden="true"
       className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100% - 1rem)] max-h-full md:w-1/2 md:h-auto sm:w-full sm:h-auto"
     >
       <div className="relative w-full max-w-2xl max-h-full">
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
           <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Static modal
-            </h3>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Edit {prescription?.medication}
+            </h1>
             <button
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
@@ -44,34 +81,94 @@ const EditPrescriptionModal: React.FC<Props> = ({
             </button>
           </div>
           <div className="p-6 space-y-6">
-            <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-              With less than a month to go before the European Union enacts new
-              consumer privacy laws for its citizens, companies around the world
-              are updating their terms of service agreements to comply.
-            </p>
-            <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-              The European Union’s General Data Protection Regulation (G.D.P.R.)
-              goes into effect on May 25 and is meant to ensure a common set of
-              data rights in the European Union. It requires organizations to
-              notify users as soon as possible of high-risk data breaches that
-              could personally affect them.
-            </p>
-          </div>
-          <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-            <button
-              data-modal-hide="staticModal"
-              type="button"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              I accept
-            </button>
-            <button
-              onClick={() => setShowModal(false)}
-              type="button"
-              className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
-            >
-              Decline
-            </button>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label
+                  className="block text-sm font-medium text-gray-700"
+                  htmlFor="medication"
+                >
+                  Medication
+                </label>
+                <input
+                  type="text"
+                  id="medication"
+                  name="medication"
+                  value={prescription?.medication}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded-md shadow-sm"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label
+                  className="block text-sm font-medium text-gray-700"
+                  htmlFor="dosage"
+                >
+                  Dosage
+                </label>
+                <input
+                  type="text"
+                  id="dosage"
+                  name="dosage"
+                  value={prescription?.dosage}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded-md shadow-sm"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label
+                  className="block text-sm font-medium text-gray-700"
+                  htmlFor="notes"
+                >
+                  Notes
+                </label>
+                <textarea
+                  id="notes"
+                  name="notes"
+                  value={prescription?.notes}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded-md shadow-sm"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label
+                  className="block text-sm font-medium text-gray-700"
+                  htmlFor="started"
+                >
+                  Started
+                </label>
+                <input
+                  type="date"
+                  id="started"
+                  name="started"
+                  value={
+                    prescription !== null
+                      ? convertDate(new Date(prescription?.started))
+                      : convertDate(new Date(0))
+                  }
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded-md shadow-sm"
+                />
+              </div>
+              <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <button
+                  type="submit"
+                  onSubmit={handleSubmit}
+                  className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+                >
+                  Submit
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  type="button"
+                  className="px-4 py-2 dark:bg-red-600 rounded-md text-white hover:bg-red-800"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

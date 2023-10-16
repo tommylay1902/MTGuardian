@@ -38,6 +38,7 @@ const PrescriptionTableBody: React.FC<Props> = ({
                 className="rounded-md bg-blue-400 text-white py-2 px-3"
                 onClick={() => {
                   setShowModal(true);
+                  setPrescription(p);
                 }}
               >
                 Edit

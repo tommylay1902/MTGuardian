@@ -42,6 +42,7 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
         <EditPrescriptionModal
           prescription={prescription}
           setShowModal={setShowModal}
+          setPrescription={setPrescription}
         />
       )}
     </>
