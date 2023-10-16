@@ -2,10 +2,10 @@ import React from "react";
 import PrescriptionTableView from "../components/table/PrescriptionTableView";
 
 export interface Prescription {
-  id: string;
-  medication: string;
-  dosage: string;
-  notes: string;
+  id?: string | null;
+  medication?: string | null;
+  dosage?: string | null;
+  notes?: string | null;
   started: string;
 }
 

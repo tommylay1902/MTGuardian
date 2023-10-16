@@ -4,10 +4,12 @@ import React, { Dispatch, SetStateAction } from "react";
 type Props = {
   prescriptions: Prescription[];
   setShowModal: Dispatch<SetStateAction<boolean>>;
+  setPrescription: Dispatch<SetStateAction<Prescription | null>>;
 };
 const PrescriptionTableBody: React.FC<Props> = ({
   prescriptions,
   setShowModal,
+  setPrescription,
 }) => {
   return (
     <tbody>
