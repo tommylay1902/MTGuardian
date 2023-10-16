@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Prescription } from "../../prescriptions/page";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -15,6 +15,8 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
     prescriptions.length > 0 ? Object.keys(prescriptions[0]) : null;
   const tableHeaderExclusions = ["id"];
 
+  const [showModal, setShowModal] = useState(false);
+
   return (
     <>
       {tableHeaders == null ? (
@@ -26,10 +28,14 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
               tableHeaders={tableHeaders}
               tableHeaderExclusions={tableHeaderExclusions}
             />
-            <PrescriptionTableBody prescriptions={prescriptions} />
+            <PrescriptionTableBody
+              prescriptions={prescriptions}
+              setShowModal={setShowModal}
+            />
           </table>
         </div>
       )}
+      {showModal && <div>hello</div>}
     </>
   );
 };

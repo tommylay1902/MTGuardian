@@ -1,10 +1,14 @@
 import { Prescription } from "@/app/prescriptions/page";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
 type Props = {
   prescriptions: Prescription[];
+  setShowModal: Dispatch<SetStateAction<boolean>>;
 };
-const PrescriptionTableBody: React.FC<Props> = ({ prescriptions }) => {
+const PrescriptionTableBody: React.FC<Props> = ({
+  prescriptions,
+  setShowModal,
+}) => {
   return (
     <tbody>
       {prescriptions.map((p) => (
@@ -28,7 +32,12 @@ const PrescriptionTableBody: React.FC<Props> = ({ prescriptions }) => {
             <td className="px-6 py-3">
               {" "}
               {/* Keep the last column with the original padding */}
-              <button className="rounded-md bg-blue-400 text-white py-2 px-3">
+              <button
+                className="rounded-md bg-blue-400 text-white py-2 px-3"
+                onClick={() => {
+                  setShowModal(true);
+                }}
+              >
                 Edit
               </button>
             </td>
