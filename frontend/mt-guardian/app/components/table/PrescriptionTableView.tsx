@@ -41,14 +41,14 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
           </table>
         </div>
       )}
-      {showEditModal && (
+      {showEditModal && prescription != null && (
         <EditPrescriptionModal
           prescription={prescription}
           setShowEditModal={setShowEditModal}
           setPrescription={setPrescription}
         />
       )}
-      {showDeleteModal && (
+      {showDeleteModal && prescription !== null && (
         <DeletePrescriptionModal
           setShowDeleteModal={setShowDeleteModal}
           prescription={prescription}

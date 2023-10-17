@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { Router } from "next/router";
 import React, { Dispatch, SetStateAction } from "react";
 type Props = {
-  prescription: Prescription | null;
+  prescription: Prescription;
   setShowEditModal: Dispatch<SetStateAction<boolean>>;
   setPrescription: Dispatch<SetStateAction<Prescription | null>>;
 };
@@ -78,7 +78,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
           <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Edit {prescription?.medication}
+              Edit {prescription.medication}
             </h1>
             <button
               type="button"
@@ -116,7 +116,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
                   type="text"
                   id="medication"
                   name="medication"
-                  value={prescription?.medication}
+                  value={prescription.medication}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-md shadow-sm"
                 />
@@ -133,7 +133,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
                   type="text"
                   id="dosage"
                   name="dosage"
-                  value={prescription?.dosage}
+                  value={prescription.dosage}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-md shadow-sm"
                 />
@@ -149,7 +149,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
                 <textarea
                   id="notes"
                   name="notes"
-                  value={prescription?.notes}
+                  value={prescription.notes}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-md shadow-sm"
                 />
@@ -168,7 +168,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
                   name="started"
                   value={
                     prescription !== null
-                      ? convertDate(new Date(prescription?.started))
+                      ? convertDate(new Date(prescription.started))
                       : convertDate(new Date(0))
                   }
                   onChange={handleChange}
