@@ -22,7 +22,7 @@ const PrescriptionTableHeader: React.FC<Props> = ({
           }
         })}
         <th scope="col" className="px-6 py-3">
-          Edit
+          Edit/Delete
         </th>{" "}
         {/* Keep the last column with the original padding */}
       </tr>

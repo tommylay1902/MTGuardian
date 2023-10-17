@@ -31,17 +31,23 @@ const PrescriptionTableBody: React.FC<Props> = ({
               {new Date(p.started).toDateString()}
             </td>{" "}
             {/* Decreased the padding */}
-            <td className="px-6 py-3">
+            <td className="px-6 py-3 ">
               {" "}
               {/* Keep the last column with the original padding */}
               <button
-                className="rounded-md bg-blue-400 text-white py-2 px-3"
+                className="rounded-md bg-blue-700 text-white py-2 px-3 mr-3 hover:bg-blue-500"
                 onClick={() => {
                   setShowModal(true);
                   setPrescription(p);
                 }}
               >
                 Edit
+              </button>
+              <button
+                className="rounded-md bg-red-700 text-white py-2 px-3 hover:bg-red-500"
+                onClick={() => {}}
+              >
+                Delete
               </button>
             </td>
           </tr>
