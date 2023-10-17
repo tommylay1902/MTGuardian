@@ -6,13 +6,14 @@ import PrescriptionForm from "../form/PrescriptionForm";
 type Props = {
   prescription: Prescription;
   setShowEditModal: Dispatch<SetStateAction<boolean>>;
-  setPrescription: Dispatch<SetStateAction<Prescription | null>>;
+  setPrescription: Dispatch<SetStateAction<Prescription>>;
 };
 const EditPrescriptionModal: React.FC<Props> = ({
   prescription,
   setShowEditModal,
   setPrescription,
 }) => {
+  console.log("hello from edit");
   const router = useRouter();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,31 +37,6 @@ const EditPrescriptionModal: React.FC<Props> = ({
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    let { name, value } = e.target;
-    setPrescription((prevPrescription) => {
-      if (name === "started") {
-        value = new Date(value).toISOString();
-      }
-      if (prevPrescription === null) {
-        return {
-          id: "", // Provide default values for other properties
-          medication: "",
-          dosage: "",
-          notes: "",
-          started: "",
-          [name]: value,
-        };
-      } else {
-        return {
-          ...prevPrescription,
-          [name]: value,
-        };
-      }
-    });
-  };
   return (
     <div
       aria-hidden="true"
@@ -101,7 +77,6 @@ const EditPrescriptionModal: React.FC<Props> = ({
               setPrescription={setPrescription}
               setShowEditModal={setShowEditModal}
               handleSubmit={handleSubmit}
-              handleChange={handleChange}
             />
           </div>
         </div>

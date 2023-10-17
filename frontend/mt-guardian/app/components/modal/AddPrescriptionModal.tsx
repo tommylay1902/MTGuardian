@@ -4,27 +4,28 @@ import { Router } from "next/router";
 import React, { Dispatch, SetStateAction } from "react";
 import PrescriptionForm from "../form/PrescriptionForm";
 type Props = {
-  prescription: Prescription;
+  createPrescription: Prescription;
   setShowAddModal: Dispatch<SetStateAction<boolean>>;
-  setPrescription: Dispatch<SetStateAction<Prescription | null>>;
+  setCreatePrescription: Dispatch<SetStateAction<Prescription>>;
 };
 const AddPrescriptionModal: React.FC<Props> = ({
   setShowAddModal,
-  setPrescription,
-  prescription,
+  setCreatePrescription,
+  createPrescription,
 }) => {
+  console.log(createPrescription);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (prescription != null && prescription?.id !== null) {
+      if (createPrescription != null && createPrescription?.id !== null) {
         const res = await fetch(`http://0.0.0.0:8000/api/v1/prescription`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ ...prescription }),
+          body: JSON.stringify({ ...createPrescription }),
         });
         setShowAddModal(false);
         router.refresh();
@@ -34,31 +35,6 @@ const AddPrescriptionModal: React.FC<Props> = ({
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    let { name, value } = e.target;
-    setPrescription((prevPrescription) => {
-      if (name === "started") {
-        value = new Date(value).toISOString();
-      }
-      if (prevPrescription === null) {
-        return {
-          id: "", // Provide default values for other properties
-          medication: "",
-          dosage: "",
-          notes: "",
-          started: "",
-          [name]: value,
-        };
-      } else {
-        return {
-          ...prevPrescription,
-          [name]: value,
-        };
-      }
-    });
-  };
   return (
     <div
       aria-hidden="true"
@@ -95,10 +71,10 @@ const AddPrescriptionModal: React.FC<Props> = ({
           </div>
           <div className="p-6 space-y-6">
             <PrescriptionForm
-              setPrescription={setPrescription}
-              setShowEditModal={setShowAddModal}
+              prescription={createPrescription}
+              setPrescription={setCreatePrescription}
+              setShowAddModal={setShowAddModal}
               handleSubmit={handleSubmit}
-              handleChange={handleChange}
             />
           </div>
         </div>

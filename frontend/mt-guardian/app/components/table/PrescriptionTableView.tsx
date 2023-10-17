@@ -8,6 +8,7 @@ import PrescriptionTableBody from "./PrescriptionTableBody";
 import EditPrescriptionModal from "../modal/EditPrescriptionModal";
 import DeletePrescriptionModal from "../modal/DeletePrescriptionModal";
 import AddPrescriptionModal from "../modal/AddPrescriptionModal";
+import { create } from "domain";
 
 type Props = {
   prescriptions: Prescription[];
@@ -21,7 +22,20 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
-  const [prescription, setPrescription] = useState<Prescription | null>(null);
+  const [prescription, setPrescription] = useState<Prescription>({
+    id: "",
+    medication: "",
+    dosage: "",
+    notes: "",
+    started: "",
+  });
+  const [createPrescription, setCreatePrescription] = useState<Prescription>({
+    id: "",
+    medication: "",
+    dosage: "",
+    notes: "",
+    started: "",
+  });
 
   return (
     <>
@@ -66,14 +80,8 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
       )}
       {showAddModal && (
         <AddPrescriptionModal
-          prescription={{
-            id: "",
-            medication: "",
-            dosage: "",
-            notes: "",
-            started: "",
-          }}
-          setPrescription={setPrescription}
+          createPrescription={createPrescription}
+          setCreatePrescription={setCreatePrescription}
           setShowAddModal={setShowAddModal}
         />
       )}
