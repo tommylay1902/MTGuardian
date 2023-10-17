@@ -7,6 +7,7 @@ import PrescriptionTableHeader from "./PrescriptionTableHeader";
 import PrescriptionTableBody from "./PrescriptionTableBody";
 import EditPrescriptionModal from "../modal/EditPrescriptionModal";
 import DeletePrescriptionModal from "../modal/DeletePrescriptionModal";
+import AddPrescriptionModal from "../modal/AddPrescriptionModal";
 
 type Props = {
   prescriptions: Prescription[];
@@ -19,6 +20,7 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
 
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [prescription, setPrescription] = useState<Prescription | null>(null);
 
   return (
@@ -26,7 +28,15 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
       {tableHeaders == null ? (
         <div>no prescriptions found!</div>
       ) : (
-        <div className="relative shadow-md sm:rounded-lg m-5">
+        <div className="relative  sm:rounded-lg m-5">
+          <div className="my-2 ">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="rounded-lg bg-green-700 text-white py-2 px-3 hover:bg-green-500"
+            >
+              Create
+            </button>
+          </div>
           <table className="w-full text-left text-gray-500 dark:text-gray-400">
             <PrescriptionTableHeader
               tableHeaders={tableHeaders}
@@ -52,6 +62,19 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
         <DeletePrescriptionModal
           setShowDeleteModal={setShowDeleteModal}
           prescription={prescription}
+        />
+      )}
+      {showAddModal && (
+        <AddPrescriptionModal
+          prescription={{
+            id: "",
+            medication: "",
+            dosage: "",
+            notes: "",
+            started: "",
+          }}
+          setPrescription={setPrescription}
+          setShowAddModal={setShowAddModal}
         />
       )}
     </>

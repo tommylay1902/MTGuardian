@@ -5,30 +5,28 @@ import React, { Dispatch, SetStateAction } from "react";
 import PrescriptionForm from "../form/PrescriptionForm";
 type Props = {
   prescription: Prescription;
-  setShowEditModal: Dispatch<SetStateAction<boolean>>;
+  setShowAddModal: Dispatch<SetStateAction<boolean>>;
   setPrescription: Dispatch<SetStateAction<Prescription | null>>;
 };
-const EditPrescriptionModal: React.FC<Props> = ({
-  prescription,
-  setShowEditModal,
+const AddPrescriptionModal: React.FC<Props> = ({
+  setShowAddModal,
   setPrescription,
+  prescription,
 }) => {
   const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (prescription != null && prescription?.id !== null) {
-        const res = await fetch(
-          `http://0.0.0.0:8000/api/v1/prescription/${prescription.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ ...prescription }),
-          }
-        );
-        setShowEditModal(false);
+        const res = await fetch(`http://0.0.0.0:8000/api/v1/prescription`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...prescription }),
+        });
+        setShowAddModal(false);
         router.refresh();
       }
     } catch (e) {
@@ -70,12 +68,12 @@ const EditPrescriptionModal: React.FC<Props> = ({
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
           <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Edit {prescription.medication}
+              Add Prescription
             </h1>
             <button
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              onClick={() => setShowEditModal(false)}
+              onClick={() => setShowAddModal(false)}
             >
               <svg
                 className="w-3 h-3"
@@ -97,9 +95,8 @@ const EditPrescriptionModal: React.FC<Props> = ({
           </div>
           <div className="p-6 space-y-6">
             <PrescriptionForm
-              prescription={prescription}
               setPrescription={setPrescription}
-              setShowEditModal={setShowEditModal}
+              setShowEditModal={setShowAddModal}
               handleSubmit={handleSubmit}
               handleChange={handleChange}
             />
@@ -110,4 +107,4 @@ const EditPrescriptionModal: React.FC<Props> = ({
   );
 };
 
-export default EditPrescriptionModal;
+export default AddPrescriptionModal;
