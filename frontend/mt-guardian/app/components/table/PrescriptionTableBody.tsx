@@ -1,4 +1,5 @@
 import { Prescription } from "@/app/prescriptions/page";
+import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction } from "react";
 
 type Props = {
@@ -11,6 +12,13 @@ const PrescriptionTableBody: React.FC<Props> = ({
   setShowModal,
   setPrescription,
 }) => {
+  const router = useRouter();
+  const deletePrescription = async (id: string) => {
+    await fetch(`http://0.0.0.0:8000/api/v1/prescription/${id}`, {
+      method: "DELETE",
+    });
+    router.refresh();
+  };
   return (
     <tbody>
       {prescriptions.map((p) => (
@@ -45,7 +53,9 @@ const PrescriptionTableBody: React.FC<Props> = ({
               </button>
               <button
                 className="rounded-md bg-red-700 text-white py-2 px-3 hover:bg-red-500"
-                onClick={() => {}}
+                onClick={() => {
+                  deletePrescription(p.id);
+                }}
               >
                 Delete
               </button>
