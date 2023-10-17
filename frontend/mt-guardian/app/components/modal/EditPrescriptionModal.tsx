@@ -4,12 +4,12 @@ import { Router } from "next/router";
 import React, { Dispatch, SetStateAction } from "react";
 type Props = {
   prescription: Prescription | null;
-  setShowModal: Dispatch<SetStateAction<boolean>>;
+  setShowEditModal: Dispatch<SetStateAction<boolean>>;
   setPrescription: Dispatch<SetStateAction<Prescription | null>>;
 };
 const EditPrescriptionModal: React.FC<Props> = ({
   prescription,
-  setShowModal,
+  setShowEditModal,
   setPrescription,
 }) => {
   const router = useRouter();
@@ -54,7 +54,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
             body: JSON.stringify({ ...prescription }),
           }
         );
-        setShowModal(false);
+        setShowEditModal(false);
         router.refresh();
       }
     } catch (e) {
@@ -83,7 +83,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
             <button
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              onClick={() => setShowModal(false)}
+              onClick={() => setShowEditModal(false)}
             >
               <svg
                 className="w-3 h-3"
@@ -184,7 +184,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
                   Submit
                 </button>
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={() => setShowEditModal(false)}
                   type="button"
                   className="px-4 py-2 dark:bg-red-600 rounded-md text-white hover:bg-red-800"
                 >

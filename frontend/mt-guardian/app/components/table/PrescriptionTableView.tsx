@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import PrescriptionTableHeader from "./PrescriptionTableHeader";
 import PrescriptionTableBody from "./PrescriptionTableBody";
 import EditPrescriptionModal from "../modal/EditPrescriptionModal";
+import DeletePrescriptionModal from "../modal/DeletePrescriptionModal";
 
 type Props = {
   prescriptions: Prescription[];
@@ -16,7 +17,8 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
     prescriptions.length > 0 ? Object.keys(prescriptions[0]) : null;
   const tableHeaderExclusions = ["id"];
 
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [prescription, setPrescription] = useState<Prescription | null>(null);
 
   return (
@@ -32,17 +34,24 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
             />
             <PrescriptionTableBody
               prescriptions={prescriptions}
-              setShowModal={setShowModal}
+              setShowEditModal={setShowEditModal}
+              setShowDeleteModal={setShowDeleteModal}
               setPrescription={setPrescription}
             />
           </table>
         </div>
       )}
-      {showModal && (
+      {showEditModal && (
         <EditPrescriptionModal
           prescription={prescription}
-          setShowModal={setShowModal}
+          setShowEditModal={setShowEditModal}
           setPrescription={setPrescription}
+        />
+      )}
+      {showDeleteModal && (
+        <DeletePrescriptionModal
+          setShowDeleteModal={setShowDeleteModal}
+          prescription={prescription}
         />
       )}
     </>

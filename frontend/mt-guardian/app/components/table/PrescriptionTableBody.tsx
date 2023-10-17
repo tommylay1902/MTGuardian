@@ -4,21 +4,16 @@ import React, { Dispatch, SetStateAction } from "react";
 
 type Props = {
   prescriptions: Prescription[];
-  setShowModal: Dispatch<SetStateAction<boolean>>;
+  setShowEditModal: Dispatch<SetStateAction<boolean>>;
+  setShowDeleteModal: Dispatch<SetStateAction<boolean>>;
   setPrescription: Dispatch<SetStateAction<Prescription | null>>;
 };
 const PrescriptionTableBody: React.FC<Props> = ({
   prescriptions,
-  setShowModal,
+  setShowEditModal,
+  setShowDeleteModal,
   setPrescription,
 }) => {
-  const router = useRouter();
-  const deletePrescription = async (id: string) => {
-    await fetch(`http://0.0.0.0:8000/api/v1/prescription/${id}`, {
-      method: "DELETE",
-    });
-    router.refresh();
-  };
   return (
     <tbody>
       {prescriptions.map((p) => (
@@ -45,8 +40,8 @@ const PrescriptionTableBody: React.FC<Props> = ({
               <button
                 className="rounded-md bg-blue-700 text-white py-2 px-3 mr-3 hover:bg-blue-500"
                 onClick={() => {
-                  setShowModal(true);
                   setPrescription(p);
+                  setShowEditModal(true);
                 }}
               >
                 Edit
@@ -54,7 +49,8 @@ const PrescriptionTableBody: React.FC<Props> = ({
               <button
                 className="rounded-md bg-red-700 text-white py-2 px-3 hover:bg-red-500"
                 onClick={() => {
-                  deletePrescription(p.id);
+                  setPrescription(p);
+                  setShowDeleteModal(true);
                 }}
               >
                 Delete
