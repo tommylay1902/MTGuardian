@@ -4,16 +4,17 @@ import { Router } from "next/router";
 import React, { Dispatch, SetStateAction } from "react";
 import PrescriptionForm from "../form/PrescriptionForm";
 type Props = {
-  createPrescription: Prescription;
+  createPrescription: Prescription | null;
   setShowAddModal: Dispatch<SetStateAction<boolean>>;
-  setCreatePrescription: Dispatch<SetStateAction<Prescription>>;
+  setActiveModal: Dispatch<SetStateAction<boolean>>;
+  setCreatePrescription: Dispatch<SetStateAction<Prescription | null>>;
 };
 const AddPrescriptionModal: React.FC<Props> = ({
   setShowAddModal,
   setCreatePrescription,
+  setActiveModal,
   createPrescription,
 }) => {
-  console.log(createPrescription);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,6 +28,7 @@ const AddPrescriptionModal: React.FC<Props> = ({
           },
           body: JSON.stringify({ ...createPrescription }),
         });
+        setActiveModal(false);
         setShowAddModal(false);
         router.refresh();
       }
@@ -49,7 +51,10 @@ const AddPrescriptionModal: React.FC<Props> = ({
             <button
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              onClick={() => setShowAddModal(false)}
+              onClick={() => {
+                setActiveModal(false);
+                setShowAddModal(false);
+              }}
             >
               <svg
                 className="w-3 h-3"

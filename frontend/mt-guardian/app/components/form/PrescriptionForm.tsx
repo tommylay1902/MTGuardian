@@ -2,10 +2,11 @@ import { Prescription } from "@/app/prescriptions/page";
 import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction } from "react";
 type Props = {
-  prescription: Prescription;
-  setPrescription: Dispatch<SetStateAction<Prescription>>;
+  prescription: Prescription | null;
+  setPrescription: Dispatch<SetStateAction<Prescription | null>>;
   setShowEditModal?: Dispatch<SetStateAction<boolean>>;
   setShowAddModal?: Dispatch<SetStateAction<boolean>>;
+
   handleSubmit: (e: React.FormEvent) => Promise<void>;
 };
 const PrescriptionForm: React.FC<Props> = ({
@@ -61,7 +62,7 @@ const PrescriptionForm: React.FC<Props> = ({
           type="text"
           id="medication"
           name="medication"
-          value={prescription.medication}
+          value={prescription?.medication}
           onChange={handleChange}
           className="w-full px-3 py-2 border rounded-md shadow-sm"
         />
@@ -78,7 +79,7 @@ const PrescriptionForm: React.FC<Props> = ({
           type="text"
           id="dosage"
           name="dosage"
-          value={prescription.dosage}
+          value={prescription?.dosage}
           onChange={handleChange}
           className="w-full px-3 py-2 border rounded-md shadow-sm"
         />
@@ -94,7 +95,7 @@ const PrescriptionForm: React.FC<Props> = ({
         <textarea
           id="notes"
           name="notes"
-          value={prescription.notes}
+          value={prescription?.notes}
           onChange={handleChange}
           className="w-full px-3 py-2 border rounded-md shadow-sm"
         />
@@ -111,7 +112,11 @@ const PrescriptionForm: React.FC<Props> = ({
           type="date"
           id="started"
           name="started"
-          value={convertDate(new Date(prescription.started))}
+          value={
+            prescription
+              ? convertDate(new Date(prescription.started))
+              : convertDate(new Date(0))
+          }
           onChange={handleChange}
           className="w-full px-3 py-2 border rounded-md shadow-sm"
         />

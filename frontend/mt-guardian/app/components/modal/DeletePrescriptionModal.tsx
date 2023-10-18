@@ -3,10 +3,12 @@ import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction } from "react";
 type Props = {
   setShowDeleteModal: Dispatch<SetStateAction<boolean>>;
+  setActiveModal: Dispatch<SetStateAction<boolean>>;
   prescription: Prescription;
 };
 const DeletePrescriptionModal: React.FC<Props> = ({
   setShowDeleteModal,
+  setActiveModal,
   prescription,
 }) => {
   const router = useRouter();
@@ -20,7 +22,6 @@ const DeletePrescriptionModal: React.FC<Props> = ({
     <div
       aria-hidden="true"
       className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100% - 1rem)] max-h-full md:w-1/2 md:h-auto sm:w-full sm:h-auto backdrop-blur-xl"
-      //   style={{ filter: "drop-shadow(white 1rem 1rem 10px)" }}
     >
       <div className="relative w-full max-w-2xl max-h-full">
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -32,6 +33,7 @@ const DeletePrescriptionModal: React.FC<Props> = ({
               type="button"
               onClick={() => {
                 setShowDeleteModal(false);
+                setActiveModal(false);
                 deletePrescription(prescription.id);
               }}
               className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
@@ -40,6 +42,7 @@ const DeletePrescriptionModal: React.FC<Props> = ({
             </button>
             <button
               onClick={() => {
+                setActiveModal(false);
                 setShowDeleteModal(false);
               }}
               type="button"

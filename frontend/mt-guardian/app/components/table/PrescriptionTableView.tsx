@@ -22,20 +22,22 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
-  const [prescription, setPrescription] = useState<Prescription>({
+  const [activeModal, setActiveModal] = useState<boolean>(false);
+  const [prescription, setPrescription] = useState<Prescription | null>({
     id: "",
     medication: "",
     dosage: "",
     notes: "",
     started: "",
   });
-  const [createPrescription, setCreatePrescription] = useState<Prescription>({
-    id: "",
-    medication: "",
-    dosage: "",
-    notes: "",
-    started: "",
-  });
+  const [createPrescription, setCreatePrescription] =
+    useState<Prescription | null>({
+      id: "",
+      medication: "",
+      dosage: "",
+      notes: "",
+      started: "",
+    });
 
   return (
     <>
@@ -45,7 +47,11 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
         <div className="relative  sm:rounded-lg m-5">
           <div className="my-2 ">
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => {
+                setActiveModal(true);
+                setShowAddModal(true);
+              }}
+              disabled={activeModal}
               className="rounded-lg bg-green-700 text-white py-2 px-3 hover:bg-green-500"
             >
               Create
@@ -60,6 +66,8 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
               prescriptions={prescriptions}
               setShowEditModal={setShowEditModal}
               setShowDeleteModal={setShowDeleteModal}
+              setActiveModal={setActiveModal}
+              activeModal={activeModal}
               setPrescription={setPrescription}
             />
           </table>
@@ -70,11 +78,13 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
           prescription={prescription}
           setShowEditModal={setShowEditModal}
           setPrescription={setPrescription}
+          setActiveModal={setActiveModal}
         />
       )}
       {showDeleteModal && prescription !== null && (
         <DeletePrescriptionModal
           setShowDeleteModal={setShowDeleteModal}
+          setActiveModal={setActiveModal}
           prescription={prescription}
         />
       )}
@@ -83,6 +93,7 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
           createPrescription={createPrescription}
           setCreatePrescription={setCreatePrescription}
           setShowAddModal={setShowAddModal}
+          setActiveModal={setActiveModal}
         />
       )}
     </>

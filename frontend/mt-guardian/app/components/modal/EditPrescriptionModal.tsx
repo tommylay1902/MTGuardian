@@ -6,14 +6,15 @@ import PrescriptionForm from "../form/PrescriptionForm";
 type Props = {
   prescription: Prescription;
   setShowEditModal: Dispatch<SetStateAction<boolean>>;
-  setPrescription: Dispatch<SetStateAction<Prescription>>;
+  setActiveModal: Dispatch<SetStateAction<boolean>>;
+  setPrescription: Dispatch<SetStateAction<Prescription | null>>;
 };
 const EditPrescriptionModal: React.FC<Props> = ({
   prescription,
   setShowEditModal,
+  setActiveModal,
   setPrescription,
 }) => {
-  console.log("hello from edit");
   const router = useRouter();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +30,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
             body: JSON.stringify({ ...prescription }),
           }
         );
+        setActiveModal(false);
         setShowEditModal(false);
         router.refresh();
       }
@@ -51,7 +53,10 @@ const EditPrescriptionModal: React.FC<Props> = ({
             <button
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              onClick={() => setShowEditModal(false)}
+              onClick={() => {
+                setActiveModal(false);
+                setShowEditModal(false);
+              }}
             >
               <svg
                 className="w-3 h-3"

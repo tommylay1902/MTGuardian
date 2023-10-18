@@ -6,12 +6,16 @@ type Props = {
   prescriptions: Prescription[];
   setShowEditModal: Dispatch<SetStateAction<boolean>>;
   setShowDeleteModal: Dispatch<SetStateAction<boolean>>;
+  activeModal: boolean;
+  setActiveModal: Dispatch<SetStateAction<boolean>>;
   setPrescription: Dispatch<SetStateAction<Prescription | null>>;
 };
 const PrescriptionTableBody: React.FC<Props> = ({
   prescriptions,
   setShowEditModal,
   setShowDeleteModal,
+  activeModal,
+  setActiveModal,
   setPrescription,
 }) => {
   return (
@@ -39,8 +43,10 @@ const PrescriptionTableBody: React.FC<Props> = ({
               {/* Keep the last column with the original padding */}
               <button
                 className="rounded-md bg-blue-700 text-white py-2 px-3 mr-3 hover:bg-blue-500"
+                disabled={activeModal}
                 onClick={() => {
                   setPrescription(p);
+                  setActiveModal(true);
                   setShowEditModal(true);
                 }}
               >
@@ -48,8 +54,10 @@ const PrescriptionTableBody: React.FC<Props> = ({
               </button>
               <button
                 className="rounded-md bg-red-700 text-white py-2 px-3 hover:bg-red-500"
+                disabled={activeModal}
                 onClick={() => {
                   setPrescription(p);
+                  setActiveModal(true);
                   setShowDeleteModal(true);
                 }}
               >
