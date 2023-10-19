@@ -128,13 +128,6 @@ func TestGetPrescriptionById(t *testing.T) {
 		Started:    TimePointer(time.Now()),
 	}
 
-	expectedDTO := &dto.PrescriptionDTO{
-		Medication: StringPointer("Sample Medication"),
-		Dosage:     StringPointer("Sample Dosage"),
-		Notes:      StringPointer("Sample Notes"),
-		Started:    prescription.Started,
-	}
-
 	// Mock the GetPrescriptionById method of the DAO to return the sample prescription
 	dao.On("GetPrescriptionById", expectedID).Return(prescription, nil)
 
@@ -143,10 +136,7 @@ func TestGetPrescriptionById(t *testing.T) {
 
 	// Your assertions here
 	assert.NoError(t, err)
-	assert.Equal(t, *expectedDTO.Dosage, *result.Dosage)
-	assert.Equal(t, *expectedDTO.Medication, *result.Medication)
-	assert.Equal(t, *expectedDTO.Notes, *result.Notes)
-	assert.Equal(t, *expectedDTO.Started, *result.Started)
+	assert.Equal(t, *prescription, *result)
 	dao.AssertExpectations(t)
 }
 
@@ -176,19 +166,19 @@ func TestGetAllPrescriptions(t *testing.T) {
 		Started:    TimePointer(time.Now()),
 	}
 
-	expectedDTOOne := &dto.PrescriptionDTO{
-		Medication: prescriptionOne.Medication,
-		Dosage:     prescriptionOne.Dosage,
-		Notes:      prescriptionOne.Notes,
-		Started:    prescriptionOne.Started,
-	}
+	// expectedDTOOne := &dto.PrescriptionDTO{
+	// 	Medication: prescriptionOne.Medication,
+	// 	Dosage:     prescriptionOne.Dosage,
+	// 	Notes:      prescriptionOne.Notes,
+	// 	Started:    prescriptionOne.Started,
+	// }
 
-	expectedDTOTwo := &dto.PrescriptionDTO{
-		Medication: prescriptionTwo.Medication,
-		Dosage:     prescriptionTwo.Dosage,
-		Notes:      prescriptionTwo.Notes,
-		Started:    prescriptionTwo.Started,
-	}
+	// expectedDTOTwo := &dto.PrescriptionDTO{
+	// 	Medication: prescriptionTwo.Medication,
+	// 	Dosage:     prescriptionTwo.Dosage,
+	// 	Notes:      prescriptionTwo.Notes,
+	// 	Started:    prescriptionTwo.Started,
+	// }
 
 	// Mock the GetPrescriptionById method of the DAO to return the sample prescription
 	dao.On("GetAllPrescriptions").Return([]models.Prescription{*prescriptionOne, *prescriptionTwo}, nil)
@@ -199,8 +189,8 @@ func TestGetAllPrescriptions(t *testing.T) {
 	// Your assertions here
 	assert.NoError(t, err)
 	assert.Len(t, resultDTOs, 2)
-	assert.Contains(t, resultDTOs, *expectedDTOOne)
-	assert.Contains(t, resultDTOs, *expectedDTOTwo)
+	assert.Contains(t, resultDTOs, *prescriptionOne)
+	assert.Contains(t, resultDTOs, *prescriptionTwo)
 	dao.AssertExpectations(t)
 }
 
