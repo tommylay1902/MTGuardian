@@ -53,7 +53,7 @@ const PrescriptionForm: React.FC<Props> = ({
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
         <label
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-white"
           htmlFor="medication"
         >
           Medication
@@ -70,7 +70,7 @@ const PrescriptionForm: React.FC<Props> = ({
 
       <div className="mb-4">
         <label
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-white"
           htmlFor="dosage"
         >
           Dosage
@@ -86,10 +86,7 @@ const PrescriptionForm: React.FC<Props> = ({
       </div>
 
       <div className="mb-4">
-        <label
-          className="block text-sm font-medium text-gray-700"
-          htmlFor="notes"
-        >
+        <label className="block text-sm font-medium text-white" htmlFor="notes">
           Notes
         </label>
         <textarea
@@ -103,7 +100,7 @@ const PrescriptionForm: React.FC<Props> = ({
 
       <div className="mb-4">
         <label
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-white"
           htmlFor="started"
         >
           Started
