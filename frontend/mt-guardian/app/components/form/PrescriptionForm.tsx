@@ -6,6 +6,7 @@ type Props = {
   setPrescription: Dispatch<SetStateAction<Prescription | null>>;
   setShowEditModal?: Dispatch<SetStateAction<boolean>>;
   setShowAddModal?: Dispatch<SetStateAction<boolean>>;
+  setActiveModal: Dispatch<SetStateAction<boolean>>;
 
   handleSubmit: (e: React.FormEvent) => Promise<void>;
 };
@@ -14,6 +15,7 @@ const PrescriptionForm: React.FC<Props> = ({
   setPrescription,
   setShowEditModal,
   setShowAddModal,
+  setActiveModal,
   handleSubmit,
 }) => {
   const handleChange = (
@@ -128,6 +130,7 @@ const PrescriptionForm: React.FC<Props> = ({
         </button>
         <button
           onClick={() => {
+            setActiveModal(false);
             if (setShowEditModal) {
               setShowEditModal(false);
             }

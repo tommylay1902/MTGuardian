@@ -81,6 +81,7 @@ const EditPrescriptionModal: React.FC<Props> = ({
               prescription={prescription}
               setPrescription={setPrescription}
               setShowEditModal={setShowEditModal}
+              setActiveModal={setActiveModal}
               handleSubmit={handleSubmit}
             />
           </div>
