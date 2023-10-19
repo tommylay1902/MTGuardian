@@ -5,6 +5,7 @@ import (
 	"github.com/tommylay1902/prescriptionmicro/api/dataaccess"
 	dto "github.com/tommylay1902/prescriptionmicro/internal/dtos/prescription"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
+	"github.com/tommylay1902/prescriptionmicro/internal/models"
 )
 
 type PrescriptionService struct {
@@ -28,29 +29,29 @@ func (ps *PrescriptionService) CreatePrescription(prescription *dto.Prescription
 	return id, nil
 }
 
-func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*dto.PrescriptionDTO, error) {
+func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*models.Prescription, error) {
 	p, err := ps.dao.GetPrescriptionById(id)
 	if err != nil {
 		return nil, err
 	}
-	resultMapping, mappingErr := dto.MapPrescriptionModelToDTO(p)
-	if mappingErr != nil {
-		return nil, mappingErr
-	}
-	return resultMapping, nil
+	// resultMapping, mappingErr := dto.MapPrescriptionModelToDTO(p)
+	// if mappingErr != nil {
+	// 	return nil, mappingErr
+	// }
+	return p, nil
 }
 
-func (ps *PrescriptionService) GetPrescriptions() ([]dto.PrescriptionDTO, error) {
+func (ps *PrescriptionService) GetPrescriptions() ([]models.Prescription, error) {
 	prescriptions, err := ps.dao.GetAllPrescriptions()
 
 	if err != nil {
 		return nil, err
 	}
-	resultMapping, mappingErr := dto.MapPrescriptionModelSliceToDTOSlice(prescriptions)
-	if mappingErr != nil {
-		return nil, mappingErr
-	}
-	return resultMapping, nil
+	// resultMapping, mappingErr := dto.MapPrescriptionModelSliceToDTOSlice(prescriptions)
+	// if mappingErr != nil {
+	// 	return nil, mappingErr
+	// }
+	return prescriptions, nil
 }
 
 func (ps *PrescriptionService) DeletePrescription(id uuid.UUID) error {
