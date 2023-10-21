@@ -7,7 +7,7 @@ import (
 func BuildQueryWithSearchParam(searchQueries map[string]string, db *gorm.DB) *gorm.DB {
 
 	if len(searchQueries) == 0 {
-		return db
+		return db.Where("ended IS NULL")
 	} else {
 		dbChain := db
 		for key, value := range searchQueries {

@@ -34,10 +34,7 @@ func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*models.Prescr
 	if err != nil {
 		return nil, err
 	}
-	// resultMapping, mappingErr := dto.MapPrescriptionModelToDTO(p)
-	// if mappingErr != nil {
-	// 	return nil, mappingErr
-	// }
+
 	return p, nil
 }
 
@@ -48,10 +45,7 @@ func (ps *PrescriptionService) GetPrescriptions(searchQuery map[string]string) (
 	if err != nil {
 		return nil, err
 	}
-	// resultMapping, mappingErr := dto.MapPrescriptionModelSliceToDTOSlice(prescriptions)
-	// if mappingErr != nil {
-	// 	return nil, mappingErr
-	// }
+
 	return prescriptions, nil
 }
 
