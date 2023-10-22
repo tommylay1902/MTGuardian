@@ -11,6 +11,6 @@ type Prescription struct {
 	Medication *string    `json:"medication"`
 	Dosage     *string    `json:"dosage"`
 	Notes      *string    `json:"notes"`
-	Started    *time.Time `json:"started" gorm:"default:current_timestamp"`
-	Ended      *time.Time `json:"ended"`
+	Started    *time.Time `json:"started" gorm:"type:timestamp;"`
+	Ended      *time.Time `json:"ended" gorm:"type:timestamp;"`
 }

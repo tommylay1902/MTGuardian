@@ -142,7 +142,7 @@ func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()
-	started := time.Now().Format("2006-01-02T15:04:05.999999-07:00")
+	started := time.Now().UTC().Format("2006-01-02T15:04:05.999999-07:00")
 
 	prescriptionData := `{
         "medication": "` + randomMed + `",
@@ -206,8 +206,9 @@ func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
 	assert.Equal(t, *expected.Notes, *retrievedPrescription.Notes)
 
 	// Convert the expected Started time to UTC
-	expectedStarted := expected.Started.In(time.UTC)
-
+	expectedStarted := expected.Started.UTC()
+	fmt.Println("!!!!!!!!!!!!!!!!")
+	fmt.Println(expectedStarted, *retrievedPrescription.Started)
 	// Compare the Started time
 	assert.True(t, expectedStarted.Equal(*retrievedPrescription.Started))
 }
@@ -223,7 +224,7 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()
-	started := time.Now().Format("2006-01-02T15:04:05.999999-07:00")
+	started := time.Now().UTC().Format("2006-01-02T15:04:05.999999-07:00")
 
 	prescriptionData := `{
         "medication": "` + randomMed + `",
@@ -326,7 +327,7 @@ func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()
-	started := time.Now().Format("2006-01-02T15:04:05.999999-07:00")
+	started := time.Now().UTC().Format("2006-01-02T15:04:05.999999-07:00")
 
 	prescriptionData := `{
         "medication": "` + randomMed + `",
