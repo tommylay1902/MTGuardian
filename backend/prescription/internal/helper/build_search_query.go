@@ -1,8 +1,17 @@
 package helper
 
 import (
+	"golang.org/x/exp/slices"
 	"gorm.io/gorm"
 )
+
+var validParams = []string{
+	"dosage",
+	"medication",
+	"notes",
+	"started",
+	"ended",
+}
 
 func BuildQueryWithSearchParam(searchQueries map[string]string, db *gorm.DB) *gorm.DB {
 
@@ -11,7 +20,10 @@ func BuildQueryWithSearchParam(searchQueries map[string]string, db *gorm.DB) *go
 	} else {
 		dbChain := db
 		for key, value := range searchQueries {
-			dbChain = dbChain.Where(key+" = ?", value)
+			if slices.Contains(validParams, key) {
+				dbChain = dbChain.Where(key+" = ?", value)
+			}
+
 		}
 		return dbChain
 	}
