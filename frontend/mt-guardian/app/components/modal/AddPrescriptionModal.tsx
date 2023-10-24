@@ -30,6 +30,14 @@ const AddPrescriptionModal: React.FC<Props> = ({
         });
         setActiveModal(false);
         setShowAddModal(false);
+        setCreatePrescription({
+          id: "",
+          medication: "",
+          dosage: "",
+          notes: "",
+          started: "",
+          ended: null,
+        });
         router.refresh();
       }
     } catch (e) {

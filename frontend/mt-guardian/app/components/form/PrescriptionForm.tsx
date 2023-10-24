@@ -35,6 +35,7 @@ const PrescriptionForm: React.FC<Props> = ({
           dosage: "",
           notes: "",
           started: "",
+          ended: null,
           [name]: value,
         };
       } else {

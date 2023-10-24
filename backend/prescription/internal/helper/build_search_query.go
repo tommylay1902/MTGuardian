@@ -25,9 +25,9 @@ func BuildQueryWithSearchParam(searchQueries map[string]string, db *gorm.DB) *go
 			if key == "present" {
 				isPresent, _ := strconv.ParseBool(value)
 				if isPresent {
-					dbChain = dbChain.Where("ended is NOT NULL")
-				} else {
 					dbChain = dbChain.Where("ended is NULL")
+				} else {
+					dbChain = dbChain.Where("ended is NOT NULL")
 				}
 			} else {
 				dbChain = dbChain.Where(key+" = ?", value)

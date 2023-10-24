@@ -1,4 +1,4 @@
-package journeys
+package crud_test
 
 import (
 	"context"
@@ -33,6 +33,7 @@ type PrescriptionModel struct {
 	Dosage     string `json:"dosage"`
 	Notes      string `json:"notes"`
 	Started    string `json:"started"`
+	Ended      string `json:"ended"`
 }
 
 func parsePrescriptionDataToDTO(data string) (*prescriptiondto.PrescriptionDTO, error) {
@@ -101,7 +102,7 @@ func TestMain(m *testing.M) {
 	db, err := SetupTestDatabase()
 	dbContainer = db
 
-	envErr := godotenv.Load("../../.env")
+	envErr := godotenv.Load("../../../.env")
 	if envErr != nil {
 		log.Fatal("Error loading .env file", envErr)
 	}
@@ -133,7 +134,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
-	// Setup your database connection, similar to other integration tests
 
 	// Define the API endpoint for creating a prescriptions
 	createEndpoint := "http://" + testPort + "/api/v1/prescription"
@@ -207,8 +207,7 @@ func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
 
 	// Convert the expected Started time to UTC
 	expectedStarted := expected.Started.UTC()
-	fmt.Println("!!!!!!!!!!!!!!!!")
-	fmt.Println(expectedStarted, *retrievedPrescription.Started)
+
 	// Compare the Started time
 	assert.True(t, expectedStarted.Equal(*retrievedPrescription.Started))
 }
@@ -316,7 +315,6 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 	defer getAfterDeleteResp.Body.Close()
 
 	assert.True(t, getAfterDeleteResp.StatusCode == http.StatusNotFound)
-
 }
 
 func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
@@ -435,5 +433,4 @@ func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
 	}
 	expectedStarted := expected.Started.In(time.UTC)
 	assert.Equal(t, expectedStarted, *updatedRetrievedPrescription.Started)
-
 }
