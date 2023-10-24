@@ -18,6 +18,13 @@ const PrescriptionTableBody: React.FC<Props> = ({
   setActiveModal,
   setPrescription,
 }) => {
+  const convertDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-based
+
+    const day = String(date.getDate() + 1).padStart(2, "0");
+    return `${month}-${day}-${year}`;
+  };
   return (
     <tbody>
       {prescriptions.map((p) => (
@@ -35,10 +42,10 @@ const PrescriptionTableBody: React.FC<Props> = ({
             <td className="px-4 py-4">{p.notes}</td>{" "}
             {/* Decreased the padding */}
             <td className="px-4 py-4">
-              {new Date(p.started).toDateString()}
+              {convertDate(new Date(p.started))}
             </td>{" "}
             <td className="px-4 py-4">
-              {p.ended !== null ? new Date(p.ended).toDateString() : "present"}
+              {p.ended !== null ? convertDate(new Date(p.ended)) : "Present"}
             </td>{" "}
             {/* Decreased the padding */}
             <td className="px-6 py-3 ">

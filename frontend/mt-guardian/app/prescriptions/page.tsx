@@ -12,7 +12,7 @@ export interface Prescription {
 
 const PrescriptionPage = async () => {
   const res = await fetch(
-    "http://0.0.0.0:8000/api/v1/prescription?present=false",
+    "http://0.0.0.0:8000/api/v1/prescription?present=true",
     {
       cache: "no-cache",
     }
