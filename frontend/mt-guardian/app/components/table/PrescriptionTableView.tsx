@@ -29,6 +29,7 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
     dosage: "",
     notes: "",
     started: "",
+    ended: null,
   });
   const [createPrescription, setCreatePrescription] =
     useState<Prescription | null>({
@@ -37,14 +38,28 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
       dosage: "",
       notes: "",
       started: "",
+      ended: null,
     });
 
   return (
     <>
       {tableHeaders == null ? (
-        <div>no prescriptions found!</div>
-      ) : (
         <div className="relative  sm:rounded-lg m-5">
+          <div className="my-2">
+            <button
+              onClick={() => {
+                setActiveModal(true);
+                setShowAddModal(true);
+              }}
+              disabled={activeModal}
+              className="rounded-lg bg-green-700 text-white py-2 px-3 hover:bg-green-500"
+            >
+              Create
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="relative sm:rounded-lg m-5">
           <div className="my-2 ">
             <button
               onClick={() => {

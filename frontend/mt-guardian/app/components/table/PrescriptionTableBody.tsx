@@ -37,6 +37,9 @@ const PrescriptionTableBody: React.FC<Props> = ({
             <td className="px-4 py-4">
               {new Date(p.started).toDateString()}
             </td>{" "}
+            <td className="px-4 py-4">
+              {p.ended !== null ? new Date(p.ended).toDateString() : "present"}
+            </td>{" "}
             {/* Decreased the padding */}
             <td className="px-6 py-3 ">
               {" "}

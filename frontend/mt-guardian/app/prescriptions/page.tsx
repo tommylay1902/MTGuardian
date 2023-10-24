@@ -7,6 +7,7 @@ export interface Prescription {
   dosage: string;
   notes: string;
   started: string;
+  ended: string | null;
 }
 
 const PrescriptionPage = async () => {
