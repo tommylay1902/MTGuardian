@@ -1,4 +1,4 @@
-import { Prescription } from "@/app/prescriptions/page";
+import { Prescription } from "@/app/libs/types/Prescription";
 import { useRouter } from "next/navigation";
 import { Router } from "next/router";
 import React, { Dispatch, SetStateAction } from "react";

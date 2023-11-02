@@ -1,24 +1,11 @@
 import React from "react";
 import PrescriptionTableView from "../components/table/PrescriptionTableView";
 
-export interface Prescription {
-  id: string;
-  medication: string;
-  dosage: string;
-  notes: string;
-  started: string;
-  ended: string | null;
-}
+import { Prescription } from "../libs/types/Prescription";
+import { getPresentPrescriptions } from "../libs/api/prescriptions";
 
 const PrescriptionPage = async () => {
-  const res = await fetch(
-    "http://0.0.0.0:8000/api/v1/prescription?present=true",
-    {
-      cache: "no-cache",
-    }
-  );
-
-  const prescriptions: Prescription[] = await res.json();
+  const prescriptions: Prescription[] = await getPresentPrescriptions();
 
   return <PrescriptionTableView prescriptions={prescriptions} />;
 };

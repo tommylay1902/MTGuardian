@@ -1,5 +1,5 @@
-import { Prescription } from "@/app/prescriptions/page";
-import { useRouter } from "next/navigation";
+import { Prescription } from "@/app/libs/types/Prescription";
+import convertDate from "@/app/libs/util/date";
 import React, { Dispatch, SetStateAction } from "react";
 
 type Props = {
@@ -18,13 +18,6 @@ const PrescriptionTableBody: React.FC<Props> = ({
   setActiveModal,
   setPrescription,
 }) => {
-  const convertDate = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-based
-
-    const day = String(date.getDate() + 1).padStart(2, "0");
-    return `${month}-${day}-${year}`;
-  };
   return (
     <tbody>
       {prescriptions.map((p) => (
@@ -41,11 +34,9 @@ const PrescriptionTableBody: React.FC<Props> = ({
             {/* Decreased the padding */}
             <td className="px-4 py-4">{p.notes}</td>{" "}
             {/* Decreased the padding */}
+            <td className="px-4 py-4">{convertDate(p.started)}</td>{" "}
             <td className="px-4 py-4">
-              {convertDate(new Date(p.started))}
-            </td>{" "}
-            <td className="px-4 py-4">
-              {p.ended !== null ? convertDate(new Date(p.ended)) : "Present"}
+              {p.ended !== null ? convertDate(p.ended) : "Present"}
             </td>{" "}
             {/* Decreased the padding */}
             <td className="px-6 py-3 ">

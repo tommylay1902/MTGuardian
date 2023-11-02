@@ -1,14 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { Prescription } from "../../prescriptions/page";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { Prescription } from "../../libs/types/Prescription";
 import PrescriptionTableHeader from "./PrescriptionTableHeader";
 import PrescriptionTableBody from "./PrescriptionTableBody";
 import EditPrescriptionModal from "../modal/EditPrescriptionModal";
 import DeletePrescriptionModal from "../modal/DeletePrescriptionModal";
 import AddPrescriptionModal from "../modal/AddPrescriptionModal";
-import { create } from "domain";
 
 type Props = {
   prescriptions: Prescription[];
@@ -101,9 +98,9 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
       {showDeleteModal && prescription !== null && (
         <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 backdrop-blur-5 z-50">
           <DeletePrescriptionModal
+            prescription={prescription}
             setShowDeleteModal={setShowDeleteModal}
             setActiveModal={setActiveModal}
-            prescription={prescription}
           />
         </div>
       )}

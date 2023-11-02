@@ -1,6 +1,6 @@
-import { Prescription } from "@/app/prescriptions/page";
+import { Prescription } from "@/app/libs/types/Prescription";
+import { createPrescriptionWithBody } from "@/app/libs/api/prescriptions";
 import { useRouter } from "next/navigation";
-import { Router } from "next/router";
 import React, { Dispatch, SetStateAction } from "react";
 import PrescriptionForm from "../form/PrescriptionForm";
 type Props = {
@@ -21,13 +21,7 @@ const AddPrescriptionModal: React.FC<Props> = ({
     e.preventDefault();
     try {
       if (createPrescription != null && createPrescription?.id !== null) {
-        const res = await fetch(`http://0.0.0.0:8000/api/v1/prescription`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ ...createPrescription }),
-        });
+        await createPrescriptionWithBody(createPrescription);
         setActiveModal(false);
         setShowAddModal(false);
         setCreatePrescription({
