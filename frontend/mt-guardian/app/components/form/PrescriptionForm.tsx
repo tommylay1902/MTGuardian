@@ -1,7 +1,8 @@
 import convertDate from "@/app/libs/util/date";
 import { Prescription } from "@/app/libs/types/Prescription";
 
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
+import { handlePrescriptionFormChange } from "@/app/libs/util/form";
 type Props = {
   prescription: Prescription | null;
   setPrescription: Dispatch<SetStateAction<Prescription | null>>;
@@ -9,7 +10,10 @@ type Props = {
   setShowAddModal?: Dispatch<SetStateAction<boolean>>;
   setActiveModal: Dispatch<SetStateAction<boolean>>;
 
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
+  handleSubmit: (
+    e: React.FormEvent,
+    createPrescription: Prescription
+  ) => Promise<void>;
 };
 const PrescriptionForm: React.FC<Props> = ({
   prescription,
@@ -19,36 +23,21 @@ const PrescriptionForm: React.FC<Props> = ({
   setActiveModal,
   handleSubmit,
 }) => {
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    let { name, value } = e.target;
-
-    if (name === "started") {
-      value = new Date(value).toISOString();
-    }
-    setPrescription((prevPrescription) => {
-      if (prevPrescription === null) {
-        return {
-          id: "", // Provide default values for other properties
+  const [prescriptionForm, setPrescriptionForm] = useState(
+    prescription
+      ? { ...prescription }
+      : {
+          id: "",
           medication: "",
           dosage: "",
           notes: "",
           started: "",
           ended: null,
-          [name]: value,
-        };
-      } else {
-        return {
-          ...prevPrescription,
-          [name]: value,
-        };
-      }
-    });
-  };
+        }
+  );
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => handleSubmit(e, prescriptionForm)}>
       <div className="mb-4">
         <label
           className="block text-sm font-medium text-white"
@@ -60,8 +49,8 @@ const PrescriptionForm: React.FC<Props> = ({
           type="text"
           id="medication"
           name="medication"
-          value={prescription?.medication}
-          onChange={handleChange}
+          value={prescriptionForm.medication}
+          onChange={(e) => handlePrescriptionFormChange(e, setPrescriptionForm)}
           className="w-full px-3 py-2 border rounded-md shadow-sm"
         />
       </div>
@@ -77,8 +66,8 @@ const PrescriptionForm: React.FC<Props> = ({
           type="text"
           id="dosage"
           name="dosage"
-          value={prescription?.dosage}
-          onChange={handleChange}
+          value={prescriptionForm.dosage}
+          onChange={(e) => handlePrescriptionFormChange(e, setPrescriptionForm)}
           className="w-full px-3 py-2 border rounded-md shadow-sm"
         />
       </div>
@@ -90,8 +79,8 @@ const PrescriptionForm: React.FC<Props> = ({
         <textarea
           id="notes"
           name="notes"
-          value={prescription?.notes}
-          onChange={handleChange}
+          value={prescriptionForm.notes}
+          onChange={(e) => handlePrescriptionFormChange(e, setPrescriptionForm)}
           className="w-full px-3 py-2 border rounded-md shadow-sm"
         />
       </div>
@@ -108,18 +97,18 @@ const PrescriptionForm: React.FC<Props> = ({
           id="started"
           name="started"
           value={
-            prescription
-              ? convertDate(prescription.started)
+            prescriptionForm.started
+              ? convertDate(prescriptionForm.started)
               : convertDate(new Date(0).toDateString())
           }
-          onChange={handleChange}
+          onChange={(e) => handlePrescriptionFormChange(e, setPrescriptionForm)}
           className="w-full px-3 py-2 border rounded-md shadow-sm"
         />
       </div>
       <div className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
         <button
           type="submit"
-          onSubmit={handleSubmit}
+          onSubmit={(e) => handleSubmit(e, prescriptionForm)}
           className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
         >
           Submit

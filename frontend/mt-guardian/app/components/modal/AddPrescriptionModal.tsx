@@ -17,7 +17,10 @@ const AddPrescriptionModal: React.FC<Props> = ({
 }) => {
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent,
+    createPrescription: Prescription
+  ) => {
     e.preventDefault();
     try {
       if (createPrescription != null && createPrescription?.id !== null) {
