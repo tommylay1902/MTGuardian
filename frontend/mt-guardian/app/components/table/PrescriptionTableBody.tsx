@@ -28,20 +28,15 @@ const PrescriptionTableBody: React.FC<Props> = ({
           >
             <th scope="row" className="px-4 py-4 text-gray-900 dark:text-white">
               {p.medication}
-            </th>{" "}
-            {/* Decreased the padding */}
-            <td className="px-4 py-4">{p.dosage}</td>{" "}
-            {/* Decreased the padding */}
-            <td className="px-4 py-4">{p.notes}</td>{" "}
-            {/* Decreased the padding */}
-            <td className="px-4 py-4">{convertDate(p.started)}</td>{" "}
+            </th>
+            <td className="px-4 py-4">{p.dosage}</td>
+            <td className="px-4 py-4">{p.notes}</td>
+            <td className="px-4 py-4">{convertDate(p.started)}</td>
             <td className="px-4 py-4">
               {p.ended !== null ? convertDate(p.ended) : "Present"}
-            </td>{" "}
-            {/* Decreased the padding */}
+            </td>
+
             <td className="px-6 py-3 ">
-              {" "}
-              {/* Keep the last column with the original padding */}
               <button
                 className="rounded-md bg-blue-700 text-white py-2 px-3 mr-3 hover:bg-blue-500"
                 disabled={activeModal}

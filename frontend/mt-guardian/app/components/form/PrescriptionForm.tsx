@@ -5,7 +5,6 @@ import React, { Dispatch, SetStateAction, useState } from "react";
 import { handlePrescriptionFormChange } from "@/app/libs/util/form";
 type Props = {
   prescription: Prescription | null;
-  setPrescription: Dispatch<SetStateAction<Prescription | null>>;
   setShowEditModal?: Dispatch<SetStateAction<boolean>>;
   setShowAddModal?: Dispatch<SetStateAction<boolean>>;
   setActiveModal: Dispatch<SetStateAction<boolean>>;
@@ -17,7 +16,6 @@ type Props = {
 };
 const PrescriptionForm: React.FC<Props> = ({
   prescription,
-  setPrescription,
   setShowEditModal,
   setShowAddModal,
   setActiveModal,
@@ -25,7 +23,7 @@ const PrescriptionForm: React.FC<Props> = ({
 }) => {
   const [prescriptionForm, setPrescriptionForm] = useState(
     prescription
-      ? { ...prescription }
+      ? prescription
       : {
           id: "",
           medication: "",

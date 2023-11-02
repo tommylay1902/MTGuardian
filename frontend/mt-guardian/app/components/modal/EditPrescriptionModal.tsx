@@ -82,7 +82,6 @@ const EditPrescriptionModal: React.FC<Props> = ({
           <div className="p-6 space-y-6">
             <PrescriptionForm
               prescription={prescription}
-              setPrescription={setPrescription}
               setShowEditModal={setShowEditModal}
               setActiveModal={setActiveModal}
               handleSubmit={handleSubmit}
