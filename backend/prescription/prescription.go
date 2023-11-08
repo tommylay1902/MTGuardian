@@ -24,7 +24,7 @@ func main() {
 
 	// Or extend your config for customization
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:3000",
+		AllowOrigins: "http://localhost:5173",
 		AllowHeaders: "*",
 	}))
 
