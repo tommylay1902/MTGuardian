@@ -1,25 +1,45 @@
 <script lang="ts">
   import Form from "./Form.svelte";
   import ActiveModalStore, { updateModal } from "$lib/store/ActiveModalStore";
-
-  export let header: string;
+  import { invalidate } from "$app/navigation";
+  import PrescriptionStore from "$lib/store/PrescriptionStore";
+  async function deletePrescription() {
+    PrescriptionStore.update((currentData) => {
+      currentData = currentData.filter(
+        (curr) => curr.id !== $ActiveModalStore.id
+      );
+      return currentData;
+    });
+    // $PrescriptionStore = $PrescriptionStore;
+    await fetch(
+      `http://0.0.0.0:8000/api/v1/prescription/${$ActiveModalStore.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+    updateModal({ isOpen: false });
+  }
 </script>
 
-<div class="modal" class:modal-open={$ActiveModalStore}>
+<div class="modal" class:modal-open={$ActiveModalStore.isOpen}>
   <div class="modal-box">
-    <h3 class="font-bold text-lg">{header}</h3>
+    <h3 class="font-bold text-lg">{$ActiveModalStore.header}</h3>
     <p class="py-4">
-      <Form />
+      {#if $ActiveModalStore.body === "form"}
+        <Form />
+      {:else}
+        <p>{$ActiveModalStore.body}</p>
+        <button class="btn btn-primary" on:click={deletePrescription}
+          >Delete</button
+        >
+        <button
+          class="btn btn-secondary"
+          on:click={() => updateModal({ isOpen: false })}>Cancel</button
+        >
+      {/if}
     </p>
     <div class="modal-action">
       <!-- 🔵 set false on click -->
-      <button
-        class="btn btn-secondary"
-        type="button"
-        on:click={() => updateModal(false)}
-      >
-        Cancel
-      </button>
     </div>
   </div>
 </div>

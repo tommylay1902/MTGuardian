@@ -1,9 +1,20 @@
+import type { Modal } from "$lib/types/Modal";
 import { writable } from "svelte/store";
 
-const ActiveModalStore = writable(false);
+const ActiveModalStore = writable<Modal>({
+  isOpen: false,
+  header: "",
+  body: "",
+  id: "",
+});
 
-export const updateModal = (isOpen: boolean) => {
-  ActiveModalStore.set(isOpen);
-};
+export function updateModal(newData: any) {
+  ActiveModalStore.update((current) => {
+    return {
+      ...current,
+      ...newData,
+    };
+  });
+}
 
 export default ActiveModalStore;

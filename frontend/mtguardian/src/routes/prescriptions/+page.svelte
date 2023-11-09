@@ -3,15 +3,16 @@
   import type { PageData } from "./$types";
   import type { Prescription } from "$lib/types/Prescription";
   import Modal from "$lib/components/Modal.svelte";
-  import { updateModal } from "$lib/store/ActiveModalStore";
+  import ActiveModalStore, { updateModal } from "$lib/store/ActiveModalStore";
   import FormStore from "$lib/store/Form";
+  import PrescriptionStore from "$lib/store/PrescriptionStore";
 
   // load data
   export let data: PageData;
-  let prescriptions: Prescription[] = data.prescriptions;
+  PrescriptionStore.set(data.prescriptions);
 
   //page specific variables
-  const tableHeaders: string[] = Object.keys(prescriptions[0]);
+  const tableHeaders: string[] = Object.keys($PrescriptionStore[0]);
   const ignoreHeaders: string[] = ["id"];
 
   function createPrescriptionModal() {
@@ -22,7 +23,15 @@
         formMethod: "post",
       };
     });
-    updateModal(true);
+    updateModal({ isOpen: true, header: "Create Prescription", body: "form" });
+  }
+  function deletePrescriptionModal(id: string) {
+    updateModal({
+      isOpen: true,
+      header: "Delete Prescription",
+      body: "Are you sure you want to delete this prescription?",
+      id,
+    });
   }
 </script>
 
@@ -39,11 +48,12 @@
           >
         {/if}
       {/each}
+      <th class="text-3xl text-white">Edit/Delete</th>
     </tr>
   </thead>
 
   <tbody>
-    {#each data.prescriptions as p}
+    {#each $PrescriptionStore as p}
       <tr>
         {#each tableHeaders as th}
           {#if !ignoreHeaders.includes(th)}
@@ -52,9 +62,16 @@
             >
           {/if}
         {/each}
+        <td>
+          <button class="btn btn-primary">Edit</button>
+          <button
+            class="btn btn-secondary"
+            on:click={() => deletePrescriptionModal(p.id)}>Delete</button
+          >
+        </td>
       </tr>
     {/each}
   </tbody>
 </table>
 
-<Modal header="Create Prescription" />
+<Modal />

@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { enhance } from "$app/forms";
-  import { invalidate, invalidateAll } from "$app/navigation";
-  import ActiveModalStore, { updateModal } from "$lib/store/ActiveModalStore";
+  import { updateModal } from "$lib/store/ActiveModalStore";
   import FormStore from "$lib/store/Form";
   import type { Prescription } from "$lib/types/Prescription";
   import { DateTime } from "luxon";
@@ -103,4 +101,11 @@
     />
   </div>
   <button class="btn btn-primary" type="submit"> Submit </button>
+  <button
+    class="btn btn-secondary"
+    type="button"
+    on:click={() => updateModal({ isOpen: false })}
+  >
+    Cancel
+  </button>
 </form>
