@@ -1,7 +1,61 @@
 <script lang="ts">
+  import { enhance } from "$app/forms";
+  import { invalidate, invalidateAll } from "$app/navigation";
+  import ActiveModalStore, { updateModal } from "$lib/store/ActiveModalStore";
+  import FormStore from "$lib/store/Form";
+  import type { Prescription } from "$lib/types/Prescription";
+  import { DateTime } from "luxon";
+
+  let prescription: Prescription;
+  if (Object.keys($FormStore.data).length === 0) {
+    prescription = {
+      id: "",
+      medication: "",
+      dosage: "",
+      notes: "",
+      started: "",
+      ended: "",
+    };
+  }
+
+  async function createPrescription(event: Event) {
+    try {
+      const values = event.target as HTMLFormElement;
+      const data = new FormData(values);
+
+      const date = data.get("started");
+
+      let formattedStartedDate = new Date().toDateString();
+
+      if (date !== null) {
+        formattedStartedDate = DateTime.fromFormat(
+          date.toString(),
+          "yyyy-MM-dd"
+        ).toFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
+      }
+
+      const prescription = {
+        medication: data.get("medication"),
+        dosage: data.get("dosage"),
+        notes: data.get("notes"),
+        started: formattedStartedDate,
+        ended: data.get("ended"),
+      };
+
+      await fetch(`http://0.0.0.0:8000/api/v1/prescription`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...prescription }),
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
 </script>
 
-<form>
+<form method="POST" action="?/createPrescription">
   <div class="mb-4">
     <label class="block text-sm font-medium text-white" for="medication">
       Medication
@@ -15,62 +69,38 @@
   </div>
 
   <div class="mb-4">
-    <!--  <label className="block text-sm font-medium text-white" htmlFor="dosage">
+    <label class="block text-sm font-medium text-white" for="dosage">
       Dosage
     </label>
     <input
       type="text"
       id="dosage"
       name="dosage"
-      value={prescriptionForm.dosage}
-      onChange={(e) => handlePrescriptionFormChange(e, setPrescriptionForm)}
-      className="w-full px-3 py-2 border rounded-md shadow-sm"
+      class="w-full px-3 py-2 border rounded-md shadow-sm"
     />
   </div>
 
-  <div className="mb-4">
-    <label className="block text-sm font-medium text-white" htmlFor="notes">
+  <div class="mb-4">
+    <label class="block text-sm font-medium text-white" for="notes">
       Notes
     </label>
     <textarea
       id="notes"
       name="notes"
-      value={prescriptionForm.notes}
-      onChange={(e) => handlePrescriptionFormChange(e, setPrescriptionForm)}
-      className="w-full px-3 py-2 border rounded-md shadow-sm"
+      class="w-full px-3 py-2 border rounded-md shadow-sm"
     />
   </div>
 
-  <div className="mb-4">
-    <label className="block text-sm font-medium text-white" htmlFor="started">
+  <div class="mb-4">
+    <label class="block text-sm font-medium text-white" for="started">
       Started
     </label>
     <input
       type="date"
       id="started"
       name="started"
-      value={prescriptionForm.started
-        ? convertDate(prescriptionForm.started)
-        : convertDate(new Date(0).toDateString())}
-      onChange={(e) => handlePrescriptionFormChange(e, setPrescriptionForm)}
-      className="w-full px-3 py-2 border rounded-md shadow-sm"
+      class="w-full px-3 py-2 border rounded-md shadow-sm"
     />
   </div>
-  <div
-    className="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600"
-  > -->
-    <!-- <button
-      type="submit"
-      onSubmit={(e) => handleSubmit(e, prescriptionForm)}
-      className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
-    >
-      Submit
-    </button> -->
-    <button
-      type="button"
-      class="px-4 py-2 dark:bg-red-600 rounded-md text-white hover:bg-red-800"
-    >
-      Cancel
-    </button>
-  </div>
+  <button class="btn btn-primary" type="submit"> Submit </button>
 </form>

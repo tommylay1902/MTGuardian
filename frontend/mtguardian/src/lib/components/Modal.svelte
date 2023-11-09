@@ -2,7 +2,7 @@
   import Form from "./Form.svelte";
   import ActiveModalStore, { updateModal } from "$lib/store/ActiveModalStore";
 
-  export let header;
+  export let header: string;
 </script>
 
 <div class="modal" class:modal-open={$ActiveModalStore}>
@@ -13,7 +13,13 @@
     </p>
     <div class="modal-action">
       <!-- 🔵 set false on click -->
-      <button class="btn" on:click={() => updateModal(false)}>Yay!</button>
+      <button
+        class="btn btn-secondary"
+        type="button"
+        on:click={() => updateModal(false)}
+      >
+        Cancel
+      </button>
     </div>
   </div>
 </div>
