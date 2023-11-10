@@ -1,5 +1,5 @@
 interface IObjectKeys {
-  [key: string]: string | number;
+  [key: string]: string | number | null;
 }
 export interface Prescription extends IObjectKeys {
   id: string;
@@ -7,5 +7,16 @@ export interface Prescription extends IObjectKeys {
   dosage: string;
   notes: string;
   started: string;
-  ended: string;
+  ended: string | null;
 }
+
+export const generatePrescriptionTemplate = () => {
+  return {
+    id: "",
+    medication: "",
+    dosage: "",
+    notes: "",
+    started: "",
+    ended: "",
+  };
+};

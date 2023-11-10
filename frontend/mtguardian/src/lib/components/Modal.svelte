@@ -1,7 +1,6 @@
 <script lang="ts">
   import Form from "./Form.svelte";
   import ActiveModalStore, { updateModal } from "$lib/store/ActiveModalStore";
-  import { invalidate } from "$app/navigation";
   import PrescriptionStore from "$lib/store/PrescriptionStore";
   async function deletePrescription() {
     PrescriptionStore.update((currentData) => {

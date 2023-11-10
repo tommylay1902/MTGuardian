@@ -19,12 +19,14 @@
     FormStore.update((current) => {
       return {
         ...current,
-        formAction: "?/createPrescription",
-        formMethod: "post",
+        formAction: "createPrescription",
+        formMethod: "POST",
       };
     });
+
     updateModal({ isOpen: true, header: "Create Prescription", body: "form" });
   }
+
   function deletePrescriptionModal(id: string) {
     updateModal({
       isOpen: true,
@@ -32,6 +34,17 @@
       body: "Are you sure you want to delete this prescription?",
       id,
     });
+  }
+
+  function editPrescriptionModal(p: Prescription) {
+    FormStore.update((current) => {
+      return {
+        ...current,
+        data: { ...p },
+        formAction: "updatePrescription",
+      };
+    });
+    updateModal({ isOpen: true, header: "Edit Prescription", body: "form" });
   }
 </script>
 
@@ -58,12 +71,15 @@
         {#each tableHeaders as th}
           {#if !ignoreHeaders.includes(th)}
             <td class="text-white text-2xl"
-              >{p[th] == null ? "present" : p[th]}</td
+              >{p[th] == null || p[th] == "null" ? "present" : p[th]}</td
             >
           {/if}
         {/each}
         <td>
-          <button class="btn btn-primary">Edit</button>
+          <button
+            class="btn btn-primary"
+            on:click={() => editPrescriptionModal(p)}>Edit</button
+          >
           <button
             class="btn btn-secondary"
             on:click={() => deletePrescriptionModal(p.id)}>Delete</button

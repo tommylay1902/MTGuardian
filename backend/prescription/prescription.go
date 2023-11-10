@@ -26,6 +26,7 @@ func main() {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "http://localhost:5173",
 		AllowHeaders: "*",
+		AllowMethods: "*",
 	}))
 
 	prescriptionDAO := dataaccess.InitalizePrescriptionDAO(db)
