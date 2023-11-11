@@ -3,9 +3,10 @@
   import type { PageData } from "./$types";
   import type { Prescription } from "$lib/types/Prescription";
   import Modal from "$lib/components/Modal.svelte";
-  import ActiveModalStore, { updateModal } from "$lib/store/ActiveModalStore";
+  import { updateModal } from "$lib/store/ActiveModalStore";
   import FormStore from "$lib/store/Form";
   import PrescriptionStore from "$lib/store/PrescriptionStore";
+  import { convertStringISO8601ToShortDate } from "$lib/utils/date";
 
   // load data
   export let data: PageData;
@@ -14,7 +15,8 @@
   //page specific variables
   const tableHeaders: string[] = Object.keys($PrescriptionStore[0]);
   const ignoreHeaders: string[] = ["id"];
-
+  let prescriptionHistory: string = "present";
+  tableHeaders.forEach((e) => console.log(e));
   function createPrescriptionModal() {
     FormStore.update((current) => {
       return {
@@ -46,6 +48,24 @@
     });
     updateModal({ isOpen: true, header: "Edit Prescription", body: "form" });
   }
+
+  async function presentMedication() {
+    let response;
+    if (prescriptionHistory === "present") {
+      response = await fetch(
+        "http://0.0.0.0:8000/api/v1/prescription?present=true"
+      );
+    } else if (prescriptionHistory === "past") {
+      response = await fetch(
+        "http://0.0.0.0:8000/api/v1/prescription?present=false"
+      );
+    } else {
+      response = await fetch("http://0.0.0.0:8000/api/v1/prescription");
+    }
+    const prescriptions = await response.json();
+
+    $PrescriptionStore = prescriptions;
+  }
 </script>
 
 <div class="m-3 flex flex-col">
@@ -53,9 +73,14 @@
     <button class="btn btn-primary mb-1" on:click={createPrescriptionModal}
       >Create Prescription</button
     >
-    <select class="select select-bordered w-full max-w-xs">
-      <option selected>Current Prescriptions</option>
-      <option>All Prescriptions</option>
+    <select
+      class="select select-bordered w-full max-w-xs"
+      bind:value={prescriptionHistory}
+      on:change={presentMedication}
+    >
+      <option selected value="present">Current Prescriptions</option>
+      <option value="past">Past Prescriptions</option>
+      <option value="all">All Prescriptions</option>
     </select>
   </div>
   <div>
@@ -78,9 +103,17 @@
           <tr>
             {#each tableHeaders as th}
               {#if !ignoreHeaders.includes(th)}
-                <td class="text-white text-2xl"
-                  >{p[th] == null || p[th] == "null" ? "present" : p[th]}</td
-                >
+                {#if th === "started" || th === "ended"}
+                  <td class="text-white text-2xl">
+                    {p[th] == null ||
+                    p[th] === "null" ||
+                    typeof p[th] === "string"
+                      ? "Present"
+                      : convertStringISO8601ToShortDate(p[th])}
+                  </td>
+                {:else}
+                  <td class="text-white text-2xl">{p[th]}</td>
+                {/if}
               {/if}
             {/each}
             <td>
