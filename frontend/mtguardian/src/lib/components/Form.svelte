@@ -2,6 +2,7 @@
   import { updateModal } from "$lib/store/ActiveModalStore";
   import FormStore from "$lib/store/Form";
   import PrescriptionStore from "$lib/store/PrescriptionStore";
+  import { PrescriptionViewHistoryStore } from "$lib/store/PrescriptionViewHistoryStore";
   import {
     generatePrescriptionTemplate,
     type Prescription,
@@ -103,7 +104,7 @@
         }
       );
 
-      const response = await fetch("http://0.0.0.0:8000/api/v1/prescription", {
+      const response = await fetch(`${$PrescriptionViewHistoryStore}`, {
         cache: "no-cache",
       });
       const prescriptions = await response.json();

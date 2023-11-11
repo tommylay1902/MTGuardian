@@ -7,6 +7,7 @@
   import FormStore from "$lib/store/Form";
   import PrescriptionStore from "$lib/store/PrescriptionStore";
   import { convertStringISO8601ToShortDate } from "$lib/utils/date";
+  import { PrescriptionViewHistoryStore } from "$lib/store/PrescriptionViewHistoryStore";
 
   // load data
   export let data: PageData;
@@ -16,7 +17,7 @@
   const tableHeaders: string[] = Object.keys($PrescriptionStore[0]);
   const ignoreHeaders: string[] = ["id"];
   let prescriptionHistory: string = "present";
-  tableHeaders.forEach((e) => console.log(e));
+
   function createPrescriptionModal() {
     FormStore.update((current) => {
       return {
@@ -50,18 +51,25 @@
   }
 
   async function presentMedication() {
-    let response;
-    if (prescriptionHistory === "present") {
-      response = await fetch(
-        "http://0.0.0.0:8000/api/v1/prescription?present=true"
-      );
-    } else if (prescriptionHistory === "past") {
-      response = await fetch(
-        "http://0.0.0.0:8000/api/v1/prescription?present=false"
-      );
-    } else {
-      response = await fetch("http://0.0.0.0:8000/api/v1/prescription");
+    switch (prescriptionHistory) {
+      case "present":
+        PrescriptionViewHistoryStore.set(
+          "http://0.0.0.0:8000/api/v1/prescription?present=true"
+        );
+        break;
+      case "past":
+        PrescriptionViewHistoryStore.set(
+          "http://0.0.0.0:8000/api/v1/prescription?present=false"
+        );
+        break;
+      default:
+        PrescriptionViewHistoryStore.set(
+          "http://0.0.0.0:8000/api/v1/prescription"
+        );
     }
+
+    const response = await fetch(`${$PrescriptionViewHistoryStore}`);
+
     const prescriptions = await response.json();
 
     $PrescriptionStore = prescriptions;
@@ -107,7 +115,7 @@
                   <td class="text-white text-2xl">
                     {p[th] == null ||
                     p[th] === "null" ||
-                    typeof p[th] === "string"
+                    typeof p[th] !== "string"
                       ? "Present"
                       : convertStringISO8601ToShortDate(p[th])}
                   </td>
