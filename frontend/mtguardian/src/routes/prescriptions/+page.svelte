@@ -1,7 +1,10 @@
 <script lang="ts">
   //imports
   import type { PageData } from "./$types";
-  import type { Prescription } from "$lib/types/Prescription";
+  import {
+    generatePrescriptionTemplate,
+    type Prescription,
+  } from "$lib/types/Prescription";
   import Modal from "$lib/components/Modal.svelte";
   import { updateModal } from "$lib/store/ActiveModalStore";
   import FormStore from "$lib/store/Form";
@@ -14,7 +17,7 @@
   PrescriptionStore.set(data.prescriptions);
 
   //page specific variables
-  const tableHeaders: string[] = Object.keys($PrescriptionStore[0]);
+  const tableHeaders: string[] = Object.keys(generatePrescriptionTemplate());
   const ignoreHeaders: string[] = ["id"];
   let prescriptionHistory: string = "present";
 
@@ -78,11 +81,11 @@
 
 <div class="m-3 flex flex-col">
   <div>
-    <button class="btn btn-primary mb-1" on:click={createPrescriptionModal}
+    <button class="btn btn-primary mb-3 mr-4" on:click={createPrescriptionModal}
       >Create Prescription</button
     >
     <select
-      class="select select-bordered w-full max-w-xs"
+      class="select select-bordered w-full max-w-xs text-white"
       bind:value={prescriptionHistory}
       on:change={presentMedication}
     >
