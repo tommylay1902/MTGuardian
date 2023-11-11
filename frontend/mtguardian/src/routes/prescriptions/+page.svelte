@@ -48,46 +48,56 @@
   }
 </script>
 
-<button class="btn btn-primary" on:click={createPrescriptionModal}
-  >Create</button
->
-<table class="table table-lg">
-  <thead>
-    <tr>
-      {#each tableHeaders as th}
-        {#if !ignoreHeaders.includes(th)}
-          <th class="text-3xl text-white"
-            ><strong>{th.toUpperCase()}</strong></th
-          >
-        {/if}
-      {/each}
-      <th class="text-3xl text-white">Edit/Delete</th>
-    </tr>
-  </thead>
+<div class="m-3 flex flex-col">
+  <div>
+    <button class="btn btn-primary mb-1" on:click={createPrescriptionModal}
+      >Create Prescription</button
+    >
+    <select class="select select-bordered w-full max-w-xs">
+      <option selected>Current Prescriptions</option>
+      <option>All Prescriptions</option>
+    </select>
+  </div>
+  <div>
+    <table class="table table-lg">
+      <thead>
+        <tr>
+          {#each tableHeaders as th}
+            {#if !ignoreHeaders.includes(th)}
+              <th class="text-3xl text-white"
+                ><strong>{th.toUpperCase()}</strong></th
+              >
+            {/if}
+          {/each}
+          <th class="text-3xl text-white">Edit/Delete</th>
+        </tr>
+      </thead>
 
-  <tbody>
-    {#each $PrescriptionStore as p}
-      <tr>
-        {#each tableHeaders as th}
-          {#if !ignoreHeaders.includes(th)}
-            <td class="text-white text-2xl"
-              >{p[th] == null || p[th] == "null" ? "present" : p[th]}</td
-            >
-          {/if}
+      <tbody>
+        {#each $PrescriptionStore as p}
+          <tr>
+            {#each tableHeaders as th}
+              {#if !ignoreHeaders.includes(th)}
+                <td class="text-white text-2xl"
+                  >{p[th] == null || p[th] == "null" ? "present" : p[th]}</td
+                >
+              {/if}
+            {/each}
+            <td>
+              <button
+                class="btn btn-primary"
+                on:click={() => editPrescriptionModal(p)}>Edit</button
+              >
+              <button
+                class="btn btn-secondary"
+                on:click={() => deletePrescriptionModal(p.id)}>Delete</button
+              >
+            </td>
+          </tr>
         {/each}
-        <td>
-          <button
-            class="btn btn-primary"
-            on:click={() => editPrescriptionModal(p)}>Edit</button
-          >
-          <button
-            class="btn btn-secondary"
-            on:click={() => deletePrescriptionModal(p.id)}>Delete</button
-          >
-        </td>
-      </tr>
-    {/each}
-  </tbody>
-</table>
+      </tbody>
+    </table>
+  </div>
 
-<Modal />
+  <Modal />
+</div>

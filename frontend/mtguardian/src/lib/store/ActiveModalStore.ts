@@ -10,10 +10,6 @@ const ActiveModalStore = writable<Modal>({
 
 export function updateModal(newData: any) {
   ActiveModalStore.update((current) => {
-    console.log({
-      ...current,
-      ...newData,
-    });
     return {
       ...current,
       ...newData,

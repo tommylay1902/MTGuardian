@@ -8,14 +8,6 @@
   } from "$lib/types/Prescription";
   import { DateTime } from "luxon";
 
-  let prescriptionFormData: Prescription;
-
-  if (Object.keys($FormStore.data).length === 0) {
-    prescriptionFormData = generatePrescriptionTemplate();
-  } else {
-    prescriptionFormData = $FormStore.data;
-  }
-
   function convertDate(date: string) {
     const parsedDate = DateTime.fromISO(date, { zone: "utc" }).toFormat(
       "yyyy-MM-dd"
@@ -117,7 +109,6 @@
       const prescriptions = await response.json();
 
       $PrescriptionStore = [...prescriptions];
-      $PrescriptionStore = $PrescriptionStore;
 
       $FormStore.data = generatePrescriptionTemplate();
       updateModal({ isOpen: false });
@@ -183,17 +174,19 @@
       class="w-full px-3 py-2 border rounded-md shadow-sm"
     />
   </div>
-  <button class="btn btn-primary" type="submit"> Submit </button>
-  <button
-    class="btn btn-secondary"
-    type="button"
-    on:click={() => {
-      ($FormStore.data = generatePrescriptionTemplate()),
-        updateModal({
-          isOpen: false,
-        });
-    }}
-  >
-    Cancel
-  </button>
+  <div class="flex space-x-1 content-between">
+    <button class="btn btn-primary w-1/2" type="submit"> Submit </button>
+    <button
+      class="btn btn-secondary w-1/2"
+      type="button"
+      on:click={() => {
+        ($FormStore.data = generatePrescriptionTemplate()),
+          updateModal({
+            isOpen: false,
+          });
+      }}
+    >
+      Cancel
+    </button>
+  </div>
 </form>
