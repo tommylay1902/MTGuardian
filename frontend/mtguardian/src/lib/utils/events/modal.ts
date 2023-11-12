@@ -2,7 +2,7 @@ import { updateModal } from "$lib/store/ActiveModalStore";
 import FormStore from "$lib/store/Form";
 import type { Prescription } from "$lib/types/Prescription";
 
-export function createPrescriptionModal() {
+export function showCreatePrescriptionModal() {
   FormStore.update((current) => {
     return {
       ...current,
@@ -14,7 +14,7 @@ export function createPrescriptionModal() {
   updateModal({ isOpen: true, header: "Create Prescription", body: "form" });
 }
 
-export function deletePrescriptionModal(id: string) {
+export function showDeletePrescriptionModal(id: string) {
   updateModal({
     isOpen: true,
     header: "Delete Prescription",
@@ -23,7 +23,7 @@ export function deletePrescriptionModal(id: string) {
   });
 }
 
-export function editPrescriptionModal(p: Prescription) {
+export function showEditPrescriptionModal(p: Prescription) {
   FormStore.update((current) => {
     return {
       ...current,

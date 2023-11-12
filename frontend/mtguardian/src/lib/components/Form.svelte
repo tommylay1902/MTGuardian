@@ -1,128 +1,54 @@
 <script lang="ts">
-  import { resetModalStore, updateModal } from "$lib/store/ActiveModalStore";
+  import { resetModalStore } from "$lib/store/ActiveModalStore";
   import FormStore, { resetFormStore } from "$lib/store/Form";
   import HighlightTableRowStore from "$lib/store/HighlightTableRowStore";
   import PrescriptionStore from "$lib/store/PrescriptionStore";
 
-  import { convertDateHtmlInputStringToISO8601 } from "$lib/utils/date";
+  import {
+    createPrescription,
+    updatePrescription,
+  } from "$lib/utils/formactions";
   import PrescriptionInput from "./PrescriptionInput.svelte";
 
-  async function createPrescription(event: Event) {
-    try {
-      const values = event.target as HTMLFormElement;
-      const data = new FormData(values);
+  async function updatePrescriptionEvent(e: Event) {
+    const data = await updatePrescription(e, $FormStore.data.id);
+    $PrescriptionStore = $PrescriptionStore.map((obj) => {
+      const id = $FormStore.data.id;
+      if (id === obj.id && data !== undefined) {
+        return { ...data };
+      } else return obj;
+    });
 
-      const date = data.get("started");
+    HighlightTableRowStore.set({
+      id: $FormStore.data.id,
+      canHighlightAfterCreation: false,
+      canHighlightAfterUpdate: true,
+    });
 
-      let formattedStartedDate = new Date().toDateString();
+    resetModalStore();
+    resetFormStore();
+  }
 
-      if (date !== null) {
-        formattedStartedDate = convertDateHtmlInputStringToISO8601(
-          date.toString()
-        );
-      }
-
-      const prescription = {
-        medication: data.get("medication"),
-        dosage: data.get("dosage"),
-        notes: data.get("notes"),
-        started: formattedStartedDate,
-        ended: data.get("ended"),
-      };
-
-      const response = await fetch(`http://0.0.0.0:8000/api/v1/prescription`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...prescription }),
-      });
-
-      const responseId = await response.json();
-      const id = responseId["success"];
-
+  async function createPrescriptionEvent(e: Event) {
+    const data = await createPrescription(e);
+    if (data !== undefined) {
       PrescriptionStore.update((currentData) => [
         ...currentData,
         {
-          id,
-          medication: data.get("medication")?.toString() || "",
-          dosage: data.get("dosage")?.toString() || "",
-          notes: data.get("notes")?.toString() || "",
-          started: formattedStartedDate.toString() || "",
-          ended: data.get("ended")?.toString() || "null",
+          ...data,
         },
       ]);
-
-      resetModalStore();
-      resetFormStore();
-    } catch (e) {
-      console.log(e);
     }
-  }
 
-  async function updatePrescription(event: Event) {
-    try {
-      const values = event.target as HTMLFormElement;
-      const data = new FormData(values);
-
-      const date = data.get("started");
-
-      let formattedStartedDate = new Date().toDateString();
-
-      if (date !== null) {
-        formattedStartedDate = convertDateHtmlInputStringToISO8601(
-          date.toString()
-        );
-      }
-
-      const prescription = {
-        medication: data.get("medication"),
-        dosage: data.get("dosage"),
-        notes: data.get("notes"),
-        started: formattedStartedDate,
-        ended: data.get("ended"),
-      };
-
-      fetch(`http://0.0.0.0:8000/api/v1/prescription/${$FormStore.data.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...prescription }),
-      });
-
-      $PrescriptionStore = $PrescriptionStore.map((obj) => {
-        const id = $FormStore.data.id;
-        if (id === obj.id) {
-          return {
-            id,
-            medication: data.get("medication")?.toString() || "",
-            dosage: data.get("dosage")?.toString() || "",
-            notes: data.get("notes")?.toString() || "",
-            started: formattedStartedDate.toString() || "",
-            ended: data.get("ended")?.toString() || "null",
-          };
-        } else return obj;
-      });
-
-      HighlightTableRowStore.set({
-        id: $FormStore.data.id,
-        canHighlightAfterCreation: false,
-        canHighlightAfterUpdate: true,
-      });
-
-      resetModalStore();
-      resetFormStore();
-    } catch (e) {
-      console.log(e);
-    }
+    resetModalStore();
+    resetFormStore();
   }
 </script>
 
 <form
   on:submit|preventDefault={$FormStore.formAction === "createPrescription"
-    ? createPrescription
-    : updatePrescription}
+    ? createPrescriptionEvent
+    : updatePrescriptionEvent}
 >
   <div class="mb-4">
     <PrescriptionInput name="medication" />

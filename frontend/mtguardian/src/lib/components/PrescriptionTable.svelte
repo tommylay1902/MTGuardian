@@ -1,17 +1,13 @@
 <script lang="ts">
-  import {
-    generatePrescriptionTemplate,
-    type Prescription,
-  } from "$lib/types/Prescription";
+  import { generatePrescriptionTemplate } from "$lib/types/Prescription";
   import { convertStringISO8601ToShortDate } from "$lib/utils/date";
 
   import PrescriptionStore from "$lib/store/PrescriptionStore";
   import HighlightTableRowStore from "$lib/store/HighlightTableRowStore";
-  import { updateModal } from "$lib/store/ActiveModalStore";
-  import FormStore from "$lib/store/Form";
+
   import {
-    deletePrescriptionModal,
-    editPrescriptionModal,
+    showDeletePrescriptionModal,
+    showEditPrescriptionModal,
   } from "$lib/utils/events/modal";
 
   const tableHeaders: string[] = Object.keys(generatePrescriptionTemplate());
@@ -60,11 +56,11 @@
         <td>
           <button
             class="btn btn-primary"
-            on:click={() => editPrescriptionModal(p)}>Edit</button
+            on:click={() => showEditPrescriptionModal(p)}>Edit</button
           >
           <button
             class="btn btn-secondary"
-            on:click={() => deletePrescriptionModal(p.id)}>Delete</button
+            on:click={() => showDeletePrescriptionModal(p.id)}>Delete</button
           >
         </td>
       </tr>

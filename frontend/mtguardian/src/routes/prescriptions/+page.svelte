@@ -10,7 +10,7 @@
 
   import { onMount } from "svelte";
   import PrescriptionTable from "$lib/components/PrescriptionTable.svelte";
-  import { createPrescriptionModal } from "$lib/utils/events/modal";
+  import { showCreatePrescriptionModal } from "$lib/utils/events/modal";
 
   // load data
   export let data: PageData;
@@ -52,8 +52,9 @@
 
 <div class="m-3 flex flex-col">
   <div>
-    <button class="btn btn-primary mb-3 mr-4" on:click={createPrescriptionModal}
-      >Create Prescription</button
+    <button
+      class="btn btn-primary mb-3 mr-4"
+      on:click={showCreatePrescriptionModal}>Create Prescription</button
     >
     <select
       class="select select-bordered w-full max-w-xs text-white"
