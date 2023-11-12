@@ -1,6 +1,7 @@
 <script lang="ts">
   import { updateModal } from "$lib/store/ActiveModalStore";
   import FormStore from "$lib/store/Form";
+  import HighlightTableRowStore from "$lib/store/HighlightTableRowStore";
   import PrescriptionStore from "$lib/store/PrescriptionStore";
   import { PrescriptionViewHistoryStore } from "$lib/store/PrescriptionViewHistoryStore";
   import {
@@ -48,22 +49,30 @@
         body: JSON.stringify({ ...prescription }),
       });
 
-      const id = await response.json();
+      const responseId = await response.json();
+      const id = responseId["success"];
+      // PrescriptionStore.update((currentData) => [
+      //   ...currentData,
+      //   {
+      //     id,
+      //     medication: data.get("medication")?.toString() || "",
+      //     dosage: data.get("dosage")?.toString() || "",
+      //     notes: data.get("notes")?.toString() || "",
+      //     started: formattedStartedDate.toString() || "",
+      //     ended: data.get("ended")?.toString() || "null",
+      //   },
+      // ]);
 
-      PrescriptionStore.update((currentData) => [
-        ...currentData,
-        {
-          id: id["success"],
-          medication: data.get("medication")?.toString() || "",
-          dosage: data.get("dosage")?.toString() || "",
-          notes: data.get("notes")?.toString() || "",
-          started: formattedStartedDate.toString() || "",
-          ended: data.get("ended")?.toString() || "null",
-        },
-      ]);
+      const responseReload = await fetch(`${$PrescriptionViewHistoryStore}`, {
+        cache: "no-cache",
+      });
+      const prescriptions = await responseReload.json();
+
+      $PrescriptionStore = [...prescriptions];
 
       $FormStore.data = generatePrescriptionTemplate();
-      updateModal({ isOpen: false });
+
+      updateModal({ isOpen: false, header: "", body: "", id: "" });
     } catch (e) {
       console.log(e);
     }
@@ -111,8 +120,15 @@
 
       $PrescriptionStore = [...prescriptions];
 
+      HighlightTableRowStore.set({
+        id: $FormStore.data.id,
+        canHighlightAfterCreation: false,
+        canHighlightAfterUpdate: true,
+      });
+
       $FormStore.data = generatePrescriptionTemplate();
-      updateModal({ isOpen: false });
+
+      updateModal({ isOpen: false, header: "", body: "", id: "" });
     } catch (e) {
       console.log(e);
     }

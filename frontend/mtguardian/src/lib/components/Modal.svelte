@@ -28,17 +28,16 @@
         <Form />
       {:else}
         <p>{$ActiveModalStore.body}</p>
-        <button class="btn btn-primary" on:click={deletePrescription}
-          >Delete</button
-        >
-        <button
-          class="btn btn-secondary"
-          on:click={() => updateModal({ isOpen: false })}>Cancel</button
-        >
+        <div class="flex flex-row space-x-3 pt-4">
+          <button class="btn btn-primary w-1/2" on:click={deletePrescription}
+            >Delete</button
+          >
+          <button
+            class="btn btn-secondary w-1/2"
+            on:click={() => updateModal({ isOpen: false })}>Cancel</button
+          >
+        </div>
       {/if}
     </p>
-    <div class="modal-action">
-      <!-- 🔵 set false on click -->
-    </div>
   </div>
 </div>

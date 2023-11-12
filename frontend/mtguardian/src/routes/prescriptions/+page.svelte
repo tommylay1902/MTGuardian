@@ -11,6 +11,7 @@
   import PrescriptionStore from "$lib/store/PrescriptionStore";
   import { convertStringISO8601ToShortDate } from "$lib/utils/date";
   import { PrescriptionViewHistoryStore } from "$lib/store/PrescriptionViewHistoryStore";
+  import HighlightTableRowStore from "$lib/store/HighlightTableRowStore";
 
   // load data
   export let data: PageData;
@@ -110,8 +111,18 @@
       </thead>
 
       <tbody>
-        {#each $PrescriptionStore as p}
-          <tr>
+        {#each $PrescriptionStore as p (p.id)}
+          <tr
+            class:highlight={$HighlightTableRowStore.canHighlightAfterUpdate &&
+              $HighlightTableRowStore.id === p.id}
+            on:animationend={() => {
+              HighlightTableRowStore.set({
+                id: "",
+                canHighlightAfterCreation: false,
+                canHighlightAfterUpdate: false,
+              });
+            }}
+          >
             {#each tableHeaders as th}
               {#if !ignoreHeaders.includes(th)}
                 {#if th === "started" || th === "ended"}
@@ -145,3 +156,15 @@
 
   <Modal />
 </div>
+
+<style>
+  .highlight {
+    animation: highlight 2s ease-in-out;
+  }
+
+  @keyframes highlight {
+    50% {
+      background-color: green;
+    }
+  }
+</style>
