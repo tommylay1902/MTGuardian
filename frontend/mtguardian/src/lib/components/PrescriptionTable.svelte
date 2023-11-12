@@ -19,7 +19,7 @@
     <tr>
       {#each tableHeaders as th}
         {#if !ignoreHeaders.includes(th)}
-          <th class="text-3xl text-white"
+          <th class={`text-3xl text-white `}
             ><strong>{th.toUpperCase()}</strong></th
           >
         {/if}
@@ -43,7 +43,7 @@
         {#each tableHeaders as th}
           {#if !ignoreHeaders.includes(th)}
             {#if th === "started" || th === "ended"}
-              <td class="text-white text-2xl">
+              <td class={`text-white text-2xl dates`}>
                 {p[th] == null || p[th] === "null" || typeof p[th] !== "string"
                   ? "Present"
                   : convertStringISO8601ToShortDate(p[th])}
@@ -70,7 +70,7 @@
 
 <style>
   .highlight {
-    animation: highlight 1.4s ease-in-out;
+    animation: highlight 1s ease-in-out;
   }
 
   @keyframes highlight {
