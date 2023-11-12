@@ -17,4 +17,8 @@ export function updateModal(newData: any) {
   });
 }
 
+export function resetModalStore() {
+  ActiveModalStore.set({ isOpen: false, header: "", body: "", id: "" });
+}
+
 export default ActiveModalStore;

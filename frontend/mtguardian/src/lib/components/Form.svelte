@@ -1,21 +1,11 @@
 <script lang="ts">
-  import { updateModal } from "$lib/store/ActiveModalStore";
-  import FormStore from "$lib/store/Form";
+  import { resetModalStore, updateModal } from "$lib/store/ActiveModalStore";
+  import FormStore, { resetFormStore } from "$lib/store/Form";
   import HighlightTableRowStore from "$lib/store/HighlightTableRowStore";
   import PrescriptionStore from "$lib/store/PrescriptionStore";
-  import { PrescriptionViewHistoryStore } from "$lib/store/PrescriptionViewHistoryStore";
-  import {
-    generatePrescriptionTemplate,
-    type Prescription,
-  } from "$lib/types/Prescription";
-  import { DateTime } from "luxon";
 
-  function convertDate(date: string) {
-    const parsedDate = DateTime.fromISO(date, { zone: "utc" }).toFormat(
-      "yyyy-MM-dd"
-    );
-    return parsedDate;
-  }
+  import { convertDateHtmlInputStringToISO8601 } from "$lib/utils/date";
+  import PrescriptionInput from "./PrescriptionInput.svelte";
 
   async function createPrescription(event: Event) {
     try {
@@ -27,10 +17,9 @@
       let formattedStartedDate = new Date().toDateString();
 
       if (date !== null) {
-        formattedStartedDate = DateTime.fromFormat(
-          date.toString(),
-          "yyyy-MM-dd"
-        ).toFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
+        formattedStartedDate = convertDateHtmlInputStringToISO8601(
+          date.toString()
+        );
       }
 
       const prescription = {
@@ -51,28 +40,21 @@
 
       const responseId = await response.json();
       const id = responseId["success"];
-      // PrescriptionStore.update((currentData) => [
-      //   ...currentData,
-      //   {
-      //     id,
-      //     medication: data.get("medication")?.toString() || "",
-      //     dosage: data.get("dosage")?.toString() || "",
-      //     notes: data.get("notes")?.toString() || "",
-      //     started: formattedStartedDate.toString() || "",
-      //     ended: data.get("ended")?.toString() || "null",
-      //   },
-      // ]);
 
-      const responseReload = await fetch(`${$PrescriptionViewHistoryStore}`, {
-        cache: "no-cache",
-      });
-      const prescriptions = await responseReload.json();
+      PrescriptionStore.update((currentData) => [
+        ...currentData,
+        {
+          id,
+          medication: data.get("medication")?.toString() || "",
+          dosage: data.get("dosage")?.toString() || "",
+          notes: data.get("notes")?.toString() || "",
+          started: formattedStartedDate.toString() || "",
+          ended: data.get("ended")?.toString() || "null",
+        },
+      ]);
 
-      $PrescriptionStore = [...prescriptions];
-
-      $FormStore.data = generatePrescriptionTemplate();
-
-      updateModal({ isOpen: false, header: "", body: "", id: "" });
+      resetModalStore();
+      resetFormStore();
     } catch (e) {
       console.log(e);
     }
@@ -88,10 +70,9 @@
       let formattedStartedDate = new Date().toDateString();
 
       if (date !== null) {
-        formattedStartedDate = DateTime.fromFormat(
-          date.toString(),
-          "yyyy-MM-dd"
-        ).toFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
+        formattedStartedDate = convertDateHtmlInputStringToISO8601(
+          date.toString()
+        );
       }
 
       const prescription = {
@@ -102,23 +83,27 @@
         ended: data.get("ended"),
       };
 
-      await fetch(
-        `http://0.0.0.0:8000/api/v1/prescription/${$FormStore.data.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ ...prescription }),
-        }
-      );
-
-      const response = await fetch(`${$PrescriptionViewHistoryStore}`, {
-        cache: "no-cache",
+      fetch(`http://0.0.0.0:8000/api/v1/prescription/${$FormStore.data.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...prescription }),
       });
-      const prescriptions = await response.json();
 
-      $PrescriptionStore = [...prescriptions];
+      $PrescriptionStore = $PrescriptionStore.map((obj) => {
+        const id = $FormStore.data.id;
+        if (id === obj.id) {
+          return {
+            id,
+            medication: data.get("medication")?.toString() || "",
+            dosage: data.get("dosage")?.toString() || "",
+            notes: data.get("notes")?.toString() || "",
+            started: formattedStartedDate.toString() || "",
+            ended: data.get("ended")?.toString() || "null",
+          };
+        } else return obj;
+      });
 
       HighlightTableRowStore.set({
         id: $FormStore.data.id,
@@ -126,69 +111,38 @@
         canHighlightAfterUpdate: true,
       });
 
-      $FormStore.data = generatePrescriptionTemplate();
-
-      updateModal({ isOpen: false, header: "", body: "", id: "" });
+      resetModalStore();
+      resetFormStore();
     } catch (e) {
       console.log(e);
     }
   }
 </script>
 
-<!-- method="POST" action={`?/${$FormStore.formAction}`} -->
 <form
   on:submit|preventDefault={$FormStore.formAction === "createPrescription"
     ? createPrescription
     : updatePrescription}
 >
   <div class="mb-4">
-    <label class="block text-sm font-medium text-white" for="medication">
-      Medication
-    </label>
-    <input
-      type="text"
-      id="medication"
-      name="medication"
-      value={$FormStore.data.medication}
-      class="w-full px-3 py-2 border rounded-md shadow-sm"
-    />
+    <PrescriptionInput name="medication" />
   </div>
 
   <div class="mb-4">
-    <label class="block text-sm font-medium text-white" for="dosage">
-      Dosage
-    </label>
-    <input
-      type="text"
-      id="dosage"
-      name="dosage"
-      value={$FormStore.data.dosage}
-      class="w-full px-3 py-2 border rounded-md shadow-sm"
-    />
+    <PrescriptionInput name="dosage" />
   </div>
 
   <div class="mb-4">
-    <label class="block text-sm font-medium text-white" for="notes">
-      Notes
-    </label>
-    <textarea
-      id="notes"
-      name="notes"
-      value={$FormStore.data.notes}
-      class="w-full px-3 py-2 border rounded-md shadow-sm"
-    />
+    <PrescriptionInput name="notes" valueType="textarea" />
   </div>
 
   <div class="mb-4">
-    <label class="block text-sm font-medium text-white" for="started">
-      Started
-    </label>
-    <input
-      type="date"
-      id="started"
+    <PrescriptionInput
       name="started"
-      value={convertDate($FormStore.data.started)}
-      class="w-full px-3 py-2 border rounded-md shadow-sm"
+      valueType="date"
+      mode={$FormStore.formAction === "createPrescription"
+        ? "create"
+        : "update"}
     />
   </div>
   <div class="flex space-x-1 content-between">
@@ -197,10 +151,8 @@
       class="btn btn-secondary w-1/2"
       type="button"
       on:click={() => {
-        ($FormStore.data = generatePrescriptionTemplate()),
-          updateModal({
-            isOpen: false,
-          });
+        resetModalStore();
+        resetFormStore();
       }}
     >
       Cancel

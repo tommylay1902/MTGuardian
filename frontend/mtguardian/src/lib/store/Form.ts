@@ -8,4 +8,12 @@ const FormStore = writable<Form>({
   data: generatePrescriptionTemplate(),
 });
 
+export const resetFormStore = () => {
+  FormStore.set({
+    formAction: "",
+    formMethod: "",
+    data: generatePrescriptionTemplate(),
+  });
+};
+
 export default FormStore;

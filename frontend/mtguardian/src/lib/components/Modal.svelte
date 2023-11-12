@@ -1,7 +1,10 @@
 <script lang="ts">
   import Form from "./Form.svelte";
-  import ActiveModalStore, { updateModal } from "$lib/store/ActiveModalStore";
+  import ActiveModalStore, {
+    resetModalStore,
+  } from "$lib/store/ActiveModalStore";
   import PrescriptionStore from "$lib/store/PrescriptionStore";
+  import { resetFormStore } from "$lib/store/Form";
   async function deletePrescription() {
     PrescriptionStore.update((currentData) => {
       currentData = currentData.filter(
@@ -16,7 +19,8 @@
         method: "DELETE",
       }
     );
-    updateModal({ isOpen: false });
+    resetFormStore();
+    resetModalStore();
   }
 </script>
 
@@ -24,19 +28,18 @@
   <div class="modal-box">
     <h3 class="font-bold text-lg">{$ActiveModalStore.header}</h3>
     <p class="py-4">
-      {#if $ActiveModalStore.body === "form"}
-        <Form />
-      {:else}
+      {#if $ActiveModalStore.body !== "form" && $ActiveModalStore.isOpen}
         <p>{$ActiveModalStore.body}</p>
         <div class="flex flex-row space-x-3 pt-4">
           <button class="btn btn-primary w-1/2" on:click={deletePrescription}
             >Delete</button
           >
-          <button
-            class="btn btn-secondary w-1/2"
-            on:click={() => updateModal({ isOpen: false })}>Cancel</button
+          <button class="btn btn-secondary w-1/2" on:click={resetModalStore}
+            >Cancel</button
           >
         </div>
+      {:else if $ActiveModalStore.isOpen}
+        <Form />
       {/if}
     </p>
   </div>
