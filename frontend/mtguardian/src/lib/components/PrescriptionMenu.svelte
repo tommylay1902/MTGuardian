@@ -21,16 +21,16 @@
 
 <div class="flex justify-center">
   <button
+    class="btn btn-md text-white"
+    class:btn-info={activeTable === pastViewHistory}
+    on:click={() => reloadTable(pastViewHistory)}>Past Medication</button
+  >
+  <button
     class="btn btn-md text-white btn-info"
     class:btn-info={activeTable === presentViewHistory}
     on:click={() => reloadTable(presentViewHistory)}
   >
     Present</button
-  >
-  <button
-    class="btn btn-md text-white"
-    class:btn-info={activeTable === pastViewHistory}
-    on:click={() => reloadTable(pastViewHistory)}>Past Medication</button
   >
   <button
     class="btn btn-md text-white"

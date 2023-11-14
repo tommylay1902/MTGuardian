@@ -16,7 +16,7 @@
 
 <table class="table table-lg">
   <thead>
-    <tr>
+    <tr class="border-white">
       {#each tableHeaders as th}
         {#if !ignoreHeaders.includes(th)}
           <th class={`text-3xl text-white `}
@@ -31,6 +31,7 @@
   <tbody>
     {#each $PrescriptionStore as p (p.id)}
       <tr
+        class="border-white"
         class:highlight={$HighlightTableRowStore.id === p.id}
         on:animationend={() => {
           HighlightTableRowStore.set({
@@ -43,7 +44,7 @@
         {#each tableHeaders as th}
           {#if !ignoreHeaders.includes(th)}
             {#if th === "started" || th === "ended"}
-              <td class={`text-white text-2xl dates`}>
+              <td class={`text-white text-2xl`} id="date">
                 {p[th] == null || p[th] === "null" || typeof p[th] !== "string"
                   ? "Present"
                   : convertStringISO8601ToShortDate(p[th])}
@@ -77,5 +78,11 @@
     50% {
       background-color: green;
     }
+  }
+  td {
+    min-width: max-content;
+  }
+  th {
+    min-width: max-content;
   }
 </style>

@@ -5,6 +5,7 @@ export function convertStringISO8601ToShortDate(dateString: string | null) {
   const parsedDate = DateTime.fromISO(dateString, { zone: "utc" }).toFormat(
     "MM-dd-yyyy"
   );
+
   return parsedDate;
 }
 
@@ -16,7 +17,7 @@ export function convertStringISO8601ToDateHtmlInput(date: string) {
 }
 
 export function convertDateHtmlInputStringToISO8601(dateString: string) {
-  return DateTime.fromFormat(dateString, "yyyy-MM-dd").toFormat(
-    "yyyy-MM-dd'T'HH:mm:ssZZ"
-  );
+  const parsedDate = DateTime.fromFormat(dateString, "yyyy-MM-dd");
+
+  return parsedDate.toFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 }

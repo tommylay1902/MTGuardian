@@ -1,33 +1,40 @@
-import { resetModalStore } from "$lib/store/ActiveModalStore";
-import { resetFormStore } from "$lib/store/Form";
-import HighlightTableRowStore from "$lib/store/HighlightTableRowStore";
-import PrescriptionStore from "$lib/store/PrescriptionStore";
-import type { Writable } from "svelte/store";
 import { convertDateHtmlInputStringToISO8601 } from "./date";
-import type { Prescription } from "$lib/types/Prescription";
-import type { Form } from "$lib/types/Form";
 
 export async function createPrescription(event: Event) {
   try {
     const values = event.target as HTMLFormElement;
     const data = new FormData(values);
 
-    const date = data.get("started");
+    const startedDate = data.get("started");
+    const endedDate = data.get("ended");
 
     let formattedStartedDate = new Date().toDateString();
 
-    if (date !== null) {
+    let formattedEndedDate = new Date().toDateString();
+
+    let isPresent: boolean = false;
+
+    if (startedDate !== null) {
       formattedStartedDate = convertDateHtmlInputStringToISO8601(
-        date.toString()
+        startedDate.toString()
       );
     }
 
+    if (endedDate !== null) {
+      if (endedDate === "") {
+        isPresent = true;
+      } else {
+        formattedEndedDate = convertDateHtmlInputStringToISO8601(
+          endedDate.toString()
+        );
+      }
+    }
     const prescription = {
       medication: data.get("medication"),
       dosage: data.get("dosage"),
       notes: data.get("notes"),
       started: formattedStartedDate,
-      ended: data.get("ended"),
+      ended: isPresent ? null : formattedEndedDate,
     };
 
     const response = await fetch(`http://0.0.0.0:8000/api/v1/prescription`, {
@@ -59,23 +66,40 @@ export async function updatePrescription(event: Event, id: string) {
     const values = event.target as HTMLFormElement;
     const data = new FormData(values);
 
-    const date = data.get("started");
+    const startedDate = data.get("started");
+    const endedDate = data.get("ended");
 
     let formattedStartedDate = new Date().toDateString();
 
-    if (date !== null) {
+    let formattedEndedDate = new Date().toDateString();
+
+    let isPresent: boolean = false;
+
+    if (startedDate !== null) {
       formattedStartedDate = convertDateHtmlInputStringToISO8601(
-        date.toString()
+        startedDate.toString()
       );
     }
 
+    if (endedDate !== null) {
+      if (endedDate === "") {
+        isPresent = true;
+      } else {
+        formattedEndedDate = convertDateHtmlInputStringToISO8601(
+          endedDate.toString()
+        );
+      }
+    }
+
     const prescription = {
-      medication: data.get("medication"),
-      dosage: data.get("dosage"),
-      notes: data.get("notes"),
+      id,
+      medication: data.get("medication")?.toString() || "",
+      dosage: data.get("dosage")?.toString() || "",
+      notes: data.get("notes")?.toString() || "",
       started: formattedStartedDate,
-      ended: data.get("ended"),
+      ended: isPresent ? null : formattedEndedDate,
     };
+    console.log(JSON.stringify({ ...prescription }));
 
     fetch(`http://0.0.0.0:8000/api/v1/prescription/${id}`, {
       method: "PUT",
@@ -94,6 +118,6 @@ export async function updatePrescription(event: Event, id: string) {
       ended: data.get("ended")?.toString() || "null",
     };
   } catch (e) {
-    console.log(e);
+    console.log("hello", e);
   }
 }

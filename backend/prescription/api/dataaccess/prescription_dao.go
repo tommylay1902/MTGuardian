@@ -43,6 +43,7 @@ func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescript
 		}
 		return nil, err
 	}
+
 	return prescription, nil
 }
 
