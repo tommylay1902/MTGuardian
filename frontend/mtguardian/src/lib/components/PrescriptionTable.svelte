@@ -50,7 +50,7 @@
                   : convertStringISO8601ToShortDate(p[th])}
               </td>
             {:else}
-              <td class="text-white text-2xl">{p[th]}</td>
+              <td class="text-white text-2xl break-words">{p[th]}</td>
             {/if}
           {/if}
         {/each}
@@ -79,10 +79,8 @@
       background-color: green;
     }
   }
+
   td {
-    min-width: max-content;
-  }
-  th {
-    min-width: max-content;
+    max-width: 15vw;
   }
 </style>
