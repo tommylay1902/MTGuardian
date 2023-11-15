@@ -1,14 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { Prescription } from "../../prescriptions/page";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { Prescription } from "../../libs/types/Prescription";
 import PrescriptionTableHeader from "./PrescriptionTableHeader";
 import PrescriptionTableBody from "./PrescriptionTableBody";
 import EditPrescriptionModal from "../modal/EditPrescriptionModal";
 import DeletePrescriptionModal from "../modal/DeletePrescriptionModal";
 import AddPrescriptionModal from "../modal/AddPrescriptionModal";
-import { create } from "domain";
 
 type Props = {
   prescriptions: Prescription[];
@@ -29,6 +26,7 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
     dosage: "",
     notes: "",
     started: "",
+    ended: null,
   });
   const [createPrescription, setCreatePrescription] =
     useState<Prescription | null>({
@@ -37,14 +35,28 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
       dosage: "",
       notes: "",
       started: "",
+      ended: null,
     });
 
   return (
     <>
       {tableHeaders == null ? (
-        <div>no prescriptions found!</div>
-      ) : (
         <div className="relative  sm:rounded-lg m-5">
+          <div className="my-2">
+            <button
+              onClick={() => {
+                setActiveModal(true);
+                setShowAddModal(true);
+              }}
+              disabled={activeModal}
+              className="rounded-lg bg-green-700 text-white py-2 px-3 hover:bg-green-500"
+            >
+              Create
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="relative sm:rounded-lg m-5">
           <div className="my-2 ">
             <button
               onClick={() => {
@@ -86,9 +98,9 @@ const PrescriptionTableView: React.FC<Props> = ({ prescriptions }) => {
       {showDeleteModal && prescription !== null && (
         <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 backdrop-blur-5 z-50">
           <DeletePrescriptionModal
+            prescription={prescription}
             setShowDeleteModal={setShowDeleteModal}
             setActiveModal={setActiveModal}
-            prescription={prescription}
           />
         </div>
       )}

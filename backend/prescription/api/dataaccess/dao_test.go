@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 	"time"
 
@@ -57,6 +58,7 @@ func TestMain(m *testing.M) {
 
 func TestCreatePrescriptionWithMock(t *testing.T) {
 
+	defer mock.ExpectationsWereMet()
 	// Initialize the PrescriptionDAO with the GORM DB
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
@@ -67,17 +69,15 @@ func TestCreatePrescriptionWithMock(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Ended:      TimePointer(time.Now()),
 	}
+	fmt.Println(*prescription.Started, *prescription.Ended)
 
 	mock.ExpectBegin()
 	// Set up the expected SQL query and its result in the mock
-	mock.ExpectExec("INSERT INTO \"prescriptions\"").WithArgs(
-		prescription.ID,
-		*prescription.Medication,
-		*prescription.Dosage,
-		*prescription.Notes,
-		*prescription.Started,
-	).WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO \"prescriptions\" (\"id\",\"medication\",\"dosage\",\"notes\",\"started\",\"ended\") VALUES ($1,$2,$3,$4,$5,$6)")).
+		WithArgs(prescription.ID, *prescription.Medication, *prescription.Dosage, *prescription.Notes, *prescription.Started, *prescription.Ended).
+		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	mock.ExpectCommit()
 
@@ -95,6 +95,7 @@ func TestCreatePrescriptionWithMock(t *testing.T) {
 }
 
 func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
 	// Create a sample Prescription
@@ -103,7 +104,8 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 		Medication: StringPointer("Sample Medication"),
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
-		Started:    TimePointer(time.Now()),
+		Started:    TimePointer(time.Now().UTC()),
+		Ended:      TimePointer(time.Now().UTC()),
 	}
 
 	prescription2 := &models.Prescription{
@@ -111,17 +113,19 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 		Medication: StringPointer("Sample Medication"),
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
-		Started:    TimePointer(time.Now()),
+		Started:    TimePointer(time.Now().UTC()),
+		Ended:      TimePointer(time.Now().UTC()),
 	}
 
 	mock.ExpectBegin()
 	// Set up the expected SQL query and indicate an error in the mock
-	mock.ExpectExec("INSERT INTO \"prescriptions\"").WithArgs(
+	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO \"prescriptions\" (\"id\",\"medication\",\"dosage\",\"notes\",\"started\",\"ended\") VALUES ($1,$2,$3,$4,$5,$6)")).WithArgs(
 		prescription.ID,
 		*prescription.Medication,
 		*prescription.Dosage,
 		*prescription.Notes,
 		*prescription.Started,
+		*prescription.Ended,
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	// Call the CreatePrescription method of the DAO
@@ -129,12 +133,13 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 
 	mock.ExpectBegin()
 	// Set up the expected SQL query and indicate an error in the mock
-	mock.ExpectExec("INSERT INTO \"prescriptions\"").WithArgs(
+	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO \"prescriptions\" (\"id\",\"medication\",\"dosage\",\"notes\",\"started\",\"ended\") VALUES ($1,$2,$3,$4,$5,$6)")).WithArgs(
 		prescription2.ID,
 		*prescription2.Medication,
 		*prescription2.Dosage,
 		*prescription2.Notes,
 		*prescription2.Started,
+		*prescription2.Ended,
 	).WillReturnError(fmt.Errorf("database will throw error"))
 	mock.ExpectRollback()
 
@@ -151,6 +156,7 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 }
 
 func TestGetPrescriptionById(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 	id := uuid.New()
 	expected := &models.Prescription{
@@ -159,12 +165,13 @@ func TestGetPrescriptionById(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Ended:      TimePointer(time.Now()),
 	}
 
 	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
 		WithArgs(id).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "medication", "dosage", "notes", "started"}).
-			AddRow(expected.ID, *expected.Medication, *expected.Dosage, *expected.Notes, *expected.Started))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "medication", "dosage", "notes", "started", "ended"}).
+			AddRow(expected.ID, *expected.Medication, *expected.Dosage, *expected.Notes, *expected.Started, *expected.Ended))
 
 	result, err := dao.GetPrescriptionById(id)
 
@@ -177,6 +184,7 @@ func TestGetPrescriptionById(t *testing.T) {
 }
 
 func TestGetPrescriptionByIdInvalidId(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 	id := uuid.New()
 	// expected := &models.Prescription{
@@ -205,6 +213,7 @@ func TestGetPrescriptionByIdInvalidId(t *testing.T) {
 }
 
 func TestGetAllPrescriptions(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 	// Initialize the PrescriptionDAO with the GORM DB
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
@@ -235,7 +244,7 @@ func TestGetAllPrescriptions(t *testing.T) {
 		)
 
 	// Call the GetAllPrescriptions method of the DAO
-	results, err := dao.GetAllPrescriptions()
+	results, err := dao.GetAllPrescriptions(make(map[string]string))
 
 	// Check for any errors from the mock expectations
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -251,15 +260,17 @@ func TestGetAllPrescriptions(t *testing.T) {
 }
 
 func TestGetAllPrescriptionsWithError(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 	// Initialize the PrescriptionDAO with the GORM DB
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
 	// Set up the mock to expect an error when querying for prescriptions
 	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
+		WithArgs().
 		WillReturnError(fmt.Errorf("database error"))
 
 	// Call the GetAllPrescriptions method of the DAO
-	_, err := dao.GetAllPrescriptions()
+	_, err := dao.GetAllPrescriptions(make(map[string]string))
 
 	// Check for any errors from the mock expectations
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -271,6 +282,7 @@ func TestGetAllPrescriptionsWithError(t *testing.T) {
 }
 
 func TestDeletePrescription(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 	id := uuid.New()
 
@@ -301,6 +313,7 @@ func TestDeletePrescription(t *testing.T) {
 }
 
 func TestDeletePrescriptionWithError(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 	id := uuid.New()
 
@@ -327,6 +340,7 @@ func TestDeletePrescriptionWithError(t *testing.T) {
 }
 
 func TestUpdatePrescription(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 	// Initialize the PrescriptionDAO with the GORM DB
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
@@ -337,6 +351,7 @@ func TestUpdatePrescription(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Ended:      TimePointer(time.Now()),
 	}
 
 	// Insert the initial prescription into the database
@@ -349,12 +364,13 @@ func TestUpdatePrescription(t *testing.T) {
 		Dosage:     StringPointer("Updated Dosage"),
 		Notes:      StringPointer("Updated Notes"),
 		Started:    TimePointer(time.Now()),
+		Ended:      TimePointer(time.Now()),
 	}
 
 	mock.ExpectBegin()
 	// Set up the expected SQL query for the update operation
 	mock.ExpectExec("UPDATE \"prescriptions\" SET .* WHERE \"id\" = ?").
-		WithArgs(*updatedPrescription.Medication, *updatedPrescription.Dosage, *updatedPrescription.Notes, *updatedPrescription.Started, prescription.ID).
+		WithArgs(*updatedPrescription.Medication, *updatedPrescription.Dosage, *updatedPrescription.Notes, *updatedPrescription.Started, *updatedPrescription.Ended, prescription.ID).
 		WillReturnResult(sqlmock.NewResult(0, 1)) // Indicate that one row was updated
 	mock.ExpectCommit()
 
@@ -370,6 +386,7 @@ func TestUpdatePrescription(t *testing.T) {
 }
 
 func TestUpdatePrescriptionWithError(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 	// Initialize the PrescriptionDAO with the GORM DB
 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
 
@@ -380,6 +397,7 @@ func TestUpdatePrescriptionWithError(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Ended:      nil,
 	}
 
 	// Insert the initial prescription into the database
@@ -392,13 +410,14 @@ func TestUpdatePrescriptionWithError(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    prescription.Started,
+		Ended:      TimePointer(time.Now()),
 	}
 
 	mock.ExpectBegin()
 	// Set up the expected SQL query for the update operation
 	mock.ExpectExec("UPDATE \"prescriptions\" SET .* WHERE \"id\" = ?").
-		WithArgs(*updatedPrescription.Medication, *updatedPrescription.Dosage, *updatedPrescription.Notes, *updatedPrescription.Started, prescription.ID).
-		WillReturnError(fmt.Errorf("data base error"))
+		WithArgs(*updatedPrescription.Medication, *updatedPrescription.Dosage, *updatedPrescription.Notes, *updatedPrescription.Started, *updatedPrescription.Ended, prescription.ID).
+		WillReturnError(fmt.Errorf("database error"))
 	mock.ExpectRollback()
 
 	err := dao.UpdatePrescription(updatedPrescription)

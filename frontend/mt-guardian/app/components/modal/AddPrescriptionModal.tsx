@@ -1,6 +1,6 @@
-import { Prescription } from "@/app/prescriptions/page";
+import { Prescription } from "@/app/libs/types/Prescription";
+import { createPrescriptionWithBody } from "@/app/libs/api/prescriptions";
 import { useRouter } from "next/navigation";
-import { Router } from "next/router";
 import React, { Dispatch, SetStateAction } from "react";
 import PrescriptionForm from "../form/PrescriptionForm";
 type Props = {
@@ -17,19 +17,24 @@ const AddPrescriptionModal: React.FC<Props> = ({
 }) => {
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent,
+    createPrescription: Prescription
+  ) => {
     e.preventDefault();
     try {
       if (createPrescription != null && createPrescription?.id !== null) {
-        const res = await fetch(`http://0.0.0.0:8000/api/v1/prescription`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ ...createPrescription }),
-        });
+        await createPrescriptionWithBody(createPrescription);
         setActiveModal(false);
         setShowAddModal(false);
+        setCreatePrescription({
+          id: "",
+          medication: "",
+          dosage: "",
+          notes: "",
+          started: "",
+          ended: null,
+        });
         router.refresh();
       }
     } catch (e) {
@@ -77,7 +82,6 @@ const AddPrescriptionModal: React.FC<Props> = ({
           <div className="p-6 space-y-6">
             <PrescriptionForm
               prescription={createPrescription}
-              setPrescription={setCreatePrescription}
               setShowAddModal={setShowAddModal}
               setActiveModal={setActiveModal}
               handleSubmit={handleSubmit}

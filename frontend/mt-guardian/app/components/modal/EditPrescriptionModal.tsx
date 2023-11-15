@@ -1,4 +1,4 @@
-import { Prescription } from "@/app/prescriptions/page";
+import { Prescription } from "@/app/libs/types/Prescription";
 import { useRouter } from "next/navigation";
 import { Router } from "next/router";
 import React, { Dispatch, SetStateAction } from "react";
@@ -16,7 +16,10 @@ const EditPrescriptionModal: React.FC<Props> = ({
   setPrescription,
 }) => {
   const router = useRouter();
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent,
+    prescription: Prescription
+  ) => {
     e.preventDefault();
     try {
       if (prescription != null && prescription?.id !== null) {
@@ -79,7 +82,6 @@ const EditPrescriptionModal: React.FC<Props> = ({
           <div className="p-6 space-y-6">
             <PrescriptionForm
               prescription={prescription}
-              setPrescription={setPrescription}
               setShowEditModal={setShowEditModal}
               setActiveModal={setActiveModal}
               handleSubmit={handleSubmit}
