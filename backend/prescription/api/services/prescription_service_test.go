@@ -51,8 +51,8 @@ func (m *MockPrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescri
 }
 
 // GetAllPrescriptions mocks the GetAllPrescriptions method of PrescriptionDAO.
-func (m *MockPrescriptionDAO) GetAllPrescriptions() ([]models.Prescription, error) {
-	args := m.Called()
+func (m *MockPrescriptionDAO) GetAllPrescriptions(searchQueries map[string]string) ([]models.Prescription, error) {
+	args := m.Called(searchQueries)
 	return args.Get(0).([]models.Prescription), args.Error(1)
 }
 
@@ -181,10 +181,10 @@ func TestGetAllPrescriptions(t *testing.T) {
 	// }
 
 	// Mock the GetPrescriptionById method of the DAO to return the sample prescription
-	dao.On("GetAllPrescriptions").Return([]models.Prescription{*prescriptionOne, *prescriptionTwo}, nil)
+	dao.On("GetAllPrescriptions", make(map[string]string)).Return([]models.Prescription{*prescriptionOne, *prescriptionTwo}, nil)
 
 	// Call the GetPrescriptionById method of the service
-	resultDTOs, err := service.GetPrescriptions()
+	resultDTOs, err := service.GetPrescriptions(make(map[string]string))
 
 	// Your assertions here
 	assert.NoError(t, err)

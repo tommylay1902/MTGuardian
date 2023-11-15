@@ -2,9 +2,12 @@ package dataaccess
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
+	"github.com/tommylay1902/prescriptionmicro/internal/helper"
+
 	"github.com/tommylay1902/prescriptionmicro/internal/models"
 	"gorm.io/gorm"
 )
@@ -22,6 +25,8 @@ func (dao *PrescriptionDAO) CreatePrescription(prescription *models.Prescription
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("printing from dao")
+	fmt.Println(prescription.Started)
 	return &prescription.ID, nil
 }
 
@@ -38,12 +43,16 @@ func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescript
 		}
 		return nil, err
 	}
+
 	return prescription, nil
 }
 
-func (dao *PrescriptionDAO) GetAllPrescriptions() ([]models.Prescription, error) {
+func (dao *PrescriptionDAO) GetAllPrescriptions(searchQueries map[string]string) ([]models.Prescription, error) {
 	var prescriptions []models.Prescription
-	err := dao.DB.Find(&prescriptions).Error
+
+	query := helper.BuildQueryWithSearchParam(searchQueries, dao.DB)
+
+	err := query.Find(&prescriptions).Error
 
 	if err != nil {
 		return nil, err
