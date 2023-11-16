@@ -2,7 +2,6 @@ package dataaccess
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
@@ -25,8 +24,7 @@ func (dao *PrescriptionDAO) CreatePrescription(prescription *models.Prescription
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("printing from dao")
-	fmt.Println(prescription.Started)
+
 	return &prescription.ID, nil
 }
 

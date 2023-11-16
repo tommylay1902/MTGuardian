@@ -1,5 +1,25 @@
 version: '3'
 services:
+  account:
+    container_name: account
+    build:
+      context: ./backend/account
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: account
+      GORM_HOST: DB
+      PORT: 8081
+    ports:
+      - "8002:8080" 
+    tty: true
+    networks: 
+      - db
+    depends_on:
+      dbaccount: 
+        condition: service_healthy
+    restart: unless-stopped
   prescription:
     container_name: prescription
     build:
@@ -40,6 +60,27 @@ services:
       - ./initdb:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d prescription"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dbaccount:
+    container_name: dbaccount
+    image: postgres:15.3 # Use the official PostgreSQL image
+    ports:
+      - "8003:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password 
+      POSTGRES_DB: account
+      GORM_HOST: DB
+    networks:
+      - db
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d account"]
       interval: 10s
       timeout: 5s
       retries: 5
