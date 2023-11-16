@@ -2,6 +2,8 @@ module github.com/tommylay1902/accountmicro
 
 go 1.21.1
 
+require github.com/golang-jwt/jwt v3.2.2+incompatible
+
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/gofiber/fiber/v2 v2.51.0 // indirect
@@ -22,6 +24,7 @@ require (
 	github.com/valyala/fasthttp v1.50.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	gorm.io/driver/postgres v1.5.4 // indirect

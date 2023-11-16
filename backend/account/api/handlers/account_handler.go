@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/tommylay1902/accountmicro/api/services"
+	dto "github.com/tommylay1902/accountmicro/internal/dtos"
 )
 
 type AccountHandler struct {
@@ -14,7 +15,7 @@ func InitalizeAccountHandler(accountService *services.AccountService) *AccountHa
 }
 
 func (ah *AccountHandler) CreateAccount(c *fiber.Ctx) error {
-
+	ah.AccountService.CreateAccount(&dto.AccountDTO{})
 	c.Status(fiber.StatusOK)
 	return nil
 }
