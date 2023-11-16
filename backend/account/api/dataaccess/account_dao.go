@@ -1,6 +1,8 @@
 package dataaccess
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/tommylay1902/accountmicro/internal/models"
 	"gorm.io/gorm"
@@ -17,9 +19,10 @@ func InitializeAccountDAO(db *gorm.DB) *AccountDAO {
 }
 
 func (dao AccountDAO) CreateAccount(account *models.Account) (*uuid.UUID, error) {
-	err := dao.DB.Create(account).Error
+	err := dao.DB.Create(&account).Error
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(account.ID)
 	return &account.ID, nil
 }

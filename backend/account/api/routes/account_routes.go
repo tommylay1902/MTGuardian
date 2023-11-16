@@ -16,7 +16,7 @@ func SetupRoutes(app *fiber.App, accountHandler *handlers.AccountHandler) {
 		}
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"token": jwt})
 	})
-	// apiRoutes.Post("", prescriptionHandler.CreatePrescription)
+	apiRoutes.Post("", accountHandler.CreateAccount)
 	// apiRoutes.Get("/:id", prescriptionHandler.GetPrescription)
 	// apiRoutes.Get("", prescriptionHandler.GetPrescriptions)
 	// apiRoutes.Delete("/:id", prescriptionHandler.DeletePrescription)

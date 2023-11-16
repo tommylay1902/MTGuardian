@@ -15,7 +15,10 @@ func InitalizeAccountHandler(accountService *services.AccountService) *AccountHa
 }
 
 func (ah *AccountHandler) CreateAccount(c *fiber.Ctx) error {
-	ah.AccountService.CreateAccount(&dto.AccountDTO{})
-	c.Status(fiber.StatusOK)
+	id, err := ah.AccountService.CreateAccount(&dto.AccountDTO{})
+	if err != nil {
+		return err
+	}
+	c.Status(fiber.StatusCreated).JSON(fiber.Map{"id": id})
 	return nil
 }
