@@ -1,23 +1,23 @@
 version: '3'
 services:
-  account:
-    container_name: account
+  auth:
+    container_name: auth
     build:
-      context: ./backend/account
+      context: ./backend/auth
       dockerfile: Dockerfile
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: account
+      POSTGRES_DB: auth
       GORM_HOST: DB
-      PORT: 8081
+      PORT: 8080
     ports:
       - "8002:8080" 
     tty: true
     networks: 
       - db
     depends_on:
-      dbaccount: 
+      dbauth: 
         condition: service_healthy
     restart: unless-stopped
   prescription:
@@ -56,7 +56,7 @@ services:
     networks:
       - db
     volumes:
-      - data:/var/lib/postgresql/data
+      - prescription_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d prescription"]
@@ -64,23 +64,23 @@ services:
       timeout: 5s
       retries: 5
 
-  dbaccount:
-    container_name: dbaccount
+  dbauth:
+    container_name: dbauth
     image: postgres:15.3 # Use the official PostgreSQL image
     ports:
       - "8003:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password 
-      POSTGRES_DB: account
+      POSTGRES_DB: auth
       GORM_HOST: DB
     networks:
       - db
     volumes:
-      - data:/var/lib/postgresql/data
+      - auth_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d account"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auth"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -90,5 +90,7 @@ networks:
     driver: bridge
 
 volumes:
-  data:
+  auth_data:
+    driver: local
+  prescription_data:
     driver: local
