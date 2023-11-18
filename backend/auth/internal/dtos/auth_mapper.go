@@ -16,7 +16,7 @@ func AuthModelToAuthDTO(model *models.Auth) *AuthDTO {
 }
 
 func AuthDTOToAuthModel(dto *AuthDTO) (*models.Auth, error) {
-	generatedToken, err := helper.GenerateAccessToken()
+	generatedToken, err := helper.GenerateAccessToken(dto.Email)
 
 	if err != nil {
 		return nil, err

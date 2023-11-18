@@ -26,5 +26,4 @@ func (as *AuthService) CreateAuth(authDTO *dto.AuthDTO) (*uuid.UUID, error) {
 	}
 
 	return id, nil
-
 }
