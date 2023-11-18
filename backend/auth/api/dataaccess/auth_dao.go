@@ -51,3 +51,14 @@ func (dao *AuthDAO) GetHashFromEmail(email *string) (*string, error) {
 
 	return auth.Password, nil
 }
+
+func (dao *AuthDAO) GetTokenFromEmail(email *string) (*string, error) {
+	var auth models.Auth
+
+	err := dao.DB.Where("email = ?", *email).First(&auth).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return auth.RefreshToken, nil
+}

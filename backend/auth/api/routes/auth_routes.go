@@ -11,8 +11,6 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler) {
 	apiRoutes.Post("/register", authHandler.CreateAuth)
 	apiRoutes.Post("/login", authHandler.Login)
 
-	// apiRoutes.Get("/:id", prescriptionHandler.GetPrescription)
-	// apiRoutes.Get("", prescriptionHandler.GetPrescriptions)
-	// apiRoutes.Delete("/:id", prescriptionHandler.DeletePrescription)
-	// apiRoutes.Put("/:id", prescriptionHandler.UpdatePrescription)
+	// grab the userId from expired
+	apiRoutes.Post("/refresh", authHandler.Refresh)
 }
