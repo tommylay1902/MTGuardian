@@ -77,7 +77,6 @@ func TestRegisterUser(t *testing.T) {
 
 	mock.ExpectCommit()
 
-	// Call the CreatePrescription method of the DAO
 	id, err := dao.CreateAuth(auth)
 
 	// // Check for any errors from the mock expectations
@@ -85,7 +84,6 @@ func TestRegisterUser(t *testing.T) {
 		t.Fatalf("Error in SQL mock expectations: %v", err)
 	}
 
-	// Assert that there was no error returned from CreatePrescription
 	assert.NoError(t, err)
 	assert.Equal(t, *id, auth.ID)
 }
@@ -94,7 +92,6 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 	defer mock.ExpectationsWereMet()
 	dao := dataaccess.InitializeAuthDAO(gormDB)
 
-	// Create a sample Prescription
 	auth := &models.Auth{
 		ID:           uuid.New(),
 		Email:        StringPointer("tommylay.c@gmail.com"),
@@ -116,7 +113,7 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	mock.ExpectCommit()
-	// Call the CreatePrescription method of the DAO
+
 	dao.CreateAuth(auth)
 
 	mock.ExpectBegin()
@@ -133,7 +130,66 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 		t.Fatalf("Error in SQL mock expectations: %v", err)
 	}
 
-	// Assert that there was an error returned from CreatePrescription
+	assert.Error(t, err)
+}
+
+func TestGetHashFromEmail(t *testing.T) {
+	defer mock.ExpectationsWereMet()
+
+	dao := dataaccess.InitializeAuthDAO(gormDB)
+	email := "tommylay.c@gmail.com"
+	auth := &models.Auth{
+		ID:           uuid.New(),
+		Email:        StringPointer(email),
+		Password:     StringPointer("$2a$10$/Z8CBBPBv0YlGvfjGglQ3O1mGoftvtF34pXsCmOf6.gvvXYphkO32"),
+		RefreshToken: StringPointer("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRvbW15bGF5LmNAZ21haWwuY29tIiwiZXhwIjoiMjAyMy0xMi0xOCAwODoyMzo1NC44MDg3OTE4ICswMDAwIFVUQyIsInN1YiI6InRvbW15bGF5LmNAZ21haWwuY29tIn0.poUKsuF0-ZLV1ky1y-X0h150UAqYZ0MNCYknukfBJDA"),
+	}
+
+	mock.ExpectBegin()
+	// Set up the expected SQL query and its result in the mock
+	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO \"auths\" (\"id\",\"email\",\"password\",\"refresh_token\") VALUES ($1,$2,$3,$4)")).
+		WithArgs(auth.ID, *auth.Email, *auth.Password, *auth.RefreshToken).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	mock.ExpectCommit()
+
+	dao.CreateAuth(auth)
+
+	// Set up the expected SQL query and its result in the mock
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM \"auths\" WHERE email = $1 ORDER BY \"auths\".\"id\" LIMIT 1")).
+		WithArgs(*auth.Email).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "email", "password", "refresh_token"}).
+			AddRow(auth.ID, *auth.Email, *auth.Password, *auth.RefreshToken))
+
+	hash, _ := dao.GetHashFromEmail(auth.Email)
+
+	// Check for any errors from the mock expectations
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock expectations: %v", err)
+	}
+
+	assert.Equal(t, *auth.Password, *hash)
+
+}
+
+func TestGetHashFromEmailWillThrowError(t *testing.T) {
+	defer mock.ExpectationsWereMet()
+
+	dao := dataaccess.InitializeAuthDAO(gormDB)
+	email := "tommylay.c@gmail.com"
+
+	// Set up the expected SQL query and its result in the mock
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM \"auths\" WHERE email = $1 ORDER BY \"auths\".\"id\" LIMIT 1")).
+		WithArgs(email).WillReturnError(gorm.ErrRecordNotFound)
+
+	hash, err := dao.GetHashFromEmail(&email)
+
+	// Check for any errors from the mock expectations
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock expectations: %v", err)
+	}
+
+	assert.Empty(t, hash)
 	assert.Error(t, err)
 
 }
@@ -151,10 +207,10 @@ func TestCreatePrescriptionWithDatabaseError(t *testing.T) {
 // 		Ended:      TimePointer(time.Now()),
 // 	}
 
-// 	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
-// 		WithArgs(id).
-// 		WillReturnRows(sqlmock.NewRows([]string{"id", "medication", "dosage", "notes", "started", "ended"}).
-// 			AddRow(expected.ID, *expected.Medication, *expected.Dosage, *expected.Notes, *expected.Started, *expected.Ended))
+// mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
+// 	WithArgs(id).
+// 	WillReturnRows(sqlmock.NewRows([]string{"id", "medication", "dosage", "notes", "started", "ended"}).
+// 		AddRow(expected.ID, *expected.Medication, *expected.Dosage, *expected.Notes, *expected.Started, *expected.Ended))
 
 // 	result, err := dao.GetPrescriptionById(id)
 
