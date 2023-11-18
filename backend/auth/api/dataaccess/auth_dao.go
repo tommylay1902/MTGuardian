@@ -16,7 +16,7 @@ func InitializeAuthDAO(db *gorm.DB) *AuthDAO {
 	}
 }
 
-func (dao AuthDAO) CreateAuth(auth *models.Auth) (*uuid.UUID, error) {
+func (dao *AuthDAO) CreateAuth(auth *models.Auth) (*uuid.UUID, error) {
 	err := dao.DB.Create(&auth).Error
 	if err != nil {
 		return nil, err
@@ -24,9 +24,9 @@ func (dao AuthDAO) CreateAuth(auth *models.Auth) (*uuid.UUID, error) {
 	return &auth.ID, nil
 }
 
-func (dao AuthDAO) DoesEmailPasswordExists(email *string, password *string) (*bool, error) {
+func (dao *AuthDAO) DoesEmailPasswordExists(email *string, password *string) (*bool, error) {
 	var auth models.Auth
-	err := dao.DB.Where("email = ?", email).Where("password = ?", password).First(&auth).Error
+	err := dao.DB.Where("email = ?", *email).Where("password = ?", *password).First(&auth).Error
 
 	var doesEmailPasswordExist bool
 	if err != nil {
@@ -37,4 +37,17 @@ func (dao AuthDAO) DoesEmailPasswordExists(email *string, password *string) (*bo
 	doesEmailPasswordExist = true
 
 	return &doesEmailPasswordExist, nil
+}
+
+func (dao *AuthDAO) GetHashFromEmail(email *string) (*string, error) {
+	var auth models.Auth
+
+	err := dao.DB.Where("email = ?", *email).First(&auth).Error
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return auth.Password, nil
 }

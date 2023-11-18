@@ -9,6 +9,7 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler) {
 	apiRoutes := app.Group("api/v1/auth")
 
 	apiRoutes.Post("/register", authHandler.CreateAuth)
+	apiRoutes.Post("/login", authHandler.Login)
 
 	// apiRoutes.Get("/:id", prescriptionHandler.GetPrescription)
 	// apiRoutes.Get("", prescriptionHandler.GetPrescriptions)

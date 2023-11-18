@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"time"
+
 	"github.com/golang-jwt/jwt"
 )
 
@@ -13,18 +15,30 @@ func InitJwtHelper(secret string) {
 	key = []byte(secret)
 }
 
-func GenerateAccessToken(email *string) (*string, error) {
+func GenerateRefreshToken(email *string) (*string, error) {
 
 	t = jwt.New(jwt.SigningMethodHS256)
 	claims := t.Claims.(jwt.MapClaims)
-	//time.Now().Add(10 * time.Minute)
-	claims["exp"] = 10
+	claims["exp"] = time.Now().Add(720 * time.Hour)
 	claims["authorized"] = true
 	claims["email"] = *email
 	jwt, err := t.SignedString(key)
 	if err != nil {
 		return nil, err
 	}
+	return &jwt, nil
+}
 
+func GenerateAccessToken(email *string) (*string, error) {
+
+	t = jwt.New(jwt.SigningMethodHS256)
+	claims := t.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(15 * time.Minute)
+	claims["authorized"] = true
+	claims["email"] = *email
+	jwt, err := t.SignedString(key)
+	if err != nil {
+		return nil, err
+	}
 	return &jwt, nil
 }
