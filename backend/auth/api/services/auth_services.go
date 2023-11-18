@@ -11,10 +11,10 @@ import (
 )
 
 type AuthService struct {
-	AuthDAO *dataaccess.AuthDAO
+	AuthDAO dataaccess.IAuthDAO
 }
 
-func InitializeAuthService(authDAO *dataaccess.AuthDAO) *AuthService {
+func InitializeAuthService(authDAO dataaccess.IAuthDAO) *AuthService {
 	return &AuthService{AuthDAO: authDAO}
 }
 
