@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/tommylay1902/authmicro/api/services"
@@ -75,11 +74,18 @@ func (ah *AuthHandler) Refresh(c *fiber.Ctx) error {
 		}
 		return errorhandler.HandleError(badErr, c)
 	}
+	if requestBody.AccessToken == "" {
+		badErr := &customerrors.BadRequestError{
+			Message: "Provide the token",
+			Code:    400,
+		}
+
+		return errorhandler.HandleError(badErr, c)
+	}
+
 	token, err := ah.AuthService.Refresh(&requestBody)
 
 	if err != nil {
-
-		fmt.Println("printing error from handler", err)
 		return errorhandler.HandleError(err, c)
 	}
 

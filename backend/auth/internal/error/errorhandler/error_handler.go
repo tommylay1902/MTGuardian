@@ -36,6 +36,10 @@ func HandleError(err error, c *fiber.Ctx) error {
 			fiber.Map{
 				"error": err.Error(),
 			})
+	case errors.Is(err, &customerrors.NotAuthorizedError{Code: 401}):
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	default:
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "server error",

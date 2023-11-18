@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/tommylay1902/authmicro/api/dataaccess"
 	dto "github.com/tommylay1902/authmicro/internal/dtos"
@@ -69,7 +67,7 @@ func (as *AuthService) Refresh(accessToken *models.AccessToken) (*string, error)
 	claims := &models.Claims{}
 
 	//parse the expired token
-	_, _, err := new(jwt.Parser).ParseUnverified(*accessToken.AccessToken, claims)
+	_, _, err := new(jwt.Parser).ParseUnverified(accessToken.AccessToken, claims)
 
 	if err != nil {
 		return nil, err
@@ -78,9 +76,8 @@ func (as *AuthService) Refresh(accessToken *models.AccessToken) (*string, error)
 	//grab refresh token
 	refreshToken, err := as.AuthDAO.GetTokenFromEmail(&claims.Email)
 
-	fmt.Println("printing refresh", *refreshToken)
-
 	if err != nil {
+
 		return nil, err
 	}
 
@@ -88,14 +85,16 @@ func (as *AuthService) Refresh(accessToken *models.AccessToken) (*string, error)
 	isValid := helper.IsValidToken(*refreshToken)
 
 	if isValid {
+
 		newAccess, err := helper.GenerateAccessToken(&claims.Email)
 
 		if err != nil {
-			return nil, err
+			return nil, &customerrors.NotAuthorizedError{Code: 401, Message: "login"}
 		}
 
 		return newAccess, nil
 	}
+
 	return nil, &customerrors.NotAuthorizedError{Code: 401, Message: "login"}
 
 }

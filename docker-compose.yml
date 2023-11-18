@@ -25,8 +25,6 @@ services:
     build:
       context: ./backend/prescription
       dockerfile: Dockerfile
-    # env_file:
-    #   - ./backend/prescription/.env
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -63,6 +61,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   dbauth:
     container_name: dbauth
@@ -84,6 +83,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
 networks:
   db:

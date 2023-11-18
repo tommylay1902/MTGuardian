@@ -27,7 +27,7 @@ func GenerateRefreshToken(email *string) (*string, error) {
 
 	claims := t.Claims.(jwt.MapClaims)
 	claims["sub"] = *email
-	claims["exp"] = time.Now().Add(720 * time.Hour).Local().String()
+	claims["exp"] = time.Now().Add(1 * time.Second).Local().String()
 	claims["email"] = *email
 
 	jwt, err := t.SignedString(key)
@@ -53,13 +53,11 @@ func GenerateAccessToken(email *string) (*string, error) {
 
 func IsValidToken(tokenString string) bool {
 	claims := &models.Claims{}
-	fmt.Println("printing from isvalidtoken", tokenString)
+
 	//parse the expired token
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return key, nil
 	})
-
-	fmt.Println(token.Valid, "and the claims: ", claims)
 
 	// Check for parsing errors
 	if err != nil {

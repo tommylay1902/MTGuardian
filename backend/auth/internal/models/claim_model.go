@@ -16,8 +16,6 @@ func (c *Claims) Valid() error {
 	// Adjusted layout to handle the date format without time-related placeholders and monotonic clock offset
 	layout := "2006-01-02"
 
-	fmt.Println("before comparing", c.Expiration, time.Now().Local())
-
 	// Extract the expiration date without monotonic clock offset
 	expirationString := strings.Fields(c.Expiration)[0]
 
@@ -30,7 +28,6 @@ func (c *Claims) Valid() error {
 
 	present := time.Now().Local()
 
-	fmt.Println(expirationTime, present)
 	// Compare dates without considering time
 	if expirationTime.Before(present) {
 		return fmt.Errorf("token has expired")
