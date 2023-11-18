@@ -21,12 +21,13 @@ func InitalizePrescriptionDAO(db *gorm.DB) *PrescriptionDAO {
 }
 
 func (dao *PrescriptionDAO) CreatePrescription(prescription *models.Prescription) (*uuid.UUID, error) {
+	fmt.Println(prescription.ID)
 	err := dao.DB.Create(&prescription).Error
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("printing from dao")
-	fmt.Println(prescription.Started)
+	fmt.Println(prescription.ID)
+
 	return &prescription.ID, nil
 }
 
