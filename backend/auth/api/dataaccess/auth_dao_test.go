@@ -194,62 +194,66 @@ func TestGetHashFromEmailWillThrowError(t *testing.T) {
 
 }
 
-// func TestGetPrescriptionById(t *testing.T) {
-// 	defer mock.ExpectationsWereMet()
-// 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
-// 	id := uuid.New()
-// 	expected := &models.Prescription{
-// 		ID:         id,
-// 		Medication: StringPointer("Sample Medication"),
-// 		Dosage:     StringPointer("Sample Dosage"),
-// 		Notes:      StringPointer("Sample Notes"),
-// 		Started:    TimePointer(time.Now()),
-// 		Ended:      TimePointer(time.Now()),
-// 	}
+func TestGetTokenFromEmail(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 
-// mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
-// 	WithArgs(id).
-// 	WillReturnRows(sqlmock.NewRows([]string{"id", "medication", "dosage", "notes", "started", "ended"}).
-// 		AddRow(expected.ID, *expected.Medication, *expected.Dosage, *expected.Notes, *expected.Started, *expected.Ended))
+	dao := dataaccess.InitializeAuthDAO(gormDB)
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRvbW15bGF5LmNAZ21haWwuY29tIiwiZXhwIjoiMjAyMy0xMi0xOCAwODoyMzo1NC44MDg3OTE4ICswMDAwIFVUQyIsInN1YiI6InRvbW15bGF5LmNAZ21haWwuY29tIn0.poUKsuF0-ZLV1ky1y-X0h150UAqYZ0MNCYknukfBJDA"
+	auth := &models.Auth{
+		ID:           uuid.New(),
+		Email:        StringPointer("tommylay.c@gmail.com"),
+		Password:     StringPointer("$2a$10$/Z8CBBPBv0YlGvfjGglQ3O1mGoftvtF34pXsCmOf6.gvvXYphkO32"),
+		RefreshToken: StringPointer(token),
+	}
 
-// 	result, err := dao.GetPrescriptionById(id)
+	mock.ExpectBegin()
+	// Set up the expected SQL query and its result in the mock
+	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO \"auths\" (\"id\",\"email\",\"password\",\"refresh_token\") VALUES ($1,$2,$3,$4)")).
+		WithArgs(auth.ID, *auth.Email, *auth.Password, *auth.RefreshToken).
+		WillReturnResult(sqlmock.NewResult(1, 1))
 
-// 	if err := mock.ExpectationsWereMet(); err != nil {
-// 		t.Fatalf("Error in SQL mock %v", err)
-// 	}
-// 	assert.NoError(t, err)
+	mock.ExpectCommit()
 
-// 	assert.Equal(t, expected, result)
-// }
+	dao.CreateAuth(auth)
 
-// func TestGetPrescriptionByIdInvalidId(t *testing.T) {
-// 	defer mock.ExpectationsWereMet()
-// 	dao := dataaccess.InitalizePrescriptionDAO(gormDB)
-// 	id := uuid.New()
-// 	// expected := &models.Prescription{
-// 	// 	ID:         id,
-// 	// 	Medication: StringPointer("Sample Medication"),
-// 	// 	Dosage:     StringPointer("Sample Dosage"),
-// 	// 	Notes:      StringPointer("Sample Notes"),
-// 	// 	Started:    TimePointer(time.Now()),
-// 	// }
+	// Set up the expected SQL query and its result in the mock
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM \"auths\" WHERE email = $1 ORDER BY \"auths\".\"id\" LIMIT 1")).
+		WithArgs(*auth.Email).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "email", "password", "refresh_token"}).
+			AddRow(auth.ID, *auth.Email, *auth.Password, *auth.RefreshToken))
 
-// 	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
-// 		WithArgs(id).WillReturnError(gorm.ErrRecordNotFound)
+	actual, _ := dao.GetTokenFromEmail(auth.Email)
 
-// 	result, err := dao.GetPrescriptionById(id)
+	// Check for any errors from the mock expectations
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock expectations: %v", err)
+	}
 
-// 	if err := mock.ExpectationsWereMet(); err != nil {
-// 		t.Fatalf("Error in SQL mock %v", err)
-// 	}
+	assert.Equal(t, *auth.RefreshToken, *actual)
 
-// 	assert.Nil(t, result)
+}
 
-// 	assert.Error(t, err)
-// 	// expectedErr := &customerrors.ResourceNotFound{Code: 404}
+func TestGetTokenFromEmailWillThrowError(t *testing.T) {
+	defer mock.ExpectationsWereMet()
 
-// 	assert.True(t, errors.Is(err, &customerrors.ResourceNotFound{Code: 404}))
-// }
+	dao := dataaccess.InitializeAuthDAO(gormDB)
+	email := "tommylay.c@gmail.com"
+
+	// Set up the expected SQL query and its result in the mock
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM \"auths\" WHERE email = $1 ORDER BY \"auths\".\"id\" LIMIT 1")).
+		WithArgs(email).WillReturnError(gorm.ErrRecordNotFound)
+
+	token, err := dao.GetTokenFromEmail(&email)
+
+	// Check for any errors from the mock expectations
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Error in SQL mock expectations: %v", err)
+	}
+
+	assert.Empty(t, token)
+	assert.Error(t, err)
+
+}
 
 // func TestGetAllPrescriptions(t *testing.T) {
 // 	defer mock.ExpectationsWereMet()
