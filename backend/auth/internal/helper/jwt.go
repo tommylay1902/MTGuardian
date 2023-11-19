@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/tommylay1902/authmicro/internal/models"
 )
 
 var (
@@ -23,12 +22,13 @@ func GetKey() []byte {
 
 func GenerateRefreshToken(email *string) (*string, error) {
 
-	t = jwt.New(jwt.SigningMethodHS256)
+	claims := jwt.RegisteredClaims{
+		Subject:   *email,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	}
 
-	claims := t.Claims.(jwt.MapClaims)
-	claims["sub"] = *email
-	claims["exp"] = time.Now().Add(1 * time.Second).Local().String()
-	claims["email"] = *email
+	t = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	jwt, err := t.SignedString(key)
 	if err != nil {
@@ -38,24 +38,24 @@ func GenerateRefreshToken(email *string) (*string, error) {
 }
 
 func GenerateAccessToken(email *string) (*string, error) {
+	claims := jwt.RegisteredClaims{
+		Subject:   *email,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	}
+	t = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	t = jwt.New(jwt.SigningMethodHS256)
-	claims := t.Claims.(jwt.MapClaims)
-	claims["sub"] = *email
-	claims["exp"] = time.Now().Add(15 * time.Minute).Local().String()
-	claims["email"] = *email
 	jwt, err := t.SignedString(key)
 	if err != nil {
+
 		return nil, err
 	}
 	return &jwt, nil
 }
 
 func IsValidToken(tokenString string) bool {
-	claims := &models.Claims{}
 
-	//parse the expired token
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return key, nil
 	})
 

@@ -43,7 +43,6 @@ func (as *AuthService) Login(authDTO *dto.AuthDTO) (*string, error) {
 	hash, err := as.AuthDAO.GetHashFromEmail(authDTO.Email)
 
 	if err != nil {
-
 		return nil, err
 	}
 
@@ -64,8 +63,7 @@ func (as *AuthService) Login(authDTO *dto.AuthDTO) (*string, error) {
 }
 
 func (as *AuthService) Refresh(accessToken *models.AccessToken) (*string, error) {
-	claims := &models.Claims{}
-
+	claims := &jwt.RegisteredClaims{}
 	//parse the expired token
 	_, _, err := new(jwt.Parser).ParseUnverified(accessToken.AccessToken, claims)
 
@@ -74,7 +72,7 @@ func (as *AuthService) Refresh(accessToken *models.AccessToken) (*string, error)
 	}
 
 	//grab refresh token
-	refreshToken, err := as.AuthDAO.GetTokenFromEmail(&claims.Email)
+	refreshToken, err := as.AuthDAO.GetTokenFromEmail(&claims.Subject)
 
 	if err != nil {
 
@@ -86,7 +84,7 @@ func (as *AuthService) Refresh(accessToken *models.AccessToken) (*string, error)
 
 	if isValid {
 
-		newAccess, err := helper.GenerateAccessToken(&claims.Email)
+		newAccess, err := helper.GenerateAccessToken(&claims.Subject)
 
 		if err != nil {
 			return nil, &customerrors.NotAuthorizedError{Code: 401, Message: "login"}
@@ -96,5 +94,4 @@ func (as *AuthService) Refresh(accessToken *models.AccessToken) (*string, error)
 	}
 
 	return nil, &customerrors.NotAuthorizedError{Code: 401, Message: "login"}
-
 }

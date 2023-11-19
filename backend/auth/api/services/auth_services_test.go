@@ -102,6 +102,40 @@ func TestCreateAuth(t *testing.T) {
 	dao.AssertExpectations(t)
 }
 
+func TestAuthService_Login(t *testing.T) {
+
+	// Create a mock for the AuthDAO
+	dao := &MockAuthDAO{}
+
+	// Initialize the AuthService with the mock AuthDAO
+	service := services.AuthService{AuthDAO: dao}
+
+	// Test case 1: Successful login
+	email := "tommylay.c@gmail.com"
+	password := "AppleCheeseOnDeck"
+	hashedPassword, _ := helper.HashAndSaltPassword(password)
+
+	authDTO := &dto.AuthDTO{
+		Email:    StringPointer(email),
+		Password: StringPointer(password),
+	}
+
+	// Mock GetHashFromEmail to return the hashedPassword
+	dao.On("GetHashFromEmail", authDTO.Email).Return(hashedPassword, nil)
+
+	// Perform the login
+	token, err := service.Login(authDTO)
+
+	// Assertions for successful login
+	assert.NoError(t, err)
+	assert.NotNil(t, token)
+	assert.True(t, helper.IsValidToken(*token))
+
+	// Check that the mocked methods were called as expected
+	dao.AssertExpectations(t)
+
+}
+
 // Helper functions for creating pointers to string and time values
 func StringPointer(s string) *string {
 	return &s
