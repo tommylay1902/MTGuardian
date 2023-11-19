@@ -1,11 +1,15 @@
 package services_test
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/tommylay1902/authmicro/api/services"
@@ -70,6 +74,34 @@ func MatchAuthExceptWithEmail(auth *models.Auth) interface{} {
 		return arg.Email == auth.Email
 	})
 }
+
+var (
+	key []byte
+)
+
+func TestMain(m *testing.M) {
+	// Load the environment variables from the .env file
+	err := godotenv.Load("../../.env") // Adjust the path to your .env file
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		log.Fatal("Error loading secret file")
+	}
+
+	key = []byte(secret)
+	helper.InitJwtHelper(secret)
+	// Run the tests
+	exitCode := m.Run()
+
+	// Perform any teardown if needed
+
+	// Exit with the code from the tests
+	os.Exit(exitCode)
+}
+
 func TestCreateAuth(t *testing.T) {
 	// Create a mock for the DAO layer
 	dao := &MockAuthDAO{}
@@ -102,7 +134,7 @@ func TestCreateAuth(t *testing.T) {
 	dao.AssertExpectations(t)
 }
 
-func TestAuthService_Login(t *testing.T) {
+func TestAuthServiceLogin(t *testing.T) {
 
 	// Create a mock for the AuthDAO
 	dao := &MockAuthDAO{}
@@ -133,6 +165,42 @@ func TestAuthService_Login(t *testing.T) {
 
 	// Check that the mocked methods were called as expected
 	dao.AssertExpectations(t)
+}
+
+func TestRefresh(t *testing.T) {
+	dao := &MockAuthDAO{}
+	service := services.AuthService{AuthDAO: dao}
+
+	email := "tommylay.c@gmail.com"
+
+	claims := jwt.RegisteredClaims{
+		Subject:   email,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	}
+
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	fmt.Println(string(key))
+	validAccessToken, accessErr := at.SignedString(key)
+
+	accessTokenObject := &models.AccessToken{AccessToken: validAccessToken}
+
+	dao.On("GetTokenFromEmail", &email).Return(StringPointer(validAccessToken), nil)
+
+	if accessErr != nil {
+		fmt.Errorf(accessErr.Error())
+	}
+
+	token, err := service.Refresh(accessTokenObject)
+
+	if err != nil {
+		fmt.Errorf(err.Error())
+	}
+
+	assert.NotEmpty(t, token)
+
+	assert.True(t, helper.IsValidToken(*token))
 
 }
 

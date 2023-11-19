@@ -63,6 +63,7 @@ func (as *AuthService) Login(authDTO *dto.AuthDTO) (*string, error) {
 }
 
 func (as *AuthService) Refresh(accessToken *models.AccessToken) (*string, error) {
+
 	claims := &jwt.RegisteredClaims{}
 	//parse the expired token
 	_, _, err := new(jwt.Parser).ParseUnverified(accessToken.AccessToken, claims)

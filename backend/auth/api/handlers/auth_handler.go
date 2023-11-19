@@ -77,6 +77,7 @@ func (ah *AuthHandler) Refresh(c *fiber.Ctx) error {
 		}
 		return errorhandler.HandleError(badErr, c)
 	}
+
 	if requestBody.AccessToken == "" {
 		badErr := &customerrors.BadRequestError{
 			Message: "Provide the token",
