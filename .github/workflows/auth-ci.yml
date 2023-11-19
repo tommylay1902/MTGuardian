@@ -1,0 +1,37 @@
+name: Go run tests on prescription before push/pull on main
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - backend/auth/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - backend/auth/**
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env: # Define your environment variables here
+      PORT: 8080
+      TESTPORT: 0.0.0.0:8002
+    defaults:
+      run:
+        working-directory: backend/auth
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21.1
+      - name: "Create env file"
+        run: |
+          touch .env
+          echo PORT=8080 >> .env
+          echo TESTPORT=0.0.0.0:8002 >> .env
+          cat .env
+      - name: Build and Run Tests
+        run: |
+          docker compose up -d
+          go test ./... -v

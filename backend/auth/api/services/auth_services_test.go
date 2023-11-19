@@ -75,10 +75,6 @@ func MatchAuthExceptWithEmail(auth *models.Auth) interface{} {
 	})
 }
 
-var (
-	key []byte
-)
-
 func TestMain(m *testing.M) {
 	// Load the environment variables from the .env file
 	err := godotenv.Load("../../.env") // Adjust the path to your .env file
@@ -91,7 +87,6 @@ func TestMain(m *testing.M) {
 		log.Fatal("Error loading secret file")
 	}
 
-	key = []byte(secret)
 	helper.InitJwtHelper(secret)
 	// Run the tests
 	exitCode := m.Run()
@@ -181,8 +176,7 @@ func TestRefresh(t *testing.T) {
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	fmt.Println(string(key))
-	validAccessToken, accessErr := at.SignedString(key)
+	validAccessToken, accessErr := at.SignedString(helper.GetKey())
 
 	accessTokenObject := &models.AccessToken{AccessToken: validAccessToken}
 
@@ -201,7 +195,6 @@ func TestRefresh(t *testing.T) {
 	assert.NotEmpty(t, token)
 
 	assert.True(t, helper.IsValidToken(*token))
-
 }
 
 // Helper functions for creating pointers to string and time values
