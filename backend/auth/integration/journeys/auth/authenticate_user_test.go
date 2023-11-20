@@ -1,13 +1,17 @@
-package journeys_test
+package auth_test
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
+	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tommylay1902/authmicro/internal/helper"
@@ -116,4 +120,28 @@ func TestMain(m *testing.M) {
 
 	// Exit with the test exit code
 	os.Exit(exitCode)
+}
+
+func TestRegisterUser(t *testing.T) {
+	registerEndpoint := "http://" + testPort + "/api/v1/auth/register"
+	random := uuid.NewString()
+	randomEmail := "tommylay." + random + "@gmail.com"
+
+	authDTO := `{
+		"email":    "` + randomEmail + `",
+		"password": "` + random + `"
+	}`
+
+	registerRes, registerErr := http.Post(registerEndpoint, "application/json", strings.NewReader(authDTO))
+
+	assert.NoError(t, registerErr)
+
+	assert.Equal(t, registerRes.StatusCode, http.StatusCreated)
+
+	errRes, err := http.Post(registerEndpoint, "application/json", strings.NewReader(authDTO))
+
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusConflict, errRes.StatusCode)
+
 }
