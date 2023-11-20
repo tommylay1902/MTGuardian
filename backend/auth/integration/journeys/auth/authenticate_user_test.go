@@ -198,6 +198,8 @@ func TestRegisterUserThenRefreshToken(t *testing.T) {
 
 	assert.NoError(t, accessErr)
 
+	assert.Equal(t, http.StatusOK, accessRes.StatusCode)
+
 	rBody2, readErr2 := io.ReadAll(accessRes.Body)
 	defer registerRes.Body.Close()
 
@@ -211,5 +213,73 @@ func TestRegisterUserThenRefreshToken(t *testing.T) {
 
 	assert.NotEmpty(t, accessToken2.AccessToken)
 	assert.True(t, helper.IsValidToken(accessToken2.AccessToken))
+
+}
+
+func TestValidLoginAndInvalidLogin(t *testing.T) {
+	registerEndpoint := "http://" + testPort + "/api/v1/auth/register"
+	loginEndpoint := "http://" + testPort + "/api/v1/auth/login"
+
+	random := uuid.NewString()
+	randomEmail := "tommylay." + random + "@gmail.com"
+
+	authDTO := `{
+		"email":    "` + randomEmail + `",
+		"password": "` + random + `"
+	}`
+
+	registerRes, registerErr := http.Post(registerEndpoint, "application/json", strings.NewReader(authDTO))
+
+	assert.NoError(t, registerErr)
+
+	assert.Equal(t, registerRes.StatusCode, http.StatusCreated)
+
+	rBody, readErr := io.ReadAll(registerRes.Body)
+	defer registerRes.Body.Close()
+
+	assert.NoError(t, readErr)
+
+	var accessToken models.AccessToken
+
+	unmarshalErr := json.Unmarshal(rBody, &accessToken)
+
+	assert.NoError(t, unmarshalErr)
+	assert.NotEmpty(t, accessToken.AccessToken)
+	assert.True(t, helper.IsValidToken(accessToken.AccessToken))
+
+	loginRes, loginErr := http.Post(loginEndpoint, "application/json", strings.NewReader(authDTO))
+
+	assert.NoError(t, loginErr)
+
+	assert.Equal(t, http.StatusCreated, loginRes.StatusCode)
+
+	rBody2, readErr2 := io.ReadAll(loginRes.Body)
+	defer registerRes.Body.Close()
+
+	assert.NoError(t, readErr2)
+
+	var accessToken2 models.AccessToken
+
+	unmarshalErr2 := json.Unmarshal(rBody2, &accessToken2)
+
+	assert.NoError(t, unmarshalErr2)
+
+	assert.NotEmpty(t, accessToken2.AccessToken)
+
+	assert.True(t, helper.IsValidToken(accessToken2.AccessToken))
+
+	invalidRandom := uuid.NewString()
+	invalidRandomEmail := "tommylay." + random + "@gmail.com"
+
+	invalidAuthDTO := `{
+		"email":    "` + invalidRandomEmail + `",
+		"password": "` + invalidRandom + `"
+	}`
+
+	errRes, err := http.Post(loginEndpoint, "application/json", strings.NewReader(invalidAuthDTO))
+
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusNotFound, errRes.StatusCode)
 
 }
