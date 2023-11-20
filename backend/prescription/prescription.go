@@ -17,7 +17,7 @@ func main() {
 		dbInstance, _ := db.DB()
 		_ = dbInstance.Close()
 	}()
-	//test 2
+
 	app := fiber.New()
 	// Initialize default config
 	app.Use(cors.New())
