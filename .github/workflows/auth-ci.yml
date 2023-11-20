@@ -30,6 +30,7 @@ jobs:
           touch .env
           echo PORT=8080 >> .env
           echo TESTPORT=0.0.0.0:8002 >> .env
+          echo JWT_SECRET=${{secrets.JWT_SECRET}}>> .env
           cat .env
       - name: Build and Run Tests
         run: |
