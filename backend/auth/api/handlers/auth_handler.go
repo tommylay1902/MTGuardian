@@ -40,7 +40,7 @@ func (ah *AuthHandler) CreateAuth(c *fiber.Ctx) error {
 		return errorhandler.HandleError(serviceErr, c)
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"token": token})
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"access": token})
 }
 
 func (ah *AuthHandler) Login(c *fiber.Ctx) error {
@@ -64,7 +64,7 @@ func (ah *AuthHandler) Login(c *fiber.Ctx) error {
 		return errorhandler.HandleError(serviceErr, c)
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"token": token})
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"access": token})
 }
 
 func (ah *AuthHandler) Refresh(c *fiber.Ctx) error {
@@ -94,5 +94,5 @@ func (ah *AuthHandler) Refresh(c *fiber.Ctx) error {
 		return errorhandler.HandleError(err, c)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"token": token})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"access": token})
 }
