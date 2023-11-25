@@ -41,9 +41,13 @@ func (ah *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 	defer resp.Body.Close()
-
+	// Check the response status code
 	if resp.StatusCode != http.StatusCreated {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		var bodyErr types.Error
+		json.NewDecoder(resp.Body).Decode(&bodyErr)
+		return c.Status(resp.StatusCode).JSON(fiber.Map{
+			"error": bodyErr.Error,
+		})
 	}
 	var token types.AccessToken
 	json.NewDecoder(resp.Body).Decode(&token)
@@ -71,19 +75,23 @@ func (ah *AuthHandler) LoginHandler(c *fiber.Ctx) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		// Handle error
-		fmt.Println("res err", err)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 	defer resp.Body.Close()
-	var token types.AccessToken
-	json.NewDecoder(resp.Body).Decode(&token)
 
 	// Check the response status code
 	if resp.StatusCode != http.StatusCreated {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		var bodyErr types.Error
+		json.NewDecoder(resp.Body).Decode(&bodyErr)
+		return c.Status(resp.StatusCode).JSON(fiber.Map{
+			"error": bodyErr.Error,
+		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+	var token types.AccessToken
+	json.NewDecoder(resp.Body).Decode(&token)
+
+	return c.Status(resp.StatusCode).JSON(fiber.Map{
 		"token": token,
 	})
 }
