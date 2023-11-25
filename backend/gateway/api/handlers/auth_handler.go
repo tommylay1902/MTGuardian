@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/tommylay1902/gateway/internal/constant"
+	"github.com/tommylay1902/gateway/internal/helper"
 	"github.com/tommylay1902/gateway/internal/types"
 )
 
@@ -21,22 +19,8 @@ func InitializeAuthHandler(baseUrl string) *AuthHandler {
 
 func (ah *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 
-	req, err := http.NewRequest("POST", ah.BaseUrl+"/register", strings.NewReader(string(c.Body())))
-	if err != nil {
-		// Handle error
-		fmt.Println("req err", err)
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	// Create an HTTP client
-	client := http.Client{
-		Timeout: constant.TIMEOUT,
-	}
-
-	// Send the request
-	resp, err := client.Do(req)
+	resp, err := helper.MakeRequest(
+		"POST", ah.BaseUrl+"/register", string(c.Body()))
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
@@ -59,20 +43,9 @@ func (ah *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 
 func (ah *AuthHandler) LoginHandler(c *fiber.Ctx) error {
 
-	req, err := http.NewRequest("POST", ah.BaseUrl+"/login", strings.NewReader(string(c.Body())))
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	// Create an HTTP client
-	client := http.Client{
-		Timeout: constant.TIMEOUT,
-	}
-
 	// Send the request
-	resp, err := client.Do(req)
+	resp, err := helper.MakeRequest(
+		"POST", ah.BaseUrl+"/login", string(c.Body()))
 	if err != nil {
 		// Handle error
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -98,20 +71,8 @@ func (ah *AuthHandler) LoginHandler(c *fiber.Ctx) error {
 
 func (ah *AuthHandler) RefreshHandler(c *fiber.Ctx) error {
 
-	req, err := http.NewRequest("POST", ah.BaseUrl+"/refresh", strings.NewReader(string(c.Body())))
-	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	// Create an HTTP client
-	client := http.Client{
-		Timeout: constant.TIMEOUT,
-	}
-
-	// Send the request
-	resp, err := client.Do(req)
+	resp, err := helper.MakeRequest(
+		"POST", ah.BaseUrl+"/refresh", string(c.Body()))
 	if err != nil {
 		// Handle error
 		return c.SendStatus(fiber.StatusInternalServerError)
