@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/tommylay1902/gateway/internal/constant"
 	"github.com/tommylay1902/gateway/internal/types"
 )
 
@@ -32,7 +32,7 @@ func (ah *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 
 	// Create an HTTP client
 	client := http.Client{
-		Timeout: time.Second * 30,
+		Timeout: constant.TIMEOUT,
 	}
 
 	// Send the request
@@ -68,7 +68,7 @@ func (ah *AuthHandler) LoginHandler(c *fiber.Ctx) error {
 
 	// Create an HTTP client
 	client := http.Client{
-		Timeout: time.Second * 30,
+		Timeout: constant.TIMEOUT,
 	}
 
 	// Send the request
@@ -107,7 +107,7 @@ func (ah *AuthHandler) RefreshHandler(c *fiber.Ctx) error {
 
 	// Create an HTTP client
 	client := http.Client{
-		Timeout: time.Second * 30,
+		Timeout: constant.TIMEOUT,
 	}
 
 	// Send the request
