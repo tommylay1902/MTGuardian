@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/tommylay1902/gateway/internal/helper"
 	"github.com/tommylay1902/gateway/internal/types"
 )
@@ -18,6 +20,11 @@ func InitializePrescriptionHandler(baseUrl string) *PrescriptionHandler {
 }
 
 func (ph *PrescriptionHandler) GetPrescriptionById(c *fiber.Ctx) error {
+	token := c.Locals("user").(*jwt.Token)
+
+	claims := token.Claims.(jwt.MapClaims)
+	fmt.Println(claims["sub"].(string))
+
 	idParam := c.Params("id")
 
 	resp, err := helper.MakeRequest("GET", ph.BaseUrl+"/"+idParam, nil)
@@ -45,7 +52,10 @@ func (ph *PrescriptionHandler) GetPrescriptionById(c *fiber.Ctx) error {
 }
 
 func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
+	token := c.Locals("user").(*jwt.Token)
 
+	claims := token.Claims.(jwt.MapClaims)
+	fmt.Println(claims["sub"].(string))
 	resp, err := helper.MakeRequest("GET", ph.BaseUrl, nil)
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)

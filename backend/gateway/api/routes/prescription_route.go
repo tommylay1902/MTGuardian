@@ -5,11 +5,8 @@ import (
 	handlers "github.com/tommylay1902/gateway/api/handlers"
 )
 
-func SetupPrescriptionRoute(app *fiber.App, handler *handlers.PrescriptionHandler) {
-	apiRoutes := app.Group("api/v1/prescription")
+func SetupPrescriptionRoute(app *fiber.App, handler *handlers.PrescriptionHandler, authMiddle func(*fiber.Ctx) error) {
+	apiRoutes := app.Group("api/v1/prescription", authMiddle)
 	apiRoutes.Get("/:id", handler.GetPrescriptionById)
 	apiRoutes.Get("", handler.GetPrescriptions)
-	// apiRoutes.Post("/register", handler.RegisterHandler)
-	// apiRoutes.Post("/login", handler.LoginHandler)
-	// apiRoutes.Post("refresh", handler.RefreshHandler)
 }
