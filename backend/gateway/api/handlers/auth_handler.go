@@ -18,13 +18,17 @@ func InitializeAuthHandler(baseUrl string) *AuthHandler {
 }
 
 func (ah *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
+	body := string(c.Body())
 
 	resp, err := helper.MakeRequest(
-		"POST", ah.BaseUrl+"/register", string(c.Body()))
+		"POST", ah.BaseUrl+"/register", &body)
+
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
+
 	defer resp.Body.Close()
+
 	// Check the response status code
 	if resp.StatusCode != http.StatusCreated {
 		var bodyErr types.Error
@@ -33,23 +37,25 @@ func (ah *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 			"error": bodyErr.Error,
 		})
 	}
+
 	var token types.AccessToken
 	json.NewDecoder(resp.Body).Decode(&token)
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"token": token,
-	})
+	return c.Status(fiber.StatusOK).JSON(token)
 }
 
 func (ah *AuthHandler) LoginHandler(c *fiber.Ctx) error {
+	body := string(c.Body())
 
 	// Send the request
 	resp, err := helper.MakeRequest(
-		"POST", ah.BaseUrl+"/login", string(c.Body()))
+		"POST", ah.BaseUrl+"/login", &body)
+
 	if err != nil {
 		// Handle error
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
+
 	defer resp.Body.Close()
 
 	// Check the response status code
@@ -64,19 +70,19 @@ func (ah *AuthHandler) LoginHandler(c *fiber.Ctx) error {
 	var token types.AccessToken
 	json.NewDecoder(resp.Body).Decode(&token)
 
-	return c.Status(resp.StatusCode).JSON(fiber.Map{
-		"token": token,
-	})
+	return c.Status(resp.StatusCode).JSON(token)
 }
 
 func (ah *AuthHandler) RefreshHandler(c *fiber.Ctx) error {
+	body := string(c.Body())
 
 	resp, err := helper.MakeRequest(
-		"POST", ah.BaseUrl+"/refresh", string(c.Body()))
+		"POST", ah.BaseUrl+"/refresh", &body)
+
 	if err != nil {
-		// Handle error
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
+
 	defer resp.Body.Close()
 
 	// Check the response status code
@@ -91,7 +97,5 @@ func (ah *AuthHandler) RefreshHandler(c *fiber.Ctx) error {
 	var token types.AccessToken
 	json.NewDecoder(resp.Body).Decode(&token)
 
-	return c.Status(resp.StatusCode).JSON(fiber.Map{
-		"token": token,
-	})
+	return c.Status(resp.StatusCode).JSON(token)
 }

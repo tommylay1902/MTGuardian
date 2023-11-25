@@ -7,8 +7,14 @@ import (
 	"github.com/tommylay1902/gateway/internal/constant"
 )
 
-func MakeRequest(method string, url string, body string) (*http.Response, error) {
-	req, err := http.NewRequest(method, url, strings.NewReader(body))
+func MakeRequest(method string, url string, body *string) (*http.Response, error) {
+	var req *http.Request
+	var err error
+	if method == "GET" {
+		return http.Get(url)
+	} else {
+		req, err = http.NewRequest(method, url, strings.NewReader(*body))
+	}
 	if err != nil {
 		return nil, err
 	}
