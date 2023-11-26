@@ -38,6 +38,3 @@
     on:click={() => reloadTable(allViewHistory)}>All Medication</button
   >
 </div>
-
-<style>
-</style>
