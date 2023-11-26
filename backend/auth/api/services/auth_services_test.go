@@ -69,6 +69,11 @@ func (m *MockAuthDAO) GetTokenFromEmail(email *string) (*string, error) {
 	return args.Get(0).(*string), args.Error(1)
 }
 
+func (m *MockAuthDAO) InsertNewRefreshToken(email *string, token *string) error {
+	args := m.Called(email, token)
+	return args.Error(0)
+}
+
 func MatchAuthExceptWithEmail(auth *models.Auth) interface{} {
 	return mock.MatchedBy(func(arg *models.Auth) bool {
 		return arg.Email == auth.Email
