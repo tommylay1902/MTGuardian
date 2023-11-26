@@ -24,20 +24,20 @@ func (dao *AuthDAO) CreateAuth(auth *models.Auth) (*uuid.UUID, error) {
 	return &auth.ID, nil
 }
 
-func (dao *AuthDAO) DoesEmailPasswordExists(email *string, password *string) (*bool, error) {
-	var auth models.Auth
-	err := dao.DB.Where("email = ?", *email).Where("password = ?", *password).First(&auth).Error
+// func (dao *AuthDAO) DoesEmailPasswordExists(email *string, password *string) (*bool, error) {
+// 	var auth models.Auth
+// 	err := dao.DB.Where("email = ?", *email).Where("password = ?", *password).First(&auth).Error
 
-	var doesEmailPasswordExist bool
-	if err != nil {
-		doesEmailPasswordExist = false
-		return &doesEmailPasswordExist, err
-	}
+// 	var doesEmailPasswordExist bool
+// 	if err != nil {
+// 		doesEmailPasswordExist = false
+// 		return &doesEmailPasswordExist, err
+// 	}
 
-	doesEmailPasswordExist = true
+// 	doesEmailPasswordExist = true
 
-	return &doesEmailPasswordExist, nil
-}
+// 	return &doesEmailPasswordExist, nil
+// }
 
 func (dao *AuthDAO) GetHashFromEmail(email *string) (*string, error) {
 	var auth models.Auth

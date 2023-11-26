@@ -9,6 +9,7 @@
     fetch(`http://0.0.0.0:8000/api/v1/prescription/${$ActiveModalStore.id}`, {
       method: "DELETE",
     });
+
     PrescriptionStore.update((currentData) => {
       currentData = currentData.filter(
         (curr) => curr.id !== $ActiveModalStore.id

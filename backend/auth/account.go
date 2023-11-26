@@ -31,6 +31,7 @@ func main() {
 	}))
 
 	accountDAO := dataaccess.InitializeAuthDAO(db)
+
 	accountService := services.InitializeAuthService(accountDAO)
 	accountHandler := handlers.InitializeAuthHandler(accountService)
 	routes.SetupRoutes(app, accountHandler)

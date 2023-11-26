@@ -5,11 +5,11 @@ import (
 	"github.com/tommylay1902/prescriptionmicro/api/handlers"
 )
 
-func SetupRoutes(app *fiber.App, prescriptionHandler *handlers.PrescriptionHandler) {
+func SetupRoutes(app *fiber.App, handler *handlers.PrescriptionHandler) {
 	apiRoutes := app.Group("api/v1/prescription")
-	apiRoutes.Post("", prescriptionHandler.CreatePrescription)
-	apiRoutes.Get("/:id", prescriptionHandler.GetPrescription)
-	apiRoutes.Get("", prescriptionHandler.GetPrescriptions)
-	apiRoutes.Delete("/:id", prescriptionHandler.DeletePrescription)
-	apiRoutes.Put("/:id", prescriptionHandler.UpdatePrescription)
+	apiRoutes.Post("", handler.CreatePrescription)
+	apiRoutes.Get("/:id", handler.GetPrescription)
+	apiRoutes.Get("", handler.GetPrescriptions)
+	apiRoutes.Delete("/:id", handler.DeletePrescription)
+	apiRoutes.Put("/:id", handler.UpdatePrescription)
 }

@@ -1,6 +1,5 @@
 .vscode
-accountmicro
-authmicro
+gateway
 .env
 build
 coverage.out
