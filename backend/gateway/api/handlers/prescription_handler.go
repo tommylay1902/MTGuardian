@@ -52,12 +52,14 @@ func (ph *PrescriptionHandler) GetPrescriptionById(c *fiber.Ctx) error {
 }
 
 func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
-	token := c.Locals("user").(*jwt.Token)
 
+	token := c.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	fmt.Println(claims["sub"].(string))
+
 	resp, err := helper.MakeRequest("GET", ph.BaseUrl, nil)
 	if err != nil {
+		fmt.Println(err)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
@@ -77,5 +79,4 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 	json.NewDecoder(resp.Body).Decode(&prescription)
 
 	return c.Status(resp.StatusCode).JSON(prescription)
-
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,6 +25,7 @@ func (ah *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 		"POST", ah.BaseUrl+"/register", &body)
 
 	if err != nil {
+		fmt.Println(err)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
@@ -52,7 +54,7 @@ func (ah *AuthHandler) LoginHandler(c *fiber.Ctx) error {
 		"POST", ah.BaseUrl+"/login", &body)
 
 	if err != nil {
-		// Handle error
+		fmt.Println(err)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
@@ -80,6 +82,7 @@ func (ah *AuthHandler) RefreshHandler(c *fiber.Ctx) error {
 		"POST", ah.BaseUrl+"/refresh", &body)
 
 	if err != nil {
+		fmt.Println(err)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
