@@ -9,7 +9,7 @@ export const load = (async () => {
 export const actions = {
   login: async ({ cookies, request, url }) => {
     const data = await request.formData();
-    console.log(data.get("email"), data.get("password"));
+
     const response = await fetch("http:localhost:8004/api/v1/auth/login", {
       method: "POST",
       headers: {
@@ -27,7 +27,10 @@ export const actions = {
       return fail(404, { message: "failed to login" });
     }
     cookies.set("access", token);
+
+    console.log(url);
     const redirectTo = url.searchParams.get("redirectTo");
+
     if (redirectTo) {
       throw redirect(302, `/${redirectTo.slice(1)}`);
     }

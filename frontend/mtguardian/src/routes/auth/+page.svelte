@@ -3,6 +3,8 @@
   import toast from "svelte-french-toast";
   import RegisterStore from "$lib/store/RegisterStore";
   import { enhance } from "$app/forms";
+  const query = $page.url.searchParams.get("redirectTo");
+  console.log(query);
   $: {
     if ($page.status === 404) {
       toast.error("Invalid Credentials");
@@ -18,7 +20,7 @@
       <div class="text-5xl pb-3 text-white fade-in-login">Login</div>
       <form
         method="POST"
-        action="?/login"
+        action={`?/login&redirectTo=${query}`}
         class="bg-gray-700 p-10 rounded-xl fade-in-form slide-up"
         use:enhance
       >
@@ -41,7 +43,7 @@
       <div class="text-5xl pb-3 text-white fade-in-login">Register</div>
       <form
         method="POST"
-        action="?/register"
+        action={`?/register&redirectTo=${query}`}
         class="bg-gray-700 p-10 rounded-xl fade-in-form slide-up"
         use:enhance
       >
@@ -68,11 +70,15 @@
     {/if}
     {#if !$RegisterStore}
       <div class="mt-2">
-        <button on:click={() => RegisterStore.set(true)}>Register</button>
+        <button on:click={() => RegisterStore.set(true)}>
+          Don't have an account? Click here to register</button
+        >
       </div>
     {:else}
       <div class="mt-2">
-        <button on:click={() => RegisterStore.set(false)}>Login</button>
+        <button on:click={() => RegisterStore.set(false)}
+          >Already have an account? Click here to login</button
+        >
       </div>
     {/if}
   </div>
