@@ -16,7 +16,7 @@
   const ignoreHeaders: string[] = ["id"];
 </script>
 
-<table class="table table-lg" style="table-layout:fixed">
+<table class="table table-lg table-fixed">
   <thead>
     <tr class="border-white">
       {#each tableHeaders as th}

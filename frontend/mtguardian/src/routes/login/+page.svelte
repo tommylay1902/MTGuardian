@@ -1,39 +1,66 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import type { PageData } from "./$types";
-
-  export let data: PageData;
-
-  function fadeIn(element: HTMLElement) {
-    element.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: 500,
-      fill: "forwards",
-    });
-  }
+  let register = false;
 </script>
 
 <div class="background">
   <div class="flex flex-col justify-center items-center h-screen">
-    <div class="text-5xl pb-3 text-white fade-in-login">Login</div>
-    <form
-      method="POST"
-      class="bg-gray-700 p-10 rounded-xl fade-in-form slide-up"
-    >
-      <label class="block text-lg font-medium text-white" for="email">
-        Email
-      </label>
-      <input class="input" id="email" name="email" />
+    {#if !register}
+      <div class="text-5xl pb-3 text-white fade-in-login">Login</div>
+      <form
+        method="POST"
+        class="bg-gray-700 p-10 rounded-xl fade-in-form slide-up"
+      >
+        <label class="block text-lg font-medium text-white" for="email">
+          Email
+        </label>
+        <input class="input" id="email" name="email" />
 
-      <label class="block text-lg font-medium text-white" for="password">
-        Password
-      </label>
-      <input class="input" id="password" type="password" name="password" />
-      <div>
-        <button class="btn btn-primary btn-wide mt-6" type="submit"
-          >Login</button
-        >
+        <label class="block text-lg font-medium text-white" for="password">
+          Password
+        </label>
+        <input class="input" id="password" type="password" name="password" />
+        <div>
+          <button class="btn btn-primary btn-wide mt-6" type="submit"
+            >{register ? "Register" : "Login"}</button
+          >
+        </div>
+      </form>
+    {:else}
+      <div class="text-5xl pb-3 text-white fade-in-login">Register</div>
+      <form
+        method="POST"
+        class="bg-gray-700 p-10 rounded-xl fade-in-form slide-up"
+      >
+        <label class="block text-lg font-medium text-white" for="email">
+          Email
+        </label>
+        <input class="input" id="email" name="email" />
+
+        <label class="block text-lg font-medium text-white" for="password">
+          Password
+        </label>
+        <input class="input" id="password" type="password" name="password" />
+
+        <label class="block text-lg font-medium text-white" for="password">
+          Confirm Password
+        </label>
+        <input class="input" id="password" type="password" name="password" />
+        <div>
+          <button class="btn btn-primary btn-wide mt-6" type="submit"
+            >{register ? "Register" : "Login"}</button
+          >
+        </div>
+      </form>
+    {/if}
+    {#if !register}
+      <div class="mt-2">
+        <button on:click={() => (register = true)}>Register</button>
       </div>
-    </form>
+    {:else}
+      <div class="mt-2">
+        <button on:click={() => (register = false)}>Login</button>
+      </div>
+    {/if}
   </div>
 </div>
 
