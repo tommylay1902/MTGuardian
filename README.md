@@ -3,3 +3,6 @@ An intuitive application designed to streamline medication management, allowing 
 
 Schemas:
 <img src="/readMeAssets/databaseSchemaV1.pdf" alt="Image Description"/>
+
+Schemas:
+![Alt text](/readMeAssets/databaseSchemaV2.png "Current DB Schema")
