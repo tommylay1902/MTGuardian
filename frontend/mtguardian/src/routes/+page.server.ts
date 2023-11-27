@@ -8,15 +8,5 @@ export const load = (async ({ cookies, url }) => {
     const fromURL = url.pathname + url.search;
     throw redirect(302, `/auth?redirectTo=${fromURL}`);
   }
-
-  const res = await fetch(
-    "http://0.0.0.0:8000/api/v1/prescription?present=true",
-    {
-      cache: "no-cache",
-    }
-  );
-
-  const prescriptions = await res.json();
-
-  return { prescriptions };
+  return {};
 }) satisfies PageServerLoad;

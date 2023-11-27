@@ -24,7 +24,7 @@ func GenerateRefreshToken(email *string) (*string, error) {
 
 	claims := jwt.RegisteredClaims{
 		Subject:   *email,
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(720 * time.Hour)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}
 

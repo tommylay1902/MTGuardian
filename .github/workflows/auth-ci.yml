@@ -1,4 +1,4 @@
-name: Go run tests on prescription before push/pull on main
+name: Go run tests on auth microservice before push/pull on main
 on:
   push:
     branches:
