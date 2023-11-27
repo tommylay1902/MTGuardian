@@ -1,5 +1,6 @@
-import { redirect } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import toast from "svelte-french-toast";
 
 export const load = (async () => {
   return {};
@@ -23,7 +24,7 @@ export const actions = {
     const responseToken = await response.json();
     const token = responseToken["access"];
     if (!token) {
-      return;
+      return fail(404, { message: "failed to login" });
     }
     cookies.set("access", token);
     const redirectTo = url.searchParams.get("redirectTo");
@@ -47,9 +48,10 @@ export const actions = {
     });
 
     const responseToken = await response.json();
+
     const token = responseToken["access"];
     if (!token) {
-      return;
+      return fail(409, { message: "failed to login" });
     }
     cookies.set("access", token);
     const redirectTo = url.searchParams.get("redirectTo");

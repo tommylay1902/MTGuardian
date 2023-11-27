@@ -1,15 +1,26 @@
 <script lang="ts">
-  let register = false;
+  import { page } from "$app/stores";
+  import toast from "svelte-french-toast";
+  import RegisterStore from "$lib/store/RegisterStore";
+  import { enhance } from "$app/forms";
+  $: {
+    if ($page.status === 404) {
+      toast.error("Invalid Credentials");
+    } else if ($page.status === 409) {
+      toast.error("Email Already Exists");
+    }
+  }
 </script>
 
 <div class="background">
   <div class="flex flex-col justify-center items-center h-screen">
-    {#if !register}
+    {#if !$RegisterStore}
       <div class="text-5xl pb-3 text-white fade-in-login">Login</div>
       <form
         method="POST"
         action="?/login"
         class="bg-gray-700 p-10 rounded-xl fade-in-form slide-up"
+        use:enhance
       >
         <label class="block text-lg font-medium text-white" for="email">
           Email
@@ -22,7 +33,7 @@
         <input class="input" id="password" type="password" name="password" />
         <div>
           <button class="btn btn-primary btn-wide mt-6" type="submit"
-            >{register ? "Register" : "Login"}</button
+            >{$RegisterStore ? "Register" : "Login"}</button
           >
         </div>
       </form>
@@ -32,6 +43,7 @@
         method="POST"
         action="?/register"
         class="bg-gray-700 p-10 rounded-xl fade-in-form slide-up"
+        use:enhance
       >
         <label class="block text-lg font-medium text-white" for="email">
           Email
@@ -49,18 +61,18 @@
         <input class="input" id="password" type="password" name="password" />
         <div>
           <button class="btn btn-primary btn-wide mt-6" type="submit"
-            >{register ? "Register" : "Login"}</button
+            >{$RegisterStore ? "Register" : "Login"}</button
           >
         </div>
       </form>
     {/if}
-    {#if !register}
+    {#if !$RegisterStore}
       <div class="mt-2">
-        <button on:click={() => (register = true)}>Register</button>
+        <button on:click={() => RegisterStore.set(true)}>Register</button>
       </div>
     {:else}
       <div class="mt-2">
-        <button on:click={() => (register = false)}>Login</button>
+        <button on:click={() => RegisterStore.set(false)}>Login</button>
       </div>
     {/if}
   </div>
