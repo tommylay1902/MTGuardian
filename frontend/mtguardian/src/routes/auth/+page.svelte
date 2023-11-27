@@ -8,6 +8,7 @@
       <div class="text-5xl pb-3 text-white fade-in-login">Login</div>
       <form
         method="POST"
+        action="?/login"
         class="bg-gray-700 p-10 rounded-xl fade-in-form slide-up"
       >
         <label class="block text-lg font-medium text-white" for="email">
@@ -29,6 +30,7 @@
       <div class="text-5xl pb-3 text-white fade-in-login">Register</div>
       <form
         method="POST"
+        action="?/register"
         class="bg-gray-700 p-10 rounded-xl fade-in-form slide-up"
       >
         <label class="block text-lg font-medium text-white" for="email">
