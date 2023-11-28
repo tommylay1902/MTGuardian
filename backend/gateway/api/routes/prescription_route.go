@@ -9,4 +9,7 @@ func SetupPrescriptionRoute(app *fiber.App, handler *handlers.PrescriptionHandle
 	apiRoutes := app.Group("api/v1/prescription", authMiddle)
 	apiRoutes.Get("/:id", handler.GetPrescriptionById)
 	apiRoutes.Get("", handler.GetPrescriptions)
+	apiRoutes.Post("", handler.CreatePrescription)
+	apiRoutes.Put("/:id", handler.UpdatePrescription)
+	apiRoutes.Delete("/:id", handler.DeletePrescription)
 }
