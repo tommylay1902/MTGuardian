@@ -1,6 +1,6 @@
 import { convertDateHtmlInputStringToISO8601 } from "./date";
 
-export async function createPrescription(event: Event) {
+export async function createPrescription(event: Event, access: string) {
   try {
     const values = event.target as HTMLFormElement;
     const data = new FormData(values);
@@ -37,16 +37,19 @@ export async function createPrescription(event: Event) {
       ended: isPresent ? null : formattedEndedDate,
     };
 
-    const response = await fetch(`http://0.0.0.0:8000/api/v1/prescription`, {
+    const response = await fetch(`http://0.0.0.0:8004/api/v1/prescription`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${access}`,
       },
       body: JSON.stringify({ ...prescription }),
     });
 
     const responseId = await response.json();
     const id = responseId["success"];
+
+    console.log("hello?", responseId);
 
     return {
       id,
@@ -61,7 +64,11 @@ export async function createPrescription(event: Event) {
   }
 }
 
-export async function updatePrescription(event: Event, id: string) {
+export async function updatePrescription(
+  event: Event,
+  id: string,
+  access: string
+) {
   try {
     const values = event.target as HTMLFormElement;
     const data = new FormData(values);
@@ -101,10 +108,11 @@ export async function updatePrescription(event: Event, id: string) {
     };
     console.log(JSON.stringify({ ...prescription }));
 
-    fetch(`http://0.0.0.0:8000/api/v1/prescription/${id}`, {
+    await fetch(`http://0.0.0.0:8004/api/v1/prescription/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${access}`,
       },
       body: JSON.stringify({ ...prescription }),
     });

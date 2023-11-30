@@ -5,9 +5,15 @@
   } from "$lib/store/ActiveModalStore";
   import PrescriptionStore from "$lib/store/PrescriptionStore";
   import { resetFormStore } from "$lib/store/Form";
+  import { getContext } from "svelte";
+  const access = getContext("access");
+
   async function deletePrescriptionEvent() {
-    fetch(`http://0.0.0.0:8000/api/v1/prescription/${$ActiveModalStore.id}`, {
+    fetch(`http://0.0.0.0:8004/api/v1/prescription/${$ActiveModalStore.id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
     });
 
     PrescriptionStore.update((currentData) => {

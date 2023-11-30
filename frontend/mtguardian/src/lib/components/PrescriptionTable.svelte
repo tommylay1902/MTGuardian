@@ -1,8 +1,8 @@
 <script lang="ts">
   import { generatePrescriptionTemplate } from "$lib/types/Prescription";
   import { convertStringISO8601ToShortDate } from "$lib/utils/date";
-  import { fade, fly } from "svelte/transition";
-  import { quintOut, backOut, circOut } from "svelte/easing";
+  import { fly } from "svelte/transition";
+  import { circOut } from "svelte/easing";
 
   import PrescriptionStore from "$lib/store/PrescriptionStore";
   import HighlightTableRowStore from "$lib/store/HighlightTableRowStore";

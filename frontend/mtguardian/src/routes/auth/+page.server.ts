@@ -1,6 +1,5 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import toast from "svelte-french-toast";
 
 export const load = (async () => {
   return {};
@@ -20,20 +19,22 @@ export const actions = {
         password: data.get("password"),
       }),
     });
+    console.log(response.status);
+    if (response.status === 404) {
+      return fail(404, { message: "failed to login" });
+    }
 
     const responseToken = await response.json();
     const token = responseToken["access"];
-    if (!token) {
-      return fail(404, { message: "failed to login" });
-    }
+
     cookies.set("access", token);
 
-    console.log(url);
     const redirectTo = url.searchParams.get("redirectTo");
-
-    if (redirectTo) {
+    console.log("HELLUR", typeof redirectTo);
+    if (redirectTo !== "null" && redirectTo) {
       throw redirect(302, `/${redirectTo.slice(1)}`);
     }
+
     throw redirect(302, "/");
   },
 
@@ -58,7 +59,7 @@ export const actions = {
     }
     cookies.set("access", token);
     const redirectTo = url.searchParams.get("redirectTo");
-    if (redirectTo) {
+    if (redirectTo && redirectTo !== "null") {
       throw redirect(302, `/${redirectTo.slice(1)}`);
     }
     throw redirect(302, "/");

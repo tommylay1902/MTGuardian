@@ -14,7 +14,10 @@
     pastViewHistory,
     presentViewHistory,
   } from "$lib/utils/static";
+  import { getContext } from "svelte";
   import PrescriptionInput from "./PrescriptionInput.svelte";
+
+  const access: string = getContext("access");
 
   function determineUpdate(
     data:
@@ -28,7 +31,6 @@
         }
       | undefined
   ): boolean {
-    console.log($PrescriptionViewHistoryStore, data?.ended);
     if (
       $PrescriptionViewHistoryStore === presentViewHistory &&
       data?.ended === "null"
@@ -46,15 +48,14 @@
   }
 
   async function updatePrescriptionEvent(e: Event) {
-    const data = await updatePrescription(e, $FormStore.data.id);
+    const data = await updatePrescription(e, $FormStore.data.id, access);
 
     const canStay = determineUpdate(data);
-    console.log("LOGGGIN DATA", data?.id);
+
     if (!canStay && data !== undefined) {
       $PrescriptionStore = $PrescriptionStore.filter((obj) => {
         return obj.id !== data.id;
       });
-      console.log($PrescriptionStore);
     } else {
       $PrescriptionStore = $PrescriptionStore.map((obj) => {
         const id = $FormStore.data.id;
@@ -74,7 +75,7 @@
   }
 
   async function createPrescriptionEvent(e: Event) {
-    const data = await createPrescription(e);
+    const data = await createPrescription(e, access);
 
     if (data !== undefined && determineUpdate(data)) {
       PrescriptionStore.update((currentData) => [
