@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/google/uuid"
 	"github.com/tommylay1902/prescriptionmicro/api/dataaccess"
 	dto "github.com/tommylay1902/prescriptionmicro/internal/dtos/prescription"
@@ -93,7 +91,6 @@ func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id 
 		*pUpdate.Started = *pDTO.Started
 	}
 
-	fmt.Println(pUpdate, pDTO)
 	if pUpdate.Ended == nil && pDTO.Ended != nil || pDTO.Ended == nil && pUpdate.Ended != nil {
 		hasUpdate = true
 		pUpdate.Ended = pDTO.Ended

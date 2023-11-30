@@ -13,4 +13,5 @@ type Prescription struct {
 	Notes      *string    `json:"notes"`
 	Started    *time.Time `json:"started" gorm:"type:timestamp;"`
 	Ended      *time.Time `json:"ended" gorm:"type:timestamp;"`
+	Owner      *string    `json:"owner"`
 }

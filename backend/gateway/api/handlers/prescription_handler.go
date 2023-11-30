@@ -85,7 +85,35 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 	prescription := string(c.Body())
 
-	resp, err := helper.MakeRequest("POST", ph.BaseUrl, &prescription)
+	token := c.Locals("user").(*jwt.Token)
+
+	claims := token.Claims.(jwt.MapClaims)
+	email := claims["sub"]
+	fmt.Println(claims["sub"].(string))
+
+	var data map[string]interface{}
+
+	// Unmarshal the JSON string into the map
+	err := json.Unmarshal([]byte(prescription), &data)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil
+	}
+
+	// Add the additional field
+	data["owner"] = email
+
+	updatedJSON, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil
+	}
+
+	resultBody := string(updatedJSON)
+
+	fmt.Println(resultBody)
+
+	resp, err := helper.MakeRequest("POST", ph.BaseUrl, &resultBody)
 
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)

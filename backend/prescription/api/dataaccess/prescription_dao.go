@@ -2,7 +2,6 @@ package dataaccess
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/tommylay1902/prescriptionmicro/internal/error/customerrors"
@@ -21,12 +20,11 @@ func InitalizePrescriptionDAO(db *gorm.DB) *PrescriptionDAO {
 }
 
 func (dao *PrescriptionDAO) CreatePrescription(prescription *models.Prescription) (*uuid.UUID, error) {
-	fmt.Println(prescription.ID)
+
 	err := dao.DB.Create(&prescription).Error
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(prescription.ID)
 
 	return &prescription.ID, nil
 }
