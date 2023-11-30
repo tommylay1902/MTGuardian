@@ -46,12 +46,12 @@ func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescript
 	return prescription, nil
 }
 
-func (dao *PrescriptionDAO) GetAllPrescriptions(searchQueries map[string]string) ([]models.Prescription, error) {
+func (dao *PrescriptionDAO) GetAllPrescriptions(searchQueries map[string]string, owner *string) ([]models.Prescription, error) {
 	var prescriptions []models.Prescription
 
 	query := helper.BuildQueryWithSearchParam(searchQueries, dao.DB)
 
-	err := query.Find(&prescriptions).Error
+	err := query.Where("owner = ?", *owner).Find(&prescriptions).Error
 
 	if err != nil {
 		return nil, err

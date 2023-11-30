@@ -56,9 +56,14 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 
 	token := c.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
-	fmt.Println(claims["sub"].(string))
 
-	resp, err := helper.MakeRequest("GET", ph.BaseUrl, nil)
+	email := claims["sub"].(string)
+
+	if email != c.Params("email") {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	resp, err := helper.MakeRequest("GET", ph.BaseUrl+"/all/"+email, nil)
 	if err != nil {
 
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -89,7 +94,6 @@ func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 
 	claims := token.Claims.(jwt.MapClaims)
 	email := claims["sub"]
-	fmt.Println(claims["sub"].(string))
 
 	var data map[string]interface{}
 

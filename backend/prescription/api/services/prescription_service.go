@@ -38,9 +38,9 @@ func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*models.Prescr
 	return p, nil
 }
 
-func (ps *PrescriptionService) GetPrescriptions(searchQuery map[string]string) ([]models.Prescription, error) {
+func (ps *PrescriptionService) GetPrescriptions(searchQuery map[string]string, owner *string) ([]models.Prescription, error) {
 
-	prescriptions, err := ps.dao.GetAllPrescriptions(searchQuery)
+	prescriptions, err := ps.dao.GetAllPrescriptions(searchQuery, owner)
 
 	if err != nil {
 		return nil, err

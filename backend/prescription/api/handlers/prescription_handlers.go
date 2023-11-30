@@ -62,8 +62,9 @@ func (ph *PrescriptionHandler) GetPrescription(c *fiber.Ctx) error {
 }
 
 func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
+	email := c.Params("email")
 	searchQueries := c.Queries()
-	prescriptions, err := ph.PrescriptionService.GetPrescriptions(searchQueries)
+	prescriptions, err := ph.PrescriptionService.GetPrescriptions(searchQueries, &email)
 
 	if err != nil {
 		return errorhandler.HandleError(err, c)
