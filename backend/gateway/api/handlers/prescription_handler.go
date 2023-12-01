@@ -53,13 +53,21 @@ func (ph *PrescriptionHandler) GetPrescriptionById(c *fiber.Ctx) error {
 }
 
 func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
-	fmt.Println("entered handler")
+
 	token := c.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 
 	email := claims["sub"].(string)
+	viewHistory := c.Query("present")
 
-	resp, err := helper.MakeRequest("GET", ph.BaseUrl+"/all/"+email, nil)
+	var url string
+	if viewHistory == "" {
+		url = fmt.Sprintf("%s/all/%s", ph.BaseUrl, email)
+	} else {
+		url = fmt.Sprintf("%s/all/%s?present=%s", ph.BaseUrl, email, viewHistory)
+	}
+
+	resp, err := helper.MakeRequest("GET", url, nil)
 	if err != nil {
 
 		return c.SendStatus(fiber.StatusInternalServerError)

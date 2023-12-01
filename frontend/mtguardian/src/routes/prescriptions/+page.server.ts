@@ -10,16 +10,18 @@ export const load = (async ({ cookies, url }) => {
     throw redirect(302, `/auth?redirectTo=${fromURL}`);
   }
 
-  const res = await fetch("http://0.0.0.0:8004/api/v1/prescription", {
-    cache: "no-cache",
-    headers: {
-      Authorization: `Bearer ${access}`,
-    },
-  });
+  const res = await fetch(
+    "http://0.0.0.0:8004/api/v1/prescription?present=true",
+    {
+      cache: "no-cache",
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    }
+  );
 
-  //rewrite
+  //rewrite or refactor
   if (res.status === 401) {
-    console.log("cookie invalid");
     const response = await fetch("http://0.0.0.0:8004/api/v1/auth/refresh", {
       method: "POST",
       body: JSON.stringify({ access: `${access}` }),
@@ -35,12 +37,15 @@ export const load = (async ({ cookies, url }) => {
 
     cookies.set("access", token);
 
-    const res = await fetch("http://0.0.0.0:8004/api/v1/prescription", {
-      cache: "no-cache",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const res = await fetch(
+      "http://0.0.0.0:8004/api/v1/prescription?present=true",
+      {
+        cache: "no-cache",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     const prescriptions = await res.json();
 
