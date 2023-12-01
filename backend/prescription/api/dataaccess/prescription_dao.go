@@ -29,9 +29,9 @@ func (dao *PrescriptionDAO) CreatePrescription(prescription *models.Prescription
 	return &prescription.ID, nil
 }
 
-func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*models.Prescription, error) {
+func (dao *PrescriptionDAO) GetPrescriptionById(id uuid.UUID, email string) (*models.Prescription, error) {
 	prescription := new(models.Prescription)
-	err := dao.DB.First(&prescription, id).Error
+	err := dao.DB.Where("owner = ?", email).First(&prescription, id).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -60,16 +60,16 @@ func (dao *PrescriptionDAO) GetAllPrescriptions(searchQueries map[string]string,
 	return prescriptions, nil
 }
 
-func (dao *PrescriptionDAO) DeletePrescription(p *models.Prescription) error {
-	err := dao.DB.Delete(&p).Error
+func (dao *PrescriptionDAO) DeletePrescription(p *models.Prescription, email string) error {
+	err := dao.DB.Where("owner = ?", email).Delete(&p).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (dao *PrescriptionDAO) UpdatePrescription(p *models.Prescription) error {
-	err := dao.DB.Save(&p).Error
+func (dao *PrescriptionDAO) UpdatePrescription(p *models.Prescription, email string) error {
+	err := dao.DB.Where("owner = ?", email).Save(&p).Error
 
 	if err != nil {
 		return err

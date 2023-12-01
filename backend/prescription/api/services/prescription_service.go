@@ -29,8 +29,8 @@ func (ps *PrescriptionService) CreatePrescription(prescription *dto.Prescription
 	return id, nil
 }
 
-func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID) (*models.Prescription, error) {
-	p, err := ps.dao.GetPrescriptionById(id)
+func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID, email string) (*models.Prescription, error) {
+	p, err := ps.dao.GetPrescriptionById(id, email)
 	if err != nil {
 		return nil, err
 	}
@@ -49,15 +49,15 @@ func (ps *PrescriptionService) GetPrescriptions(searchQuery map[string]string, o
 	return prescriptions, nil
 }
 
-func (ps *PrescriptionService) DeletePrescription(id uuid.UUID) error {
-	p, err := ps.dao.GetPrescriptionById(id)
+func (ps *PrescriptionService) DeletePrescription(id uuid.UUID, email string) error {
+	p, err := ps.dao.GetPrescriptionById(id, email)
 	if err != nil {
 		return &customerrors.ResourceNotFound{
 			Message: err.Error(),
 			Code:    404,
 		}
 	}
-	daoError := ps.dao.DeletePrescription(p)
+	daoError := ps.dao.DeletePrescription(p, email)
 	if daoError != nil {
 		return daoError
 	}
@@ -65,8 +65,8 @@ func (ps *PrescriptionService) DeletePrescription(id uuid.UUID) error {
 }
 
 // test
-func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id uuid.UUID) error {
-	pUpdate, err := ps.dao.GetPrescriptionById(id)
+func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id uuid.UUID, email string) error {
+	pUpdate, err := ps.dao.GetPrescriptionById(id, email)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id 
 	}
 
 	if hasUpdate {
-		return ps.dao.UpdatePrescription(pUpdate)
+		return ps.dao.UpdatePrescription(pUpdate, email)
 	}
 
 	return &customerrors.BadRequestError{Message: "No updates found for the prescription", Code: 400}

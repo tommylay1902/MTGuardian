@@ -7,7 +7,7 @@ import (
 
 func SetupPrescriptionRoute(app *fiber.App, handler *handlers.PrescriptionHandler, authMiddle func(*fiber.Ctx) error) {
 	apiRoutes := app.Group("api/v1/prescription", authMiddle)
-	apiRoutes.Get("/all/:email", handler.GetPrescriptions)
+	apiRoutes.Get("", handler.GetPrescriptions)
 	apiRoutes.Get("/:id", handler.GetPrescriptionById)
 	apiRoutes.Post("", handler.CreatePrescription)
 	apiRoutes.Put("/:id", handler.UpdatePrescription)
