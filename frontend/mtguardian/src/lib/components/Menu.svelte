@@ -5,27 +5,22 @@
 </script>
 
 <nav class="bg-white border-gray-200 dark:bg-gray-700">
-  <div
-    class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"
-  >
-    <a
-      href="https://flowbite.com/"
-      class="flex items-center space-x-3 rtl:space-x-reverse"
-    >
-      <img
+  <div class="flex items-center justify-between mx-auto p-4">
+    <!-- <img
         src="https://flowbite.com/docs/images/logo.svg"
         class="h-8"
         alt="Flowbite Logo"
-      />
-      <span
-        class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
-        >Flowbite</span
-      >
-    </a>
+      /> -->
+    <h1
+      class="self-center text-3xl font-semibold whitespace-nowrap dark:text-white"
+    >
+      MedTracker Guardian
+    </h1>
+
     <button
       data-collapse-toggle="navbar-default"
       type="button"
-      class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+      class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
       aria-controls="navbar-default"
       aria-expanded="false"
     >
@@ -55,7 +50,9 @@
             href="/"
             on:click={() => (active = "")}
             class:active={active === ""}
-            class="block py-2 px-3 text-white rounded md:bg-transparent md:p-0 dark:text-white"
+            class:hover:blue-700={active !== ""}
+            class={"block py-2 px-3 text-2xl rounded md:border-0 md:p-0 dark:text-white" +
+              (active !== "" ? " hover:text-blue-700" : " ")}
             aria-current="page">Home</a
           >
         </li>
@@ -64,18 +61,19 @@
             href="/prescriptions"
             on:click={() => (active = "prescriptions")}
             class:active={active === "prescriptions"}
-            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+            class:hover-blue-700={active !== "prescriptions"}
+            class={"block py-2 px-3 text-2xl rounded md:border-0 md:p-0 dark:text-white" +
+              (active !== "prescriptions" ? " hover:text-blue-700" : " ")}
             >Medication</a
           >
         </li>
-
         <li>
           <a
             href="/events"
             on:click={() => (active = "events")}
             class:active={active === "events"}
-            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-            >Events</a
+            class={"block py-2 px-3 text-2xl rounded md:border-0 md:p-0 dark:text-white" +
+              (active !== "events" ? " hover:text-blue-700" : " ")}>Events</a
           >
         </li>
       </ul>
@@ -85,6 +83,6 @@
 
 <style>
   .active {
-    color: blue;
+    color: rgb(98, 98, 219);
   }
 </style>
