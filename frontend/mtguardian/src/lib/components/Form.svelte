@@ -56,17 +56,18 @@
       $PrescriptionStore = $PrescriptionStore.filter((obj) => {
         return obj.id !== data.id;
       });
+
+      HighlightTableRowStore.set({
+        id: $FormStore.data.id,
+        canHighlightAfterCreation: false,
+        canHighlightAfterUpdate: true,
+      });
     } else {
       $PrescriptionStore = $PrescriptionStore.map((obj) => {
         const id = $FormStore.data.id;
         if (id === obj.id && data !== undefined) {
           return { ...data };
         } else return obj;
-      });
-      HighlightTableRowStore.set({
-        id: $FormStore.data.id,
-        canHighlightAfterCreation: false,
-        canHighlightAfterUpdate: true,
       });
     }
 

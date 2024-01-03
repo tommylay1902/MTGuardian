@@ -30,7 +30,7 @@ export const actions = {
     cookies.set("access", token);
 
     const redirectTo = url.searchParams.get("redirectTo");
-    console.log("HELLUR", typeof redirectTo);
+
     if (redirectTo !== "null" && redirectTo) {
       throw redirect(302, `/${redirectTo.slice(1)}`);
     }

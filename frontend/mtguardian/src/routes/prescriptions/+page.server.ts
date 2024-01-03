@@ -40,7 +40,6 @@ export const load = (async ({ cookies, url }) => {
     const res = await fetch(
       "http://0.0.0.0:8004/api/v1/prescription?present=true",
       {
-        cache: "no-cache",
         headers: {
           Authorization: `Bearer ${token}`,
         },
