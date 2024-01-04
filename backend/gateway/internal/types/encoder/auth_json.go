@@ -1,4 +1,4 @@
-package types
+package encoder
 
 type AuthDTO struct {
 	Email    string

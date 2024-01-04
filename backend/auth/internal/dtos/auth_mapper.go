@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/tommylay1902/authmicro/internal/helper"
 	"github.com/tommylay1902/authmicro/internal/models"
@@ -16,6 +18,7 @@ func AuthModelToAuthDTO(model *models.Auth) *AuthDTO {
 func AuthDTOToAuthModel(dto *AuthDTO) (*models.Auth, error) {
 	generatedToken, err := helper.GenerateRefreshToken(dto.Email)
 
+	fmt.Println("generated access token!", *generatedToken)
 	if err != nil {
 		return nil, err
 	}

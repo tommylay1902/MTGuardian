@@ -41,6 +41,7 @@ func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 
 func (ph *PrescriptionHandler) GetPrescription(c *fiber.Ctx) error {
 	idParam := c.Params("id")
+	email := c.Params("email")
 
 	id, err := uuid.Parse(idParam)
 
@@ -52,7 +53,7 @@ func (ph *PrescriptionHandler) GetPrescription(c *fiber.Ctx) error {
 		return errorhandler.HandleError(custErr, c)
 	}
 
-	p, sErr := ph.PrescriptionService.GetPrescriptionById(id)
+	p, sErr := ph.PrescriptionService.GetPrescriptionById(id, email)
 
 	if sErr != nil {
 		return errorhandler.HandleError(sErr, c)
@@ -62,8 +63,9 @@ func (ph *PrescriptionHandler) GetPrescription(c *fiber.Ctx) error {
 }
 
 func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
+	email := c.Params("email")
 	searchQueries := c.Queries()
-	prescriptions, err := ph.PrescriptionService.GetPrescriptions(searchQueries)
+	prescriptions, err := ph.PrescriptionService.GetPrescriptions(searchQueries, &email)
 
 	if err != nil {
 		return errorhandler.HandleError(err, c)
@@ -73,7 +75,7 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 
 func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
 	idParam := c.Params("id")
-
+	email := c.Params("email")
 	id, err := uuid.Parse(idParam)
 
 	if err != nil {
@@ -83,7 +85,7 @@ func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
 		}
 		return errorhandler.HandleError(badErr, c)
 	}
-	sErr := ph.PrescriptionService.DeletePrescription(id)
+	sErr := ph.PrescriptionService.DeletePrescription(id, email)
 	if sErr != nil {
 		return errorhandler.HandleError(sErr, c)
 	}
@@ -92,7 +94,7 @@ func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
 
 func (ph *PrescriptionHandler) UpdatePrescription(c *fiber.Ctx) error {
 	idParam := c.Params("id")
-
+	email := c.Params("email")
 	id, err := uuid.Parse(idParam)
 
 	if err != nil {
@@ -112,7 +114,7 @@ func (ph *PrescriptionHandler) UpdatePrescription(c *fiber.Ctx) error {
 		return errorhandler.HandleError(bodyParseErr, c)
 	}
 
-	sErr := ph.PrescriptionService.UpdatePrescription(&requestBody, id)
+	sErr := ph.PrescriptionService.UpdatePrescription(&requestBody, id, email)
 
 	if sErr != nil {
 

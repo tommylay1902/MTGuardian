@@ -1,6 +1,7 @@
+import toast from "svelte-french-toast";
 import { convertDateHtmlInputStringToISO8601 } from "./date";
 
-export async function createPrescription(event: Event) {
+export async function createPrescription(event: Event, access: string) {
   try {
     const values = event.target as HTMLFormElement;
     const data = new FormData(values);
@@ -37,23 +38,55 @@ export async function createPrescription(event: Event) {
       ended: isPresent ? null : formattedEndedDate,
     };
 
-    const response = await fetch(`http://0.0.0.0:8000/api/v1/prescription`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...prescription }),
+    // const response = await fetch(`http://0.0.0.0:8004/api/v1/prescription`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${access}`,
+    //   },
+    //   body: JSON.stringify({ ...prescription }),
+    // });
+
+    const fetchPromise = new Promise(async (resolve, reject) => {
+      const res = await fetch(`http://0.0.0.0:8004/api/v1/prescription`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access}`,
+        },
+        body: JSON.stringify({ ...prescription }),
+      });
+      if (res.status === 201) {
+        const id = (await res.json())["success"];
+        resolve(id);
+      } else {
+        const body = await res.json();
+
+        reject(body);
+      }
     });
 
-    const responseId = await response.json();
-    const id = responseId["success"];
+    const prescriptionId = await toast.promise(
+      fetchPromise,
+      {
+        loading: "Creating...",
+        success: `Successfully created prescription:${prescription.medication}!`,
+        error: ({ error }) => `${error}`,
+      },
+      {
+        style: "color:#fff; background: #333;",
+      }
+    );
+
+    // const responseId = await response.json();
+    // const id = responseId["success"];
 
     return {
-      id,
+      id: prescriptionId,
       medication: data.get("medication")?.toString() || "",
       dosage: data.get("dosage")?.toString() || "",
       notes: data.get("notes")?.toString() || "",
-      started: formattedStartedDate.toString() || "",
+      started: formattedStartedDate.toString() || "null",
       ended: data.get("ended")?.toString() || "null",
     };
   } catch (e) {
@@ -61,7 +94,11 @@ export async function createPrescription(event: Event) {
   }
 }
 
-export async function updatePrescription(event: Event, id: string) {
+export async function updatePrescription(
+  event: Event,
+  id: string,
+  access: string
+) {
   try {
     const values = event.target as HTMLFormElement;
     const data = new FormData(values);
@@ -99,22 +136,42 @@ export async function updatePrescription(event: Event, id: string) {
       started: formattedStartedDate,
       ended: isPresent ? null : formattedEndedDate,
     };
-    console.log(JSON.stringify({ ...prescription }));
 
-    fetch(`http://0.0.0.0:8000/api/v1/prescription/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...prescription }),
+    const fetchPromise = new Promise(async (resolve, reject) => {
+      const res = await fetch(`http://0.0.0.0:8004/api/v1/prescription/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access}`,
+        },
+        body: JSON.stringify({ ...prescription }),
+      });
+      if (res.status === 200) {
+        resolve(prescription.medication);
+      } else {
+        const body = await res.json();
+
+        reject(body);
+      }
     });
 
+    toast.promise(
+      fetchPromise,
+      {
+        loading: "Saving...",
+        success: (result) => `Successfully updated ${result}!`,
+        error: ({ error }) => `${error}`,
+      },
+      {
+        style: "color:#fff; background: #333;",
+      }
+    );
     return {
       id,
       medication: data.get("medication")?.toString() || "",
       dosage: data.get("dosage")?.toString() || "",
       notes: data.get("notes")?.toString() || "",
-      started: formattedStartedDate.toString() || "",
+      started: formattedStartedDate.toString() || "null",
       ended: data.get("ended")?.toString() || "null",
     };
   } catch (e) {

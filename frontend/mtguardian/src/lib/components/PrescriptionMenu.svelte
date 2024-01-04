@@ -6,12 +6,19 @@
     pastViewHistory,
     presentViewHistory,
   } from "$lib/utils/static";
+  import { getContext } from "svelte";
+
+  const token = getContext("access");
   $: activeTable = $PrescriptionViewHistoryStore;
 
   async function reloadTable(viewHistory: string) {
     if (viewHistory === $PrescriptionViewHistoryStore) return;
     PrescriptionViewHistoryStore.set(viewHistory);
-    const response = await fetch(`${$PrescriptionViewHistoryStore}`);
+    const response = await fetch(`${$PrescriptionViewHistoryStore}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     const prescriptions = await response.json();
 
@@ -38,6 +45,3 @@
     on:click={() => reloadTable(allViewHistory)}>All Medication</button
   >
 </div>
-
-<style>
-</style>

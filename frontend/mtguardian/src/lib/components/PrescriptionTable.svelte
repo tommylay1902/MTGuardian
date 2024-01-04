@@ -1,6 +1,8 @@
 <script lang="ts">
   import { generatePrescriptionTemplate } from "$lib/types/Prescription";
   import { convertStringISO8601ToShortDate } from "$lib/utils/date";
+  import { fly } from "svelte/transition";
+  import { circOut } from "svelte/easing";
 
   import PrescriptionStore from "$lib/store/PrescriptionStore";
   import HighlightTableRowStore from "$lib/store/HighlightTableRowStore";
@@ -14,17 +16,17 @@
   const ignoreHeaders: string[] = ["id"];
 </script>
 
-<table class="table table-lg">
-  <thead>
+<table class="table table-lg table-fixed top-5">
+  <thead class="sticky top-0 bg-slate-800 rounded-lg">
     <tr class="border-white">
       {#each tableHeaders as th}
         {#if !ignoreHeaders.includes(th)}
-          <th class={`text-3xl text-white `}
+          <th class={`text-3xl text-white py-5`}
             ><strong>{th.toUpperCase()}</strong></th
           >
         {/if}
       {/each}
-      <th class="text-3xl text-white">Edit/Delete</th>
+      <th class="text-3xl text-white py-5">Edit/Delete</th>
     </tr>
   </thead>
 
@@ -33,6 +35,7 @@
       <tr
         class="border-white"
         class:highlight={$HighlightTableRowStore.id === p.id}
+        transition:fly={{ x: 400, duration: 800, easing: circOut }}
         on:animationend={() => {
           HighlightTableRowStore.set({
             id: "",
@@ -43,10 +46,16 @@
       >
         {#each tableHeaders as th}
           {#if !ignoreHeaders.includes(th)}
-            {#if th === "started" || th === "ended"}
+            {#if th === "ended"}
               <td class={`text-white text-2xl`} id="date">
                 {p[th] == null || p[th] === "null" || typeof p[th] !== "string"
                   ? "Present"
+                  : convertStringISO8601ToShortDate(p[th])}
+              </td>
+            {:else if th === "started"}
+              <td class={`text-white text-2xl`} id="date">
+                {p[th] == null || p[th] === "null" || typeof p[th] !== "string"
+                  ? "Unkown"
                   : convertStringISO8601ToShortDate(p[th])}
               </td>
             {:else}

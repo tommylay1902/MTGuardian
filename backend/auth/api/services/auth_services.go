@@ -52,13 +52,24 @@ func (as *AuthService) Login(authDTO *dto.AuthDTO) (*string, error) {
 		return nil, &customerrors.ResourceNotFound{Code: 404, Message: "Password and email do not match"}
 	}
 
-	token, err := helper.GenerateAccessToken(authDTO.Email)
+	access, err := helper.GenerateAccessToken(authDTO.Email)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return token, nil
+	refresh, err := helper.GenerateRefreshToken(authDTO.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = as.AuthDAO.InsertNewRefreshToken(authDTO.Email, refresh)
+	if err != nil {
+		return nil, err
+	}
+
+	return access, nil
 
 }
 

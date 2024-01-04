@@ -40,6 +40,18 @@ services:
       dbprescription: #connects to the service 'dbprescription' over the 'db' network
         condition: service_healthy
     restart: unless-stopped
+  gateway:
+    container_name: gateway
+    build:
+      context: ./backend/gateway
+      dockerfile: Dockerfile  
+    environment:
+      - PORT=8080
+      - HOST_IP=host.docker.internal
+    ports:
+      - "8004:8080" 
+    tty: true
+    restart: unless-stopped
   
   dbprescription:
     container_name: dbprescription
