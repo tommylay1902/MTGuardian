@@ -17,6 +17,7 @@ func MapPrescriptionDTOToModel(dto *PrescriptionDTO) (*models.Prescription, erro
 		Notes:      dto.Notes,
 		Started:    dto.Started,
 		Ended:      dto.Ended,
+		Refills:    dto.Refills,
 		Owner:      dto.Owner,
 	}
 	return model, nil
@@ -29,6 +30,7 @@ func MapPrescriptionModelToDTO(p *models.Prescription) (*PrescriptionDTO, error)
 		Notes:      p.Notes,
 		Started:    p.Started,
 		Ended:      p.Ended,
+		Refills:    p.Refills,
 		Owner:      p.Owner,
 	}
 	return dto, nil

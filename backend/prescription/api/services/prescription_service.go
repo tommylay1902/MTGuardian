@@ -99,6 +99,11 @@ func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id 
 		*pUpdate.Ended = *pDTO.Ended
 	}
 
+	if pUpdate.Refills != nil && *pDTO.Refills != *pUpdate.Refills {
+		hasUpdate = true
+		*pUpdate.Refills = *pDTO.Refills
+	}
+
 	if hasUpdate {
 		return ps.dao.UpdatePrescription(pUpdate, email)
 	}

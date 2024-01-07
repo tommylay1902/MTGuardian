@@ -51,7 +51,7 @@ func (dao *PrescriptionDAO) GetAllPrescriptions(searchQueries map[string]string,
 
 	query := helper.BuildQueryWithSearchParam(searchQueries, dao.DB)
 
-	err := query.Where("owner = ?", *owner).Find(&prescriptions).Error
+	err := query.Where("owner = ?", *owner).Order("started desc").Find(&prescriptions).Error
 
 	if err != nil {
 		return nil, err

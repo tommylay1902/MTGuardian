@@ -84,7 +84,6 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 			"error": bodyErr.Error,
 		})
 	}
-	fmt.Println("error")
 
 	var prescription []types.Prescription
 

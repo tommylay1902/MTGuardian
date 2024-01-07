@@ -56,18 +56,18 @@
       $PrescriptionStore = $PrescriptionStore.filter((obj) => {
         return obj.id !== data.id;
       });
-
-      HighlightTableRowStore.set({
-        id: $FormStore.data.id,
-        canHighlightAfterCreation: false,
-        canHighlightAfterUpdate: true,
-      });
     } else {
       $PrescriptionStore = $PrescriptionStore.map((obj) => {
         const id = $FormStore.data.id;
         if (id === obj.id && data !== undefined) {
           return { ...data };
         } else return obj;
+      });
+
+      HighlightTableRowStore.set({
+        id: $FormStore.data.id,
+        canHighlightAfterCreation: false,
+        canHighlightAfterUpdate: true,
       });
     }
 
@@ -79,12 +79,23 @@
     const data = await createPrescription(e, access);
 
     if (data !== undefined && determineUpdate(data)) {
-      PrescriptionStore.update((currentData) => [
-        ...currentData,
-        {
-          ...data,
-        },
-      ]);
+      PrescriptionStore.update((currentData) => {
+        const newData = [
+          ...currentData,
+          {
+            ...data,
+          },
+        ];
+
+        const sortedData = newData.sort((a, b) => {
+          const dateA = a.started !== null ? new Date(a.started).getTime() : 0;
+          const dateB = b.started !== null ? new Date(b.started).getTime() : 0;
+
+          return dateB - dateA;
+        });
+
+        return sortedData;
+      });
     }
 
     resetModalStore();
