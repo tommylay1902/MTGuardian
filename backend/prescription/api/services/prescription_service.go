@@ -34,7 +34,6 @@ func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID, email string) (
 	if err != nil {
 		return nil, err
 	}
-
 	return p, nil
 }
 
@@ -64,7 +63,6 @@ func (ps *PrescriptionService) DeletePrescription(id uuid.UUID, email string) er
 	return nil
 }
 
-// test
 func (ps *PrescriptionService) UpdatePrescription(pDTO *dto.PrescriptionDTO, id uuid.UUID, email string) error {
 	pUpdate, err := ps.dao.GetPrescriptionById(id, email)
 	if err != nil {
