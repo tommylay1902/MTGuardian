@@ -1,15 +1,13 @@
-package prescriptiondto
+package prescriptionhistorydto
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
-type PrescriptionDTO struct {
-	Medication *string    `json:"medication"`
-	Dosage     *string    `json:"dosage"`
-	Notes      *string    `json:"notes"`
-	Started    *time.Time `json:"started"`
-	Ended      *time.Time `json:"ended"`
-	Refills    *int       `json:"refills"`
-	Owner      *string    `json:"owner"`
+type PrescriptionHistoryDTO struct {
+	PrescriptionId uuid.UUID  `json:"prescription" gorm:"uniqueIndex:prescription_to_owner;not null"`
+	OwnerId        uuid.UUID  `json:"owner" gorm:"uniqueIndex:prescription_to_owner;not null"`
+	Taken          *time.Time `json:"taken"`
 }

@@ -1,40 +1,40 @@
-package prescriptiondto
+package prescriptionhistorydto
+
+import (
+	"github.com/google/uuid"
+	"github.com/tommylay1902/prescriptionhistory/internal/models"
+)
 
 // import (
 // 	"github.com/google/uuid"
 // 	"github.com/tommylay1902/prescriptionhistory/internal/models"
 // )
 
-// func MapPrescriptionDTOToModel(dto *PrescriptionDTO) (*models.Prescription, error) {
-// 	var id, err = uuid.NewRandom()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	model := &models.Prescription{
-// 		ID:         id,
-// 		Medication: dto.Medication,
-// 		Dosage:     dto.Dosage,
-// 		Notes:      dto.Notes,
-// 		Started:    dto.Started,
-// 		Ended:      dto.Ended,
-// 		Refills:    dto.Refills,
-// 		Owner:      dto.Owner,
-// 	}
-// 	return model, nil
-// }
+func MapDTOToModel(dto *PrescriptionHistoryDTO) (*models.PrescriptionHistory, error) {
+	var id, err = uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+	model := &models.PrescriptionHistory{
+		Id:             id,
+		OwnerId:        dto.OwnerId,
+		PrescriptionId: dto.PrescriptionId,
+		Taken:          dto.Taken,
+	}
 
-// func MapPrescriptionModelToDTO(p *models.Prescription) (*PrescriptionDTO, error) {
-// 	dto := &PrescriptionDTO{
-// 		Medication: p.Medication,
-// 		Dosage:     p.Dosage,
-// 		Notes:      p.Notes,
-// 		Started:    p.Started,
-// 		Ended:      p.Ended,
-// 		Refills:    p.Refills,
-// 		Owner:      p.Owner,
-// 	}
-// 	return dto, nil
-// }
+	return model, nil
+}
+
+func MapModelToDTO(p *models.PrescriptionHistory) (*PrescriptionHistoryDTO, error) {
+
+	dto := &PrescriptionHistoryDTO{
+		PrescriptionId: p.PrescriptionId,
+		OwnerId:        p.OwnerId,
+		Taken:          p.Taken,
+	}
+
+	return dto, nil
+}
 
 // func MapPrescriptionModelSliceToDTOSlice(prescriptions []models.Prescription) ([]PrescriptionDTO, error) {
 // 	var resultMapping []PrescriptionDTO
