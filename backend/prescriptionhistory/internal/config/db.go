@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/tommylay1902/prescriptionhistory/internal/models"
+	"github.com/tommylay1902/prescriptionhistory/internal/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -19,7 +19,7 @@ func SetupDB() *gorm.DB {
 		}
 	}
 
-	db.AutoMigrate(&models.PrescriptionHistory{})
+	db.AutoMigrate(&model.PrescriptionHistory{})
 
 	return db
 }

@@ -3,10 +3,10 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/tommylay1902/prescriptionhistory/api/dataaccess"
-	handler "github.com/tommylay1902/prescriptionhistory/api/handlers"
-	route "github.com/tommylay1902/prescriptionhistory/api/routes"
-	"github.com/tommylay1902/prescriptionhistory/api/services"
+	"github.com/tommylay1902/prescriptionhistory/api/dao"
+	handler "github.com/tommylay1902/prescriptionhistory/api/handler"
+	route "github.com/tommylay1902/prescriptionhistory/api/route"
+	"github.com/tommylay1902/prescriptionhistory/api/service"
 	"github.com/tommylay1902/prescriptionhistory/internal/config"
 )
 
@@ -29,8 +29,8 @@ func main() {
 		AllowMethods: "GET, POST, PUT, DELETE",
 	}))
 
-	dao := dataaccess.Initialize(db)
-	service := services.Initialize(dao)
+	dao := dao.Initialize(db)
+	service := service.Initialize(dao)
 	handler := handler.Initialize(service)
 
 	route.SetUp(app, handler)

@@ -16,8 +16,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
-	prescriptiondto "github.com/tommylay1902/prescriptionmicro/internal/dtos/prescription"
-	"github.com/tommylay1902/prescriptionmicro/internal/models"
+	prescriptiondto "github.com/tommylay1902/prescriptionmicro/internal/dto/prescription"
+	"github.com/tommylay1902/prescriptionmicro/internal/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -89,7 +89,7 @@ func SetupGormConnection(t *testing.T, dbContainer testcontainers.Container) *go
 
 	// Open a GORM connection
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	db.AutoMigrate(&models.Prescription{})
+	db.AutoMigrate(&model.Prescription{})
 
 	if err != nil {
 		log.Panic("error seting up gorm connection: ", err)
