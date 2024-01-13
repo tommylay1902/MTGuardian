@@ -69,7 +69,7 @@ services:
     networks: 
       - db
     depends_on:
-      dbprescriptionhistory: #connects to the service 'dbprescription' over the 'db' network
+      dbprescriptionhistory: 
         condition: service_healthy
     restart: unless-stopped
   

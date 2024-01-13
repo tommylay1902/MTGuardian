@@ -38,7 +38,6 @@ func (ps *PrescriptionService) GetPrescriptionById(id uuid.UUID, email string) (
 }
 
 func (ps *PrescriptionService) GetPrescriptions(searchQuery map[string]string, owner *string) ([]models.Prescription, error) {
-
 	prescriptions, err := ps.dao.GetAllPrescriptions(searchQuery, owner)
 
 	if err != nil {
