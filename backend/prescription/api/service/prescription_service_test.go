@@ -45,26 +45,26 @@ func (m *MockPrescriptionDAO) CreatePrescription(prescription *model.Prescriptio
 }
 
 // GetPrescriptionById mocks the GetPrescriptionById method of PrescriptionDAO.
-func (m *MockPrescriptionDAO) GetPrescriptionById(id uuid.UUID) (*model.Prescription, error) {
-	args := m.Called(id)
+func (m *MockPrescriptionDAO) GetPrescriptionById(id uuid.UUID, email string) (*model.Prescription, error) {
+	args := m.Called(id, email)
 	return args.Get(0).(*model.Prescription), args.Error(1)
 }
 
 // GetAllPrescriptions mocks the GetAllPrescriptions method of PrescriptionDAO.
-func (m *MockPrescriptionDAO) GetAllPrescriptions(searchQueries map[string]string) ([]model.Prescription, error) {
+func (m *MockPrescriptionDAO) GetAllPrescriptions(searchQueries map[string]string, email *string) ([]model.Prescription, error) {
 	args := m.Called(searchQueries)
 	return args.Get(0).([]model.Prescription), args.Error(1)
 }
 
 // DeletePrescription mocks the DeletePrescription method of PrescriptionDAO.
-func (m *MockPrescriptionDAO) DeletePrescription(p *model.Prescription) error {
-	args := m.Called(p)
+func (m *MockPrescriptionDAO) DeletePrescription(p *model.Prescription, email string) error {
+	args := m.Called(p, email)
 	return args.Error(0)
 }
 
 // UpdatePrescription mocks the UpdatePrescription method of PrescriptionDAO.
-func (m *MockPrescriptionDAO) UpdatePrescription(p *model.Prescription) error {
-	args := m.Called(p)
+func (m *MockPrescriptionDAO) UpdatePrescription(p *model.Prescription, email string) error {
+	args := m.Called(p, email)
 	return args.Error(0)
 }
 
@@ -89,6 +89,8 @@ func TestCreatePrescription(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Refills:    IntPointer(2),
+		Owner:      StringPointer("tommylay.c@gmail.com"),
 	}
 
 	prescription, mapErr := dto.MapPrescriptionDTOToModel(prescriptionDTO)
@@ -126,13 +128,16 @@ func TestGetPrescriptionById(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Ended:      TimePointer(time.Now()),
+		Refills:    IntPointer(2),
+		Owner:      StringPointer("tommylay.c@gmail.com"),
 	}
 
 	// Mock the GetPrescriptionById method of the DAO to return the sample prescription
-	dao.On("GetPrescriptionById", expectedID).Return(prescription, nil)
+	dao.On("GetPrescriptionById", expectedID, *prescription.Owner).Return(prescription, nil)
 
 	// Call the GetPrescriptionById method of the service
-	result, err := service.GetPrescriptionById(expectedID)
+	result, err := service.GetPrescriptionById(expectedID, *prescription.Owner)
 
 	// Your assertions here
 	assert.NoError(t, err)
@@ -150,12 +155,15 @@ func TestGetAllPrescriptions(t *testing.T) {
 	// Define a sample prescription and its associated ID
 	expectedIDOne := uuid.New()
 	expectedIDTwo := uuid.New()
+	email := "tommylay.c@gmail.com"
 	prescriptionOne := &model.Prescription{
 		ID:         expectedIDOne,
 		Medication: StringPointer("Sample Medication"),
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Refills:    IntPointer(2),
+		Owner:      &email,
 	}
 
 	prescriptionTwo := &model.Prescription{
@@ -164,27 +172,15 @@ func TestGetAllPrescriptions(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Refills:    IntPointer(2),
+		Owner:      &email,
 	}
-
-	// expectedDTOOne := &dto.PrescriptionDTO{
-	// 	Medication: prescriptionOne.Medication,
-	// 	Dosage:     prescriptionOne.Dosage,
-	// 	Notes:      prescriptionOne.Notes,
-	// 	Started:    prescriptionOne.Started,
-	// }
-
-	// expectedDTOTwo := &dto.PrescriptionDTO{
-	// 	Medication: prescriptionTwo.Medication,
-	// 	Dosage:     prescriptionTwo.Dosage,
-	// 	Notes:      prescriptionTwo.Notes,
-	// 	Started:    prescriptionTwo.Started,
-	// }
 
 	// Mock the GetPrescriptionById method of the DAO to return the sample prescription
 	dao.On("GetAllPrescriptions", make(map[string]string)).Return([]model.Prescription{*prescriptionOne, *prescriptionTwo}, nil)
 
 	// Call the GetPrescriptionById method of the service
-	resultDTOs, err := service.GetPrescriptions(make(map[string]string))
+	resultDTOs, err := service.GetPrescriptions(make(map[string]string), &email)
 
 	// Your assertions here
 	assert.NoError(t, err)
@@ -203,6 +199,7 @@ func TestDeletePrescription(t *testing.T) {
 
 	// Define a sample prescription and its associated ID
 	id := uuid.New()
+	email := "tommylay.c@gmail.com"
 
 	prescription := &model.Prescription{
 		ID:         id,
@@ -210,13 +207,15 @@ func TestDeletePrescription(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Refills:    IntPointer(2),
+		Owner:      &email,
 	}
 	// Mock the GetPrescriptionById method of the DAO to return a sample prescription
-	dao.On("GetPrescriptionById", id).Return(prescription, nil)
+	dao.On("GetPrescriptionById", id, email).Return(prescription, nil)
 
-	dao.On("DeletePrescription", prescription).Return(nil)
+	dao.On("DeletePrescription", prescription, *prescription.Owner).Return(nil)
 	// Call the GetPrescriptionById method of the service
-	err := service.DeletePrescription(id)
+	err := service.DeletePrescription(id, *prescription.Owner)
 
 	// Your assertions here
 	assert.NoError(t, err)
@@ -232,6 +231,7 @@ func TestUpdatePrescription(t *testing.T) {
 
 	// Define a sample prescription and its associated ID
 	id := uuid.New()
+	email := "tommylay.c@gmail.com"
 
 	prescription := &model.Prescription{
 		ID:         id,
@@ -239,6 +239,8 @@ func TestUpdatePrescription(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage"),
 		Notes:      StringPointer("Sample Notes"),
 		Started:    TimePointer(time.Now()),
+		Refills:    IntPointer(2),
+		Owner:      &email,
 	}
 
 	expectedDTO := &dto.PrescriptionDTO{
@@ -246,12 +248,14 @@ func TestUpdatePrescription(t *testing.T) {
 		Dosage:     StringPointer("Sample Dosage 2"),
 		Notes:      StringPointer("Sample Notes 2"),
 		Started:    TimePointer(time.Now()),
+		Refills:    IntPointer(2),
+		Owner:      &email,
 	}
 
-	dao.On("GetPrescriptionById", id).Return(prescription, nil)
-	dao.On("UpdatePrescription", prescription).Return(nil)
+	dao.On("GetPrescriptionById", id, email).Return(prescription, nil)
+	dao.On("UpdatePrescription", prescription, email).Return(nil)
 
-	err := service.UpdatePrescription(expectedDTO, id)
+	err := service.UpdatePrescription(expectedDTO, id, *prescription.Owner)
 
 	assert.NoError(t, err)
 }
@@ -263,4 +267,8 @@ func StringPointer(s string) *string {
 
 func TimePointer(t time.Time) *time.Time {
 	return &t
+}
+
+func IntPointer(i int) *int {
+	return &i
 }
