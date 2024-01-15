@@ -17,7 +17,7 @@ func MapDTOToModel(dto *PrescriptionHistoryDTO) (*model.PrescriptionHistory, err
 	}
 	model := &model.PrescriptionHistory{
 		Id:             id,
-		OwnerId:        dto.OwnerId,
+		Owner:          dto.Owner,
 		PrescriptionId: dto.PrescriptionId,
 		Taken:          dto.Taken,
 	}
@@ -29,7 +29,7 @@ func MapModelToDTO(p *model.PrescriptionHistory) (*PrescriptionHistoryDTO, error
 
 	dto := &PrescriptionHistoryDTO{
 		PrescriptionId: p.PrescriptionId,
-		OwnerId:        p.OwnerId,
+		Owner:          p.Owner,
 		Taken:          p.Taken,
 	}
 
