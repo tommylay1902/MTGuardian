@@ -154,6 +154,8 @@ func TestAuthServiceLogin(t *testing.T) {
 
 	// Mock GetHashFromEmail to return the hashedPassword
 	dao.On("GetHashFromEmail", authDTO.Email).Return(hashedPassword, nil)
+	// Set up the expected behavior for InsertNewRefreshToken
+	dao.On("InsertNewRefreshToken", mock.AnythingOfType("*string"), mock.AnythingOfType("*string")).Return(nil)
 
 	// Perform the login
 	token, err := service.Login(authDTO)

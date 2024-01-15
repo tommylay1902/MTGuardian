@@ -73,7 +73,9 @@ func MatchPrescriptionExceptUUID(prescription *model.Prescription) interface{} {
 		return arg.Medication == prescription.Medication &&
 			arg.Dosage == prescription.Dosage &&
 			arg.Notes == prescription.Notes &&
-			arg.Started == prescription.Started
+			arg.Started == prescription.Started &&
+			arg.Owner == prescription.Owner &&
+			arg.Refills == prescription.Refills
 	})
 }
 
