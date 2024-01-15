@@ -52,6 +52,26 @@ services:
       - "8004:8080" 
     tty: true
     restart: unless-stopped
+  prescriptionhistory:
+    container_name: prescriptionhistory
+    build:
+      context: ./backend/prescriptionhistory
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: prescriptionhistory
+      GORM_HOST: DB
+      PORT: 8080
+    ports:
+      - "8006:8080" 
+    tty: true
+    networks: 
+      - db
+    depends_on:
+      dbprescriptionhistory: 
+        condition: service_healthy
+    restart: unless-stopped
   
   dbprescription:
     container_name: dbprescription
@@ -97,6 +117,28 @@ services:
       retries: 5
     restart: unless-stopped
 
+  dbprescriptionhistory:
+    container_name: dbprescriptionhistory
+    image: postgres:15.3 # Use the official PostgreSQL image
+    ports:
+      - "8005:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password 
+      POSTGRES_DB: prescriptionhistory
+      GORM_HOST: DB
+    networks:
+      - db
+    volumes:
+      - prescription_history_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d prescriptionhistory"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 networks:
   db:
     driver: bridge
@@ -105,4 +147,6 @@ volumes:
   auth_data:
     driver: local
   prescription_data:
+    driver: local
+  prescription_history_data:
     driver: local

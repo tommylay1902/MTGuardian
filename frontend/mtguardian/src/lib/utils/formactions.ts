@@ -38,35 +38,28 @@ export async function createPrescription(event: Event, access: string) {
       ended: isPresent ? null : formattedEndedDate,
     };
 
-    // const response = await fetch(`http://0.0.0.0:8004/api/v1/prescription`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${access}`,
-    //   },
-    //   body: JSON.stringify({ ...prescription }),
-    // });
+    const fetchPromise: Promise<string> = new Promise(
+      async (resolve, reject) => {
+        const res = await fetch(`http://0.0.0.0:8004/api/v1/prescription`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${access}`,
+          },
+          body: JSON.stringify({ ...prescription }),
+        });
+        if (res.status === 201) {
+          const id = (await res.json())["success"];
+          resolve(id);
+        } else {
+          const body = await res.json();
 
-    const fetchPromise = new Promise(async (resolve, reject) => {
-      const res = await fetch(`http://0.0.0.0:8004/api/v1/prescription`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${access}`,
-        },
-        body: JSON.stringify({ ...prescription }),
-      });
-      if (res.status === 201) {
-        const id = (await res.json())["success"];
-        resolve(id);
-      } else {
-        const body = await res.json();
-
-        reject(body);
+          reject(body);
+        }
       }
-    });
+    );
 
-    const prescriptionId = await toast.promise(
+    const prescriptionId: string = await toast.promise(
       fetchPromise,
       {
         loading: "Creating...",

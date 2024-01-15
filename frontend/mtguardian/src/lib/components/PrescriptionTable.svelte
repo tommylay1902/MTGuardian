@@ -13,7 +13,7 @@
   } from "$lib/utils/events/modal";
 
   const tableHeaders: string[] = Object.keys(generatePrescriptionTemplate());
-  const ignoreHeaders: string[] = ["id"];
+  const ignoreHeaders: string[] = ["id", "notes"];
 </script>
 
 <table class="table table-lg table-fixed top-5">
