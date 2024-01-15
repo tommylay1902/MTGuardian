@@ -1,4 +1,3 @@
-// errorhandler/handler.go
 package errorhandler
 
 import (
@@ -6,7 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/tommylay1902/authmicro/internal/error/customerrors"
+	"github.com/tommylay1902/authmicro/internal/error/apperror"
 )
 
 func HandleError(err error, c *fiber.Ctx) error {
@@ -18,25 +17,24 @@ func HandleError(err error, c *fiber.Ctx) error {
 	}
 
 	switch {
-	case errors.Is(err, &customerrors.ResourceConflictError{Code: 409}) ||
+	case errors.Is(err, &apperror.ResourceConflictError{Code: 409}) ||
 		sqlCode == "23505":
 		return c.Status(fiber.StatusConflict).JSON(
 			fiber.Map{
 				"error": err.Error(),
 			})
-	case errors.Is(err, &customerrors.ResourceNotFound{Code: 404}):
-
+	case errors.Is(err, &apperror.ResourceNotFound{Code: 404}):
 		return c.Status(fiber.StatusNotFound).JSON(
 			fiber.Map{
 				"error": err.Error(),
 			})
-	case errors.Is(err, &customerrors.BadRequestError{Code: 400}):
+	case errors.Is(err, &apperror.BadRequestError{Code: 400}):
 
 		return c.Status(fiber.StatusBadRequest).JSON(
 			fiber.Map{
 				"error": err.Error(),
 			})
-	case errors.Is(err, &customerrors.NotAuthorizedError{Code: 401}):
+	case errors.Is(err, &apperror.NotAuthorizedError{Code: 401}):
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": err.Error(),
 		})

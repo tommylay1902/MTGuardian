@@ -9,10 +9,13 @@
   import PrescriptionTable from "$lib/components/PrescriptionTable.svelte";
   import { showCreatePrescriptionModal } from "$lib/utils/events/modal";
   import PrescriptionMenu from "$lib/components/PrescriptionMenu.svelte";
+  import { setContext } from "svelte";
 
   // load data
   export let data: PageData;
   PrescriptionStore.set(data.prescriptions);
+
+  setContext("access", data.access);
 </script>
 
 <div class="m-3 flex flex-col">

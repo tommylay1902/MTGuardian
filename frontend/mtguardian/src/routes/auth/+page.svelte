@@ -4,7 +4,7 @@
   import RegisterStore from "$lib/store/RegisterStore";
   import { enhance } from "$app/forms";
   const query = $page.url.searchParams.get("redirectTo");
-  console.log(query);
+
   $: {
     if ($page.status === 404) {
       toast.error("Invalid Credentials");

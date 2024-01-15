@@ -12,6 +12,8 @@ func MakeRequest(method string, url string, body *string) (*http.Response, error
 	var err error
 	if method == "GET" {
 		return http.Get(url)
+	} else if method == "DELETE" {
+		req, err = http.NewRequest(method, url, nil)
 	} else {
 		req, err = http.NewRequest(method, url, strings.NewReader(*body))
 	}

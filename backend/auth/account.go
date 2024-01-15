@@ -3,10 +3,10 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/tommylay1902/authmicro/api/dataaccess"
-	"github.com/tommylay1902/authmicro/api/handlers"
-	"github.com/tommylay1902/authmicro/api/routes"
-	"github.com/tommylay1902/authmicro/api/services"
+	"github.com/tommylay1902/authmicro/api/dao"
+	handler "github.com/tommylay1902/authmicro/api/handler"
+	"github.com/tommylay1902/authmicro/api/route"
+	"github.com/tommylay1902/authmicro/api/service"
 	"github.com/tommylay1902/authmicro/internal/config"
 )
 
@@ -30,10 +30,10 @@ func main() {
 		AllowMethods: "GET, POST, PUT, DELETE",
 	}))
 
-	accountDAO := dataaccess.InitializeAuthDAO(db)
+	dao := dao.Initialize(db)
 
-	accountService := services.InitializeAuthService(accountDAO)
-	accountHandler := handlers.InitializeAuthHandler(accountService)
-	routes.SetupRoutes(app, accountHandler)
+	service := service.Initialize(dao)
+	handler := handler.Initialize(service)
+	route.Setup(app, handler)
 	app.Listen("0.0.0.0:" + port)
 }
