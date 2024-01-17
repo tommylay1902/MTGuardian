@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/tommylay1902/prescriptionhistory/api/dao"
 	"github.com/tommylay1902/prescriptionhistory/internal/dto/rxhistorydto"
+	"github.com/tommylay1902/prescriptionhistory/internal/error/apperror"
 	"github.com/tommylay1902/prescriptionhistory/internal/model"
 )
 
@@ -48,5 +49,39 @@ func (phs *PrescriptionHistoryService) DeleteByEmailAndId(email string, id uuid.
 }
 
 func (phs *PrescriptionHistoryService) UpdateByEmailAndRx(model *model.PrescriptionHistory, email string, pId uuid.UUID) error {
+	hasUpdate := false
+
+	curr, err := phs.DAO.GetByEmailAndRx(email, pId)
+
+	if err != nil {
+		return err
+	}
+
+	if model.Id != curr.Id {
+		hasUpdate = true
+		curr.Id = model.Id
+	}
+
+	if model.Owner != curr.Owner {
+		hasUpdate = true
+		curr.Owner = model.Owner
+	}
+
+	if model.PrescriptionId != curr.PrescriptionId {
+		hasUpdate = true
+		curr.PrescriptionId = model.PrescriptionId
+	}
+
+	if model.Taken != nil && model.Taken != curr.Taken {
+		hasUpdate = true
+		curr.Taken = model.Taken
+	}
+
+	if hasUpdate {
+		err := phs.DAO.UpdateByEmailAndRx(*model, email, pId)
+		return err
+	}
+
+	return &apperror.BadRequestError{Message: "No updates found for the prescription", Code: 400}
 
 }

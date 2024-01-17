@@ -165,7 +165,23 @@ func TestDeleteByEmailAndId(t *testing.T) {
 }
 
 func TestUpdateUpdateByEmailAndRx(t *testing.T) {
+	rxOne := GenerateRxHistoryModel()
+	taken := time.Now()
+	rxTwo := &model.PrescriptionHistory{
+		Id:             rxOne.Id,
+		PrescriptionId: rxOne.PrescriptionId,
+		Owner:          rxOne.Owner,
+		Taken:          &taken,
+	}
 
+	dao := &MockPrescriptionHistoryDAO{}
+	service := service.Initialize(dao)
+
+	dao.On("GetByEmailAndRx", rxOne.Owner, rxOne.PrescriptionId).Return(rxOne, nil)
+	dao.On("UpdateByEmailAndRx", *rxTwo, rxTwo.Owner, rxTwo.PrescriptionId).Return(nil)
+
+	err := service.UpdateByEmailAndRx(rxTwo, rxTwo.Owner, rxTwo.PrescriptionId)
+	assert.NoError(t, err)
 }
 
 func GenerateRxHistoryModel() *model.PrescriptionHistory {
