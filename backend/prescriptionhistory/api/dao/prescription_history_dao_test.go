@@ -65,9 +65,9 @@ func TestCreateHistory(t *testing.T) {
 	taken := time.Now()
 
 	rxHistory := &model.PrescriptionHistory{
-		Id:             id,
-		PrescriptionId: rxId,
-		Owner:          owner,
+		Id:             &id,
+		PrescriptionId: &rxId,
+		Owner:          &owner,
 		Taken:          &taken,
 	}
 
@@ -84,7 +84,7 @@ func TestCreateHistory(t *testing.T) {
 		t.Fatalf("Error in SQL mock expectations: %v", err)
 	}
 
-	assert.Equal(t, *result, rxHistory.Id)
+	assert.Equal(t, *result, *rxHistory.Id)
 
 }
 
@@ -99,16 +99,16 @@ func TestCreateHistoryWithDatabaseError(t *testing.T) {
 	taken := time.Now()
 
 	rxHistory := &model.PrescriptionHistory{
-		Id:             id,
-		PrescriptionId: rxId,
-		Owner:          owner,
+		Id:             &id,
+		PrescriptionId: &rxId,
+		Owner:          &owner,
 		Taken:          &taken,
 	}
 
 	rxHistoryDup := &model.PrescriptionHistory{
-		Id:             id,
-		PrescriptionId: rxId,
-		Owner:          owner,
+		Id:             &id,
+		PrescriptionId: &rxId,
+		Owner:          &owner,
 		Taken:          &taken,
 	}
 
@@ -125,7 +125,7 @@ func TestCreateHistoryWithDatabaseError(t *testing.T) {
 		t.Fatalf("Error in SQL mock expectations: %v", err)
 	}
 
-	assert.Equal(t, *result, rxHistory.Id)
+	assert.Equal(t, *result, *rxHistory.Id)
 
 	mock.ExpectBegin()
 
@@ -150,9 +150,9 @@ func TestGetPrescriptionHistory(t *testing.T) {
 	taken := time.Now()
 
 	rxHistory := &model.PrescriptionHistory{
-		Id:             id,
-		PrescriptionId: rxId,
-		Owner:          owner,
+		Id:             &id,
+		PrescriptionId: &rxId,
+		Owner:          &owner,
 		Taken:          &taken,
 	}
 
@@ -162,9 +162,9 @@ func TestGetPrescriptionHistory(t *testing.T) {
 	taken2 := time.Now()
 
 	rxHistory2 := &model.PrescriptionHistory{
-		Id:             id2,
-		PrescriptionId: rxId2,
-		Owner:          owner2,
+		Id:             &id2,
+		PrescriptionId: &rxId2,
+		Owner:          &owner2,
 		Taken:          &taken2,
 	}
 
@@ -209,19 +209,20 @@ func TestGetByEmailAndRx(t *testing.T) {
 	taken := time.Now()
 	email := "tommylay.c@gmail.com"
 	id := uuid.New()
+	pId := uuid.New()
 
 	expected := &model.PrescriptionHistory{
-		Id:             uuid.New(),
-		PrescriptionId: id,
-		Owner:          email,
+		Id:             &id,
+		PrescriptionId: &pId,
+		Owner:          &email,
 		Taken:          &taken,
 	}
 
 	dao := dao.Initialize(gormDB)
 
-	mock.ExpectQuery("SELECT .* FROM \"prescription_histories\"").WithArgs(email, id).WillReturnRows(sqlmock.NewRows([]string{"id", "prescription_id", "owner", "taken"}).AddRow(expected.Id, expected.PrescriptionId, expected.Owner, expected.Taken))
+	mock.ExpectQuery("SELECT .* FROM \"prescription_histories\"").WithArgs(email, pId).WillReturnRows(sqlmock.NewRows([]string{"id", "prescription_id", "owner", "taken"}).AddRow(expected.Id, expected.PrescriptionId, expected.Owner, expected.Taken))
 
-	result, err := dao.GetByEmailAndRx(email, id)
+	result, err := dao.GetByEmailAndRx(email, pId)
 
 	assert.NoError(t, err)
 
@@ -295,14 +296,15 @@ func TestUpdate(t *testing.T) {
 	defer mock.ExpectationsWereMet()
 
 	dao := dao.Initialize(gormDB)
-
+	id := uuid.New()
+	pId := uuid.New()
 	taken := time.Now()
 	email := "tommylay.c@gmail.com"
 
 	rxHistory := &model.PrescriptionHistory{
-		Id:             uuid.New(),
-		PrescriptionId: uuid.New(),
-		Owner:          email,
+		Id:             &id,
+		PrescriptionId: &pId,
+		Owner:          &email,
 		Taken:          &taken,
 	}
 
@@ -318,11 +320,11 @@ func TestUpdate(t *testing.T) {
 
 	mock.ExpectBegin()
 
-	mock.ExpectExec(`UPDATE "prescription_histories"`).WithArgs(updatedRx.Id, updatedRx.PrescriptionId, updatedRx.Owner, *updatedRx.Taken, updatedRx.Owner, updatedRx.PrescriptionId, updatedRx.Id).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectExec(`UPDATE "prescription_histories"`).WithArgs(updatedRx.PrescriptionId, updatedRx.Owner, *updatedRx.Taken, updatedRx.Id).WillReturnResult(sqlmock.NewResult(0, 1))
 
 	mock.ExpectCommit()
 
-	err := dao.UpdateByEmailAndRx(*updatedRx, email, rxHistory.PrescriptionId)
+	err := dao.UpdateByModel(updatedRx)
 
 	assert.NoError(t, err)
 
@@ -336,13 +338,15 @@ func TestUpdateNoChange(t *testing.T) {
 	defer mock.ExpectationsWereMet()
 
 	dao := dao.Initialize(gormDB)
+	id := uuid.New()
+	pId := uuid.New()
 	taken := time.Now()
 	email := "tommylay.c@gmail.com"
 
 	rxHistory := &model.PrescriptionHistory{
-		Id:             uuid.New(),
-		PrescriptionId: uuid.New(),
-		Owner:          email,
+		Id:             &id,
+		PrescriptionId: &pId,
+		Owner:          &email,
 		Taken:          &taken,
 	}
 
@@ -350,11 +354,11 @@ func TestUpdateNoChange(t *testing.T) {
 
 	mock.ExpectBegin()
 
-	mock.ExpectExec("UPDATE \"prescription_histories\"").WithArgs(rxHistory.Id, rxHistory.PrescriptionId, rxHistory.Owner, *rxHistory.Taken, rxHistory.Owner, rxHistory.PrescriptionId, rxHistory.Id).WillReturnError(fmt.Errorf("database error"))
+	mock.ExpectExec("UPDATE \"prescription_histories\"").WithArgs(*rxHistory.PrescriptionId, *rxHistory.Owner, *rxHistory.Taken, *rxHistory.Id).WillReturnError(fmt.Errorf("database error"))
 
 	mock.ExpectRollback()
 
-	err := dao.UpdateByEmailAndRx(*rxHistory, rxHistory.Owner, rxHistory.PrescriptionId)
+	err := dao.UpdateByModel(rxHistory)
 
 	assert.Error(t, err)
 

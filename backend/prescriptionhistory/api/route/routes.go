@@ -12,4 +12,5 @@ func SetUp(app *fiber.App, handler *handler.PrescriptionHistoryHandler) {
 	apiGroup.Get("/all/:email", handler.GetAll)
 	apiGroup.Get("/:email/:pId", handler.GetByEmailAndRx)
 	apiGroup.Delete("/:email/:pId", handler.DeleteByEmailAndRx)
+	apiGroup.Put("/:email/:pId", handler.UpdateByEmailAndRx)
 }

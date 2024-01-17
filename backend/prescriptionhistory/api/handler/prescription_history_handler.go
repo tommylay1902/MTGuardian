@@ -83,3 +83,30 @@ func (h *PrescriptionHistoryHandler) DeleteByEmailAndRx(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": "succesfully deleted prescription history"})
 }
+
+func (h *PrescriptionHistoryHandler) UpdateByEmailAndRx(c *fiber.Ctx) error {
+	email := c.Params("email")
+	idParam := c.Params("pId")
+	pId, err := uuid.Parse(idParam)
+
+	if err != nil {
+		return errorhandler.HandleError(err, c)
+	}
+
+	dto := &rxhistorydto.PrescriptionHistoryDTO{}
+
+	err = c.BodyParser(dto)
+
+	if err != nil {
+		return errorhandler.HandleError(err, c)
+	}
+
+	err = h.Service.UpdateByEmailAndRx(dto, email, pId)
+
+	if err != nil {
+		return errorhandler.HandleError(err, c)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": "succesfully updated!"})
+
+}

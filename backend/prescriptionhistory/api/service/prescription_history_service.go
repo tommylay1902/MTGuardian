@@ -56,7 +56,7 @@ func (phs *PrescriptionHistoryService) DeleteByEmailAndRx(email string, id uuid.
 	return err
 }
 
-func (phs *PrescriptionHistoryService) UpdateByEmailAndRx(model *model.PrescriptionHistory, email string, pId uuid.UUID) error {
+func (phs *PrescriptionHistoryService) UpdateByEmailAndRx(dto *rxhistorydto.PrescriptionHistoryDTO, email string, pId uuid.UUID) error {
 	hasUpdate := false
 
 	curr, err := phs.DAO.GetByEmailAndRx(email, pId)
@@ -65,28 +65,27 @@ func (phs *PrescriptionHistoryService) UpdateByEmailAndRx(model *model.Prescript
 		return err
 	}
 
-	if model.Id != curr.Id {
-		hasUpdate = true
-		curr.Id = model.Id
+	if err != nil {
+		return err
 	}
 
-	if model.Owner != curr.Owner {
+	if dto.Owner != nil && dto.Owner != curr.Owner {
 		hasUpdate = true
-		curr.Owner = model.Owner
+		curr.Owner = dto.Owner
 	}
 
-	if model.PrescriptionId != curr.PrescriptionId {
+	if dto.PrescriptionId != nil && dto.PrescriptionId != curr.PrescriptionId {
 		hasUpdate = true
-		curr.PrescriptionId = model.PrescriptionId
+		curr.PrescriptionId = dto.PrescriptionId
 	}
 
-	if model.Taken != nil && model.Taken != curr.Taken {
+	if dto.Taken != nil && dto.Taken != curr.Taken {
 		hasUpdate = true
-		curr.Taken = model.Taken
+		curr.Taken = dto.Taken
 	}
 
 	if hasUpdate {
-		err := phs.DAO.UpdateByEmailAndRx(*model, email, pId)
+		err := phs.DAO.UpdateByModel(curr)
 		return err
 	}
 

@@ -26,7 +26,7 @@ func (dao *PrescriptionHistoryDAO) CreateHistory(model *model.PrescriptionHistor
 		return nil, err
 	}
 
-	return &model.Id, nil
+	return model.Id, nil
 }
 
 func (dao *PrescriptionHistoryDAO) GetAll(searchQueries map[string]string, email string) ([]model.PrescriptionHistory, error) {
@@ -70,8 +70,8 @@ func (dao *PrescriptionHistoryDAO) DeleteByEmailAndRx(email string, pId uuid.UUI
 	return nil
 }
 
-func (dao *PrescriptionHistoryDAO) UpdateByEmailAndRx(updatedRx model.PrescriptionHistory, email string, pId uuid.UUID) error {
-	err := dao.DB.Where("owner = ?", email).Where("prescription_id = ?", pId).Save(updatedRx).Error
+func (dao *PrescriptionHistoryDAO) UpdateByModel(updatedRx *model.PrescriptionHistory) error {
+	err := dao.DB.Save(updatedRx).Error
 
 	if err != nil {
 		return err
