@@ -17,13 +17,19 @@ func Initialize(dao dao.IPrescriptionHistoryDAO) *PrescriptionHistoryService {
 }
 
 func (phs *PrescriptionHistoryService) CreatePrescriptionHistory(dto *rxhistorydto.PrescriptionHistoryDTO) (*uuid.UUID, error) {
-	model, _ := rxhistorydto.MapDTOToModel(dto)
-	id, _ := phs.DAO.CreateHistory(model)
-	return id, nil
+	model, err := rxhistorydto.MapDTOToModel(dto)
+
+	if err != nil {
+		return nil, err
+	}
+
+	id, daoErr := phs.DAO.CreateHistory(model)
+
+	return id, daoErr
 }
 
-func (phs *PrescriptionHistoryService) GetPrescriptionHistory(searchQueries map[string]string, email string) ([]model.PrescriptionHistory, error) {
-	result, err := phs.DAO.GetPrescriptionHistory(searchQueries, email)
+func (phs *PrescriptionHistoryService) GetAll(searchQueries map[string]string, email string) ([]model.PrescriptionHistory, error) {
+	result, err := phs.DAO.GetAll(searchQueries, email)
 
 	if err != nil {
 		return nil, err
@@ -42,8 +48,10 @@ func (phs *PrescriptionHistoryService) GetByEmailAndRx(email string, pId uuid.UU
 	return result, err
 }
 
-func (phs *PrescriptionHistoryService) DeleteByEmailAndId(email string, id uuid.UUID) error {
-	err := phs.DAO.DeleteByEmailAndId(email, id)
+func (phs *PrescriptionHistoryService) DeleteByEmailAndRx(email string, id uuid.UUID) error {
+	// result, err := phs.DAO.GetByEmailAndRx(email, id)
+
+	err := phs.DAO.DeleteByEmailAndRx(email, id)
 
 	return err
 }

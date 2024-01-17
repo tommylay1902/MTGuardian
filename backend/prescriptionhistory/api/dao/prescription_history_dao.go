@@ -1,7 +1,11 @@
 package dao
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/google/uuid"
+	"github.com/tommylay1902/prescriptionhistory/internal/error/apperror"
 	"github.com/tommylay1902/prescriptionhistory/internal/helper"
 	"github.com/tommylay1902/prescriptionhistory/internal/model"
 	"gorm.io/gorm"
@@ -25,7 +29,7 @@ func (dao *PrescriptionHistoryDAO) CreateHistory(model *model.PrescriptionHistor
 	return &model.Id, nil
 }
 
-func (dao *PrescriptionHistoryDAO) GetPrescriptionHistory(searchQueries map[string]string, email string) ([]model.PrescriptionHistory, error) {
+func (dao *PrescriptionHistoryDAO) GetAll(searchQueries map[string]string, email string) ([]model.PrescriptionHistory, error) {
 	var history []model.PrescriptionHistory
 	query := helper.BuildQueryWithSearchParam(searchQueries, dao.DB)
 
@@ -42,18 +46,24 @@ func (dao *PrescriptionHistoryDAO) GetPrescriptionHistory(searchQueries map[stri
 func (dao *PrescriptionHistoryDAO) GetByEmailAndRx(email string, pId uuid.UUID) (*model.PrescriptionHistory, error) {
 	var rxHistory model.PrescriptionHistory
 
-	err := dao.DB.Where("owner = ?", email).Where("prescription_id = ?", pId).Find(&rxHistory).Error
+	err := dao.DB.Where("owner = ?", email).Where("prescription_id = ?", pId).First(&rxHistory).Error
 
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, &apperror.ResourceNotFound{
+				Message: "prescription history not found",
+				Code:    404,
+			}
+		}
 		return nil, err
 	}
 
 	return &rxHistory, err
 }
 
-func (dao *PrescriptionHistoryDAO) DeleteByEmailAndId(email string, id uuid.UUID) error {
-	err := dao.DB.Where("owner = ?", email).Delete(&model.PrescriptionHistory{}, id).Error
-
+func (dao *PrescriptionHistoryDAO) DeleteByEmailAndRx(email string, pId uuid.UUID) error {
+	err := dao.DB.Where("owner = ? AND prescription_id = ?", email, pId).Delete(&model.PrescriptionHistory{}).Error
+	fmt.Println(err)
 	if err != nil {
 		return err
 	}

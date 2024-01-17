@@ -37,7 +37,7 @@ func (m *MockPrescriptionHistoryDAO) CreateHistory(model *model.PrescriptionHist
 	return id, nil
 }
 
-func (m *MockPrescriptionHistoryDAO) GetPrescriptionHistory(searchQueries map[string]string, email string) ([]model.PrescriptionHistory, error) {
+func (m *MockPrescriptionHistoryDAO) GetAll(searchQueries map[string]string, email string) ([]model.PrescriptionHistory, error) {
 	args := m.Called(searchQueries, email)
 
 	result, err := args.Get(0), args.Error(1)
@@ -49,7 +49,7 @@ func (m *MockPrescriptionHistoryDAO) GetPrescriptionHistory(searchQueries map[st
 	rxHistories, ok := result.([]model.PrescriptionHistory)
 
 	if !ok {
-		log.Panic("conversion went wrong in GetPrescriptionHistory Mock")
+		log.Panic("conversion went wrong in GetAll Mock")
 	}
 
 	return rxHistories, nil
@@ -72,8 +72,8 @@ func (m *MockPrescriptionHistoryDAO) GetByEmailAndRx(email string, pId uuid.UUID
 	return rxHistory, args.Error(1)
 }
 
-func (m *MockPrescriptionHistoryDAO) DeleteByEmailAndId(email string, id uuid.UUID) error {
-	args := m.Called(email, id)
+func (m *MockPrescriptionHistoryDAO) DeleteByEmailAndRx(email string, pId uuid.UUID) error {
+	args := m.Called(email, pId)
 	return args.Error(0)
 }
 
@@ -114,7 +114,7 @@ func TestCreatePrescriptionHistory(t *testing.T) {
 	dao.AssertExpectations(t)
 }
 
-func TestGetPrescriptionHistory(t *testing.T) {
+func TestGetAll(t *testing.T) {
 	email := "tommylay.c@gmail.com"
 
 	rxOne := GenerateRxHistoryModel()
@@ -124,9 +124,9 @@ func TestGetPrescriptionHistory(t *testing.T) {
 
 	service := service.Initialize(dao)
 
-	dao.On("GetPrescriptionHistory", make(map[string]string), email).Return([]model.PrescriptionHistory{*rxOne, *rxTwo}, nil)
+	dao.On("GetAll", make(map[string]string), email).Return([]model.PrescriptionHistory{*rxOne, *rxTwo}, nil)
 
-	result, err := service.GetPrescriptionHistory(make(map[string]string), email)
+	result, err := service.GetAll(make(map[string]string), email)
 
 	assert.NoError(t, err)
 	assert.Contains(t, result, *rxOne)
@@ -157,9 +157,9 @@ func TestDeleteByEmailAndId(t *testing.T) {
 	dao := &MockPrescriptionHistoryDAO{}
 	service := service.Initialize(dao)
 
-	dao.On("DeleteByEmailAndId", email, id).Return(nil)
+	dao.On("DeleteByEmailAndRx", email, id).Return(nil)
 
-	err := service.DeleteByEmailAndId(email, id)
+	err := service.DeleteByEmailAndRx(email, id)
 
 	assert.NoError(t, err)
 }

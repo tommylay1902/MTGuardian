@@ -176,7 +176,7 @@ func TestGetPrescriptionHistory(t *testing.T) {
 		rxHistory2.Id, rxHistory2.PrescriptionId, rxHistory2.Owner, rxHistory2.Taken,
 	))
 
-	results, err := dao.GetPrescriptionHistory(make(map[string]string), owner)
+	results, err := dao.GetAll(make(map[string]string), owner)
 
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatalf("Error in SQL mock: %v", err)
@@ -195,7 +195,7 @@ func TestGetPrescriptionHistoryWithError(t *testing.T) {
 
 	mock.ExpectQuery("SELECT .* FROM \"prescription_histories\"").WithArgs("tommylay.d@gmail.com").WillReturnError(gorm.ErrRecordNotFound)
 
-	_, err := dao.GetPrescriptionHistory(make(map[string]string), "tommylay.d@gmail.com")
+	_, err := dao.GetAll(make(map[string]string), "tommylay.d@gmail.com")
 
 	assert.Error(t, err)
 
@@ -260,7 +260,7 @@ func TestDeleteByIdWithError(t *testing.T) {
 
 	mock.ExpectCommit()
 
-	err := dao.DeleteByEmailAndId(email, id)
+	err := dao.DeleteByEmailAndRx(email, id)
 
 	assert.NoError(t, err)
 
@@ -282,7 +282,7 @@ func TestDeleteByInvalidIdAndEmail(t *testing.T) {
 
 	mock.ExpectRollback()
 
-	err := dao.DeleteByEmailAndId(email, id)
+	err := dao.DeleteByEmailAndRx(email, id)
 
 	assert.Error(t, err)
 
