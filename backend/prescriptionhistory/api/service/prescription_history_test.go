@@ -58,7 +58,12 @@ func (m *MockPrescriptionHistoryDAO) GetPrescriptionHistory(searchQueries map[st
 func (m *MockPrescriptionHistoryDAO) GetByEmailAndRx(email string, pId uuid.UUID) (*model.PrescriptionHistory, error) {
 	args := m.Called(email, pId)
 
-	rxHistory, ok := args.Get(0).(*model.PrescriptionHistory)
+	result, err := args.Get(0), args.Error(1)
+	if err != nil {
+		return nil, err
+	}
+
+	rxHistory, ok := result.(*model.PrescriptionHistory)
 
 	if !ok {
 		log.Panic("conversion went wrong in GetByEmailAndRx mock function")
@@ -92,16 +97,7 @@ func TestCreatePrescriptionHistory(t *testing.T) {
 
 	service := service.Initialize(dao)
 
-	pId := uuid.New()
-	owner := "tommylay.c@gmail.com"
-	taken := time.Now()
-
-	rxDTO := &rxhistorydto.PrescriptionHistoryDTO{
-		PrescriptionId: pId,
-		Owner:          owner,
-		Taken:          &taken,
-	}
-
+	rxDTO := GenerateRxHistoryDTO()
 	model, mapErr := rxhistorydto.MapDTOToModel(rxDTO)
 
 	if mapErr != nil {
@@ -116,4 +112,82 @@ func TestCreatePrescriptionHistory(t *testing.T) {
 
 	assert.Equal(t, *id, model.Id)
 	dao.AssertExpectations(t)
+}
+
+func TestGetPrescriptionHistory(t *testing.T) {
+	email := "tommylay.c@gmail.com"
+
+	rxOne := GenerateRxHistoryModel()
+
+	rxTwo := GenerateRxHistoryModel()
+	dao := &MockPrescriptionHistoryDAO{}
+
+	service := service.Initialize(dao)
+
+	dao.On("GetPrescriptionHistory", make(map[string]string), email).Return([]model.PrescriptionHistory{*rxOne, *rxTwo}, nil)
+
+	result, err := service.GetPrescriptionHistory(make(map[string]string), email)
+
+	assert.NoError(t, err)
+	assert.Contains(t, result, *rxOne)
+	assert.Contains(t, result, *rxTwo)
+}
+
+func TestGetByEmailAndRx(t *testing.T) {
+	rx := GenerateRxHistoryModel()
+
+	dao := &MockPrescriptionHistoryDAO{}
+
+	service := service.Initialize(dao)
+
+	dao.On("GetByEmailAndRx", rx.Owner, rx.PrescriptionId).Return(rx, nil)
+
+	result, err := service.GetByEmailAndRx(rx.Owner, rx.PrescriptionId)
+
+	assert.NoError(t, err)
+
+	assert.Equal(t, rx, result)
+
+}
+
+func TestDeleteByEmailAndId(t *testing.T) {
+	email := "tommylay.c@gmail.com"
+	id := uuid.New()
+
+	dao := &MockPrescriptionHistoryDAO{}
+	service := service.Initialize(dao)
+
+	dao.On("DeleteByEmailAndId", email, id).Return(nil)
+
+	err := service.DeleteByEmailAndId(email, id)
+
+	assert.NoError(t, err)
+}
+
+func TestUpdateUpdateByEmailAndRx(t *testing.T) {
+
+}
+
+func GenerateRxHistoryModel() *model.PrescriptionHistory {
+	email := "tommylay.c@gmail.com"
+	taken := time.Now()
+	return &model.PrescriptionHistory{
+		Id:             uuid.New(),
+		PrescriptionId: uuid.New(),
+		Owner:          email,
+		Taken:          &taken,
+	}
+}
+
+func GenerateRxHistoryDTO() *rxhistorydto.PrescriptionHistoryDTO {
+	pId := uuid.New()
+	owner := "tommylay.c@gmail.com"
+	taken := time.Now()
+
+	return &rxhistorydto.PrescriptionHistoryDTO{
+		PrescriptionId: pId,
+		Owner:          owner,
+		Taken:          &taken,
+	}
+
 }

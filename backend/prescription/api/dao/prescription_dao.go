@@ -20,7 +20,6 @@ func Initialize(db *gorm.DB) *PrescriptionDAO {
 }
 
 func (dao *PrescriptionDAO) CreatePrescription(model *model.Prescription) (*uuid.UUID, error) {
-
 	err := dao.DB.Create(&model).Error
 	if err != nil {
 		return nil, err
@@ -74,6 +73,7 @@ func (dao *PrescriptionDAO) UpdatePrescription(model *model.Prescription, email 
 	if err != nil {
 		return err
 	}
+
 	return nil
 
 }

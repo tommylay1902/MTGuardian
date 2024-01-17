@@ -20,7 +20,7 @@ func InitializePrescription(baseUrl string) *PrescriptionHandler {
 	return &PrescriptionHandler{BaseUrl: baseUrl}
 }
 
-func (ph *PrescriptionHandler) GetPrescriptionById(c *fiber.Ctx) error {
+func (ph PrescriptionHandler) GetPrescriptionById(c *fiber.Ctx) error {
 	token := c.Locals("user").(*jwt.Token)
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -52,7 +52,7 @@ func (ph *PrescriptionHandler) GetPrescriptionById(c *fiber.Ctx) error {
 
 }
 
-func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
+func (ph PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 
 	token := c.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
@@ -92,7 +92,7 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 	return c.Status(resp.StatusCode).JSON(prescription)
 }
 
-func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
+func (ph PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 
 	prescription := string(c.Body())
 
@@ -143,7 +143,7 @@ func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 	return c.Status(resp.StatusCode).JSON(success)
 }
 
-func (ph *PrescriptionHandler) UpdatePrescription(c *fiber.Ctx) error {
+func (ph PrescriptionHandler) UpdatePrescription(c *fiber.Ctx) error {
 	prescription := string(c.Body())
 	idParam := c.Params("id")
 
@@ -197,7 +197,7 @@ func (ph *PrescriptionHandler) UpdatePrescription(c *fiber.Ctx) error {
 	return c.Status(resp.StatusCode).JSON(success)
 }
 
-func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
+func (ph PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
 
 	idParam := c.Params("id")
 

@@ -10,10 +10,10 @@ import (
 )
 
 type PrescriptionHandler struct {
-	Service *service.PrescriptionService
+	Service service.IPrescriptionService
 }
 
-func Initialize(service *service.PrescriptionService) *PrescriptionHandler {
+func Initialize(service service.IPrescriptionService) *PrescriptionHandler {
 	return &PrescriptionHandler{Service: service}
 }
 

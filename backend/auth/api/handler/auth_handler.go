@@ -14,10 +14,10 @@ import (
 )
 
 type AuthHandler struct {
-	Service *service.AuthService
+	Service service.IAuthService
 }
 
-func Initialize(service *service.AuthService) *AuthHandler {
+func Initialize(service service.IAuthService) *AuthHandler {
 	return &AuthHandler{Service: service}
 }
 

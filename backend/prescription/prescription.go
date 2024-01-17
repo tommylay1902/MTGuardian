@@ -13,6 +13,7 @@ import (
 func main() {
 	port := config.SetupEnvironment()
 	db := config.SetupDB()
+
 	defer func() {
 		dbInstance, _ := db.DB()
 		_ = dbInstance.Close()
@@ -35,4 +36,5 @@ func main() {
 
 	route.Setup(app, prescriptionHandler)
 	app.Listen("0.0.0.0:" + port)
+
 }

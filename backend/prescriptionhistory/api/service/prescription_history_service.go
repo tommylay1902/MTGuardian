@@ -30,3 +30,23 @@ func (phs *PrescriptionHistoryService) GetPrescriptionHistory(searchQueries map[
 
 	return result, nil
 }
+
+func (phs *PrescriptionHistoryService) GetByEmailAndRx(email string, pId uuid.UUID) (*model.PrescriptionHistory, error) {
+	result, err := phs.DAO.GetByEmailAndRx(email, pId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, err
+}
+
+func (phs *PrescriptionHistoryService) DeleteByEmailAndId(email string, id uuid.UUID) error {
+	err := phs.DAO.DeleteByEmailAndId(email, id)
+
+	return err
+}
+
+func (phs *PrescriptionHistoryService) UpdateByEmailAndRx(model *model.PrescriptionHistory, email string, pId uuid.UUID) error {
+
+}
