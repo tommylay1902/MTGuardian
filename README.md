@@ -8,6 +8,8 @@ Welcome to our Medication Management App – your go-to solution for seamlessly 
 
 1. **Intuitive Medication Monitoring**: Effortlessly keep track of your prescriptions, ensuring you always have an up-to-date list of medications at your fingertips.
 
+   ![Intuitive Medication Monitoring](/readMeAssets/MTGMedList.jpeg)
+
 2. **Medication Tracking**: Never miss a dose! Track when you take your medications, allowing you to stay consistent with your health routine.
 
 3. **Event Tracking**: Keep a detailed record of doctor and hospital visits. Your health history is now organized, easily accessible, and ready to be shared when needed.
@@ -26,10 +28,4 @@ We welcome contributions! If you have ideas for improvements, bug reports, or fe
 
 ## License
 
-This Medication Management App is licensed under the [LICENSE NAME] - see the [LICENSE.md](LICENSE.md) file for details.
-
-## Acknowledgments
-
-We would like to express our gratitude to the open-source community and contributors who have helped shape and improve this application.
-
-Thank you for choosing our Medication Management App. Here's to a healthier and more organized future!
+This Medication Management App is licensed under the [LICENSE NAME] - see the [LICENSE.
