@@ -7,4 +7,8 @@ import (
 
 type IPrescriptionHistoryDAO interface {
 	CreateHistory(model *model.PrescriptionHistory) (*uuid.UUID, error)
+	GetAll(searchQueries map[string]string, owner string) ([]model.PrescriptionHistory, error)
+	GetByEmailAndRx(email string, pId uuid.UUID) (*model.PrescriptionHistory, error)
+	DeleteByEmailAndRx(email string, pId uuid.UUID) error
+	UpdateByModel(updatedRx *model.PrescriptionHistory) error
 }

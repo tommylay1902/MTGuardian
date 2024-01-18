@@ -18,7 +18,7 @@ func InitializeAuth(baseUrl string) *AuthHandler {
 	return &AuthHandler{BaseUrl: baseUrl}
 }
 
-func (ah *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
+func (ah AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 	body := string(c.Body())
 
 	resp, err := helper.MakeRequest(
@@ -46,7 +46,7 @@ func (ah *AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(token)
 }
 
-func (ah *AuthHandler) LoginHandler(c *fiber.Ctx) error {
+func (ah AuthHandler) LoginHandler(c *fiber.Ctx) error {
 	body := string(c.Body())
 
 	// Send the request
@@ -75,7 +75,7 @@ func (ah *AuthHandler) LoginHandler(c *fiber.Ctx) error {
 	return c.Status(resp.StatusCode).JSON(token)
 }
 
-func (ah *AuthHandler) RefreshHandler(c *fiber.Ctx) error {
+func (ah AuthHandler) RefreshHandler(c *fiber.Ctx) error {
 	body := string(c.Body())
 
 	resp, err := helper.MakeRequest(

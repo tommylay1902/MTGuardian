@@ -28,7 +28,7 @@
   <div>
     <PrescriptionMenu />
   </div>
-  <div>
+  <div class="overflow-y-auto h-[65dvh] mt-5">
     <PrescriptionTable />
   </div>
 

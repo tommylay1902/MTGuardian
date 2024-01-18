@@ -57,7 +57,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreatePrescriptionWithMock(t *testing.T) {
-
 	defer mock.ExpectationsWereMet()
 	// Initialize the PrescriptionDAO with the GORM DB
 	dao := dao.Initialize(gormDB)
@@ -73,7 +72,6 @@ func TestCreatePrescriptionWithMock(t *testing.T) {
 		Refills:    IntPointer(2),
 		Owner:      StringPointer("tommylay.c@gmail.com"),
 	}
-	fmt.Println(*prescription.Started, *prescription.Ended)
 
 	mock.ExpectBegin()
 	// Set up the expected SQL query and its result in the mock
@@ -279,7 +277,7 @@ func TestGetAllPrescriptionsWithError(t *testing.T) {
 
 	// Set up the mock to expect an error when querying for prescriptions
 	mock.ExpectQuery("SELECT .* FROM \"prescriptions\"").
-		WithArgs().
+		WithArgs(email).
 		WillReturnError(fmt.Errorf("database error"))
 
 	// Call the GetAllPrescriptions method of the DAO
@@ -348,6 +346,7 @@ func TestDeletePrescriptionWithError(t *testing.T) {
 		WithArgs(email, id).
 		WillReturnError(fmt.Errorf("Database Error"))
 	mock.ExpectRollback()
+
 	err := dao.DeletePrescription(expected, email)
 
 	if err := mock.ExpectationsWereMet(); err != nil {
