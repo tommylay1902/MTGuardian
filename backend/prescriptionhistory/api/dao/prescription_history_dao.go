@@ -2,7 +2,6 @@ package dao
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/tommylay1902/prescriptionhistory/internal/error/apperror"
@@ -62,10 +61,13 @@ func (dao *PrescriptionHistoryDAO) GetByEmailAndRx(email string, pId uuid.UUID) 
 }
 
 func (dao *PrescriptionHistoryDAO) DeleteByEmailAndRx(email string, pId uuid.UUID) error {
-	err := dao.DB.Where("owner = ? AND prescription_id = ?", email, pId).Delete(&model.PrescriptionHistory{}).Error
-	fmt.Println(err)
-	if err != nil {
-		return err
+	db := dao.DB.Where("owner = ? AND prescription_id = ?", email, pId).Delete(&model.PrescriptionHistory{})
+
+	if db.Error != nil {
+		return db.Error
+	}
+	if db.RowsAffected <= 0 {
+		return &apperror.ResourceNotFound{Message: "Prescription History not found", Code: 404}
 	}
 	return nil
 }

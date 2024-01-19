@@ -22,9 +22,12 @@ func main() {
 
 	authHandler := handler.InitializeAuth("http://" + hostIP + ":8002/api/v1/auth")
 	prescriptionHandler := handler.InitializePrescription("http://" + hostIP + ":8000/api/v1/prescription")
+	rxHistoryHandler := handler.InitializePrescriptionHistory("http://" + hostIP + ":8006/api/v1/prescriptionhistory")
 
 	route.SetupAuth(app, authHandler)
 	route.SetupPrescription(app, prescriptionHandler, jwt)
+
+	route.SetupHistory(app, rxHistoryHandler, jwt)
 
 	app.Listen(":" + port)
 }

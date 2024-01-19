@@ -164,9 +164,6 @@ func (ph *PrescriptionHandler) UpdatePrescription(c *fiber.Ctx) error {
 	// Add the additional field
 	data["owner"] = email
 
-	// Add the additional field
-	data["owner"] = email
-
 	updatedJSON, err := json.Marshal(data)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -211,6 +208,7 @@ func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
+	defer resp.Body.Close()
 
 	// Check the response status code
 	if resp.StatusCode != http.StatusOK {
@@ -220,8 +218,6 @@ func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
 			"error": bodyErr.Error,
 		})
 	}
-
-	defer resp.Body.Close()
 
 	return c.SendStatus(resp.StatusCode)
 }
