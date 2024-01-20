@@ -14,6 +14,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
+
+	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tommylay1902/gateway/internal/customtype"
 	"github.com/tommylay1902/gateway/internal/customtype/dto"
@@ -23,6 +25,7 @@ import (
 
 var (
 	dbContainer testcontainers.Container
+	dNetwork    testcontainers.DockerNetwork
 	ctx         context.Context
 	testPort    string
 )
@@ -42,6 +45,18 @@ func parsePrescriptionDataToDTO(data string) (*dto.PrescriptionDTO, error) {
 		return nil, err
 	}
 	return &prescriptionDTO, nil
+}
+
+func SetupDockerNetwork() (*testcontainers.DockerNetwork, error) {
+	ctx := context.Background()
+
+	net, err := network.New(ctx, network.WithInternal())
+
+	if err != nil {
+		return nil, err
+	}
+
+	return net, nil
 }
 
 func SetupTestDatabase() (testcontainers.Container, error) {
@@ -115,6 +130,7 @@ func TestMain(m *testing.M) {
 	dbContainer = db
 
 	ctx = context.Background()
+
 	if err != nil {
 		log.Println("error connecting")
 		log.Panic(err)
@@ -128,7 +144,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
-
 	// Define the API endpoint for creating a prescriptions
 	createRxEndpoint := "http://localhost:8004/api/v1/prescription"
 	// Define the API endpoint for getting a prescription by ID
@@ -276,7 +291,7 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 
 	expected, err := parsePrescriptionDataToDTO(prescriptionData)
 	if err != nil {
-		t.Fatal("Failed to parse prescriptionData: ")
+		t.Fatal("Failed to parse prescriptionData")
 	}
 
 	assert.Equal(t, *expected.Medication, *retrievedPrescription.Medication)
@@ -316,9 +331,9 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 
 func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
 	// Define the API endpoints
-	createEndpoint := "http://" + testPort + "/api/v1/prescription"
-	updateEndpoint := "http://" + testPort + "/api/v1/prescription/"
-	getEndpoint := "http://" + testPort + "/api/v1/prescription/"
+	createEndpoint := "http://localhost:" + testPort + "/api/v1/prescription"
+	updateEndpoint := "http://localhost:" + testPort + "/api/v1/prescription/"
+	getEndpoint := "http://localhost:" + testPort + "/api/v1/prescription/"
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()
