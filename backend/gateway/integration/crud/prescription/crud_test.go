@@ -15,19 +15,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 
-	"github.com/testcontainers/testcontainers-go/network"
-	"github.com/testcontainers/testcontainers-go/wait"
-	"github.com/tommylay1902/gateway/internal/customtype"
 	"github.com/tommylay1902/gateway/internal/customtype/dto"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/tommylay1902/gateway/internal/testhelper"
 )
 
 var (
-	dbContainer testcontainers.Container
-	dNetwork    testcontainers.DockerNetwork
-	ctx         context.Context
-	testPort    string
+	dNetwork testcontainers.DockerNetwork
+	ctx      context.Context
+	testPort string
 )
 
 type PrescriptionModel struct {
@@ -47,95 +42,39 @@ func parsePrescriptionDataToDTO(data string) (*dto.PrescriptionDTO, error) {
 	return &prescriptionDTO, nil
 }
 
-func SetupDockerNetwork() (*testcontainers.DockerNetwork, error) {
-	ctx := context.Background()
+func TestMain(m *testing.M) {
+	dNetwork = testhelper.SetupDockerNetwork()
 
-	net, err := network.New(ctx, network.WithInternal())
+	gatewayContainer := testhelper.SetupTestingContainer("tommylay1902/mtguardian-gateway:latest", "8080/tcp", map[string]string{
+		"PORT":    "8080",
+		"HOST_IP": "host.docker.internal",
+	}, dNetwork)
 
+	dbContainer := testhelper.SetupTestingContainer("postgres:latest", "5432/tcp", map[string]string{
+		"POSTGRES_DB":       "prescription",
+		"POSTGRES_PASSWORD": "passsword",
+		"POSTGRES_USER":     "postgres",
+	}, dNetwork)
+
+	prescriptionContainer := testhelper.SetupTestingContainer("tommylay1902/mtguardian-prescription-micro:latest", "8080/tcp", map[string]string{
+		"POSTGRES_USER":     "postgres",
+		"POSTGRES_PASSWORD": "password",
+		"POSTGRES_DB":       "prescription",
+		"GORM_HOST":         "DB",
+		"PORT":              "8080",
+	}, dNetwork)
+
+	fmt.Println("prescription running:", prescriptionContainer.IsRunning())
+	fmt.Println("dbContainer running :", dbContainer.IsRunning())
+
+	mappedPort, err := gatewayContainer.MappedPort(context.Background(), "8080/tcp")
 	if err != nil {
-		return nil, err
-	}
-
-	return net, nil
-}
-
-func SetupTestDatabase() (testcontainers.Container, error) {
-	// 1. Create PostgreSQL container request
-	containerReq := testcontainers.ContainerRequest{
-		Image:        "postgres:latest",
-		ExposedPorts: []string{"5432/tcp"},
-		WaitingFor:   wait.ForListeningPort("5432/tcp"),
-		Env: map[string]string{
-			"POSTGRES_DB":       "prescription",
-			"POSTGRES_PASSWORD": "passsword",
-			"POSTGRES_USER":     "postgres",
-		},
-	}
-
-	// 2. Start PostgreSQL container
-	dbContainer, err := testcontainers.GenericContainer(
-		context.Background(),
-		testcontainers.GenericContainerRequest{
-			ContainerRequest: containerReq,
-			Started:          true,
-		})
-	if err != nil {
-		return nil, err
-	}
-
-	mappedPort, err := dbContainer.MappedPort(context.Background(), "5432/tcp")
-
-	if err != nil {
-		return nil, err
+		log.Panic(err)
 	}
 
 	testPort = mappedPort.Port()
 
-	return dbContainer, nil
-}
-
-func SetupGormConnection(t *testing.T, dbContainer testcontainers.Container) *gorm.DB {
-	// Get PostgreSQL container's connection details
-	dbHost, hostErr := dbContainer.Host(ctx)
-	dbPort, portErr := dbContainer.MappedPort(ctx, "5432/tcp")
-
-	if hostErr != nil {
-		log.Panic("issue getting host from dbContainer")
-	}
-
-	if portErr != nil {
-		log.Panic("issue getting port from dbContainer")
-	}
-
-	dsn := fmt.Sprintf("host=%s port=%v user=postgres password=passsword dbname=prescription sslmode=disable", dbHost, dbPort.Int())
-
-	// Open a GORM connection
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	db.AutoMigrate(&customtype.Prescription{})
-
-	if err != nil {
-		log.Panic("error seting up gorm connection: ", err)
-	}
-
-	return db
-}
-
-func TestMain(m *testing.M) {
-	db, err := SetupTestDatabase()
-	defer func() {
-		if err := db.Terminate(context.Background()); err != nil {
-			fmt.Printf("Error terminating the test database container: %v\n", err)
-		}
-	}()
-	dbContainer = db
-
-	ctx = context.Background()
-
-	if err != nil {
-		log.Println("error connecting")
-		log.Panic(err)
-	}
-
+	fmt.Println(gatewayContainer.IsRunning())
 	// Run tests
 	exitCode := m.Run()
 
@@ -144,10 +83,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
+	fmt.Println(testPort)
 	// Define the API endpoint for creating a prescriptions
-	createRxEndpoint := "http://localhost:8004/api/v1/prescription"
+	createRxEndpoint := "http://localhost:" + testPort + "/api/v1/prescription"
 	// Define the API endpoint for getting a prescription by ID
-	getRxEndpoint := "http://localhost:8004/api/v1/prescription"
+	getRxEndpoint := "http://localhost:" + testPort + "/api/v1/prescription"
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()
