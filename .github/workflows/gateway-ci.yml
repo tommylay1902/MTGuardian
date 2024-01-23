@@ -1,4 +1,4 @@
-name: Go run tests on auth microservice before push/pull on main
+name: Go run tests on gateway before push/pull on main
 on:
   push:
     branches:
@@ -18,7 +18,7 @@ jobs:
       TESTPORT: 0.0.0.0:8002
     defaults:
       run:
-        working-directory: backend/auth
+        working-directory: backend/gateway
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go
