@@ -1,49 +1,79 @@
 package testhelper
 
+// func SetupDockerNetwork(ctx context.Context) testcontainers.DockerNetwork {
+
+// 	net, err := network.New(ctx, network.WithDriver("bridge"))
+
+// 	if err != nil {
+// 		log.Panic(err)
+// 	}
+
+// 	return *net
+// }
+
+// func SetupTestingContainer(imageName string, port nat.Port, env map[string]string, dNetwork testcontainers.DockerNetwork, aliases []string, ctx context.Context) testcontainers.Container {
+
+// 	containerReq := testcontainers.ContainerRequest{
+// 		Image:        imageName,
+// 		ExposedPorts: []string{port.Port() + "/" + port.Proto()},
+// 		WaitingFor:   wait.ForListeningPort(port),
+// 		Networks:     []string{dNetwork.Name},
+// 		NetworkAliases: map[string][]string{
+// 			dNetwork.Name: aliases,
+// 		},
+// 		Env: env,
+// 	}
+
+// 	dbGatewayContainer, err := testcontainers.GenericContainer(
+// 		ctx,
+// 		testcontainers.GenericContainerRequest{
+// 			ContainerRequest: containerReq,
+// 			Started:          true,
+// 		})
+
+// 	if err != nil {
+// 		log.Panic(err)
+// 	}
+
+// 	return dbGatewayContainer
+// }
+
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/docker/go-connections/nat"
 	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/network"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-func SetupDockerNetwork() testcontainers.DockerNetwork {
-	ctx := context.Background()
+// func SetupDockerNetwork(ctx context.Context) testcontainers.DockerNetwork {
+// 	net, err := network.New(ctx, network.WithDriver("driver"))
 
-	net, err := network.New(ctx, network.WithDriver("bridge"))
+// 	if err != nil {
+// 		log.Panic(err)
+// 	}
 
-	if err != nil {
-		log.Panic(err)
-	}
+// 	return *net
+// }
 
-	defer func() {
-		if err := net.Remove(ctx); err != nil {
-			log.Panic(err)
-		}
-	}()
+func SetupTestingContainer(imageName string, port nat.Port, env map[string]string, ctx context.Context) testcontainers.Container {
 
-	return *net
-}
-
-func SetupTestingContainer(imageName string, port nat.Port, env map[string]string, dNetwork testcontainers.DockerNetwork) testcontainers.Container {
-	fmt.Println("HELLOO", port.Port(), port.Proto())
-	// 1. init gateway
-	containerGatewayReq := testcontainers.ContainerRequest{
+	containerReq := testcontainers.ContainerRequest{
 		Image:        imageName,
 		ExposedPorts: []string{port.Port() + "/" + port.Proto()},
 		WaitingFor:   wait.ForListeningPort(port),
-		Networks:     []string{dNetwork.Name},
-		Env:          env,
+		// Networks:     []string{dNetwork.Name},
+		// NetworkAliases: map[string][]string{
+		// 	dNetwork.Name: aliases,
+		// },
+		Env: env,
 	}
 
 	dbGatewayContainer, err := testcontainers.GenericContainer(
-		context.Background(),
+		ctx,
 		testcontainers.GenericContainerRequest{
-			ContainerRequest: containerGatewayReq,
+			ContainerRequest: containerReq,
 			Started:          true,
 		})
 

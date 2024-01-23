@@ -11,7 +11,7 @@ import (
 
 func main() {
 	app := fiber.New()
-	secret, port, hostIP := config.Setup()
+	secret, port, hostIP, pMicro, hMicro, aMicro := config.Setup()
 	jwt := middleware.NewAuthMiddleware(secret)
 
 	app.Use(cors.New(cors.Config{
@@ -20,9 +20,9 @@ func main() {
 		AllowMethods: "GET, POST, PUT, DELETE",
 	}))
 
-	authHandler := handler.InitializeAuth("http://" + hostIP + ":8002/api/v1/auth")
-	prescriptionHandler := handler.InitializePrescription("http://" + hostIP + ":8000/api/v1/prescription")
-	rxHistoryHandler := handler.InitializePrescriptionHistory("http://" + hostIP + ":8006/api/v1/prescriptionhistory")
+	authHandler := handler.InitializeAuth("http://" + hostIP + ":" + aMicro + "/api/v1/auth")
+	prescriptionHandler := handler.InitializePrescription("http://" + hostIP + ":" + pMicro + "/api/v1/prescription")
+	rxHistoryHandler := handler.InitializePrescriptionHistory("http://" + hostIP + ":" + hMicro + "/api/v1/prescriptionHistory")
 
 	route.SetupAuth(app, authHandler)
 	route.SetupPrescription(app, prescriptionHandler, jwt)

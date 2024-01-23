@@ -161,6 +161,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: auth
       GORM_HOST: DB
+      HOST: 5432
       PORT: 8080
     ports:
       - "8002:8080" 
@@ -180,6 +181,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: prescription
       GORM_HOST: DB
+      HOST: dbprescription
       PORT: 8080
     ports:
       - "8000:8080" 
@@ -196,6 +198,9 @@ services:
     image: tommylay1902/mtguardian-gateway:latest
     environment:
       - PORT=8080
+      - PRESCRIPTION_MICRO=8000
+      - RX_HISTORY_MICRO=8006
+      - AUTH_MICRO=8002
       - HOST_IP=host.docker.internal
     ports:
       - "8004:8080" 

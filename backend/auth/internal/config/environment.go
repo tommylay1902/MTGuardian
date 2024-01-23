@@ -8,7 +8,7 @@ import (
 	"github.com/tommylay1902/authmicro/internal/helper"
 )
 
-func SetupEnvironment() string {
+func SetupEnvironment() (string, string, string) {
 
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
@@ -29,5 +29,15 @@ func SetupEnvironment() string {
 	if portString == "" {
 		log.Fatal("Port is not specified")
 	}
-	return portString
+
+	host := os.Getenv("HOST")
+	if host == "" {
+		log.Fatal("host is not specified")
+	}
+
+	dbPort := os.Getenv("DB_PORT")
+	if dbPort == "" {
+		log.Fatal("host is not specified")
+	}
+	return portString, host, dbPort
 }

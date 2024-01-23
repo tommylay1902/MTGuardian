@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -11,18 +12,21 @@ import (
 	"testing"
 	"time"
 
+	"github.com/docker/go-connections/nat"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 
+	"github.com/tommylay1902/gateway/internal/customtype"
 	"github.com/tommylay1902/gateway/internal/customtype/dto"
-	"github.com/tommylay1902/gateway/internal/testhelper"
 )
 
 var (
-	dNetwork testcontainers.DockerNetwork
-	ctx      context.Context
-	testPort string
+	dNetwork    testcontainers.DockerNetwork
+	ctx         context.Context
+	gatewayPort string
+	userToken   string
 )
 
 type PrescriptionModel struct {
@@ -43,38 +47,90 @@ func parsePrescriptionDataToDTO(data string) (*dto.PrescriptionDTO, error) {
 }
 
 func TestMain(m *testing.M) {
-	dNetwork = testhelper.SetupDockerNetwork()
+	var network = testcontainers.NetworkRequest{
+		Name:   "db-bridge",
+		Driver: "bridge",
+	}
 
-	gatewayContainer := testhelper.SetupTestingContainer("tommylay1902/mtguardian-gateway:latest", "8080/tcp", map[string]string{
-		"PORT":    "8080",
-		"HOST_IP": "host.docker.internal",
-	}, dNetwork)
+	provider, err := testcontainers.NewDockerProvider()
 
-	dbContainer := testhelper.SetupTestingContainer("postgres:latest", "5432/tcp", map[string]string{
-		"POSTGRES_DB":       "prescription",
-		"POSTGRES_PASSWORD": "passsword",
-		"POSTGRES_USER":     "postgres",
-	}, dNetwork)
-
-	prescriptionContainer := testhelper.SetupTestingContainer("tommylay1902/mtguardian-prescription-micro:latest", "8080/tcp", map[string]string{
-		"POSTGRES_USER":     "postgres",
-		"POSTGRES_PASSWORD": "password",
-		"POSTGRES_DB":       "prescription",
-		"GORM_HOST":         "DB",
-		"PORT":              "8080",
-	}, dNetwork)
-
-	fmt.Println("prescription running:", prescriptionContainer.IsRunning())
-	fmt.Println("dbContainer running :", dbContainer.IsRunning())
-
-	mappedPort, err := gatewayContainer.MappedPort(context.Background(), "8080/tcp")
 	if err != nil {
 		log.Panic(err)
 	}
 
-	testPort = mappedPort.Port()
+	if _, err := provider.GetNetwork(context.Background(), network); err != nil {
+		if _, err := provider.CreateNetwork(context.Background(), network); err != nil {
+			log.Fatal(err)
+		}
+	}
 
-	fmt.Println(gatewayContainer.IsRunning())
+	postgresPort := nat.Port("5432/tcp")
+	prescriptionDBContainer, err := testcontainers.GenericContainer(context.Background(), testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Image:        "postgres",
+			ExposedPorts: []string{postgresPort.Port()},
+			Env: map[string]string{
+				"POSTGRES_USER":     "postgres",
+				"POSTGRES_PASSWORD": "password",
+				"POSTGRES_DB":       "prescription",
+			},
+			Networks:       []string{network.Name},
+			NetworkAliases: map[string][]string{network.Name: {"postgres"}},
+			WaitingFor: wait.ForAll(
+				wait.ForLog("database system is ready to accept connections"),
+				wait.ForListeningPort(postgresPort),
+			),
+		},
+		Started: true,
+	})
+
+	if err != nil {
+		log.Panic("error init db container", err)
+	}
+	// prescriptionDBHost, err := prescriptionDBContainer.Name(context.Background())
+
+	prescriptionDBPort, err := prescriptionDBContainer.MappedPort(context.Background(), postgresPort)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	pMicroPort := nat.Port("8080/tcp")
+
+	prescriptionContainer, err := testcontainers.GenericContainer(context.Background(), testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			FromDockerfile: testcontainers.FromDockerfile{Context: "../../../../prescription"},
+			Networks:       []string{network.Name},
+			NetworkAliases: map[string][]string{network.Name: {"prescription-bridge"}},
+			Env: map[string]string{
+				"POSTGRES_USER":     "postgres",
+				"POSTGRES_PASSWORD": "password",
+				"POSTGRES_DB":       "prescription",
+				"GORM_HOST":         "DB",
+				"PORT":              "8080",
+				"HOST":              "host.docker.internal",
+				"DB_PORT":           prescriptionDBPort.Port(),
+			},
+			ExposedPorts: []string{pMicroPort.Port()},
+			WaitingFor:   wait.ForListeningPort("8080"),
+		},
+		Started: true,
+	})
+
+	if err != nil {
+		log.Panic("error starting pMicro", err)
+	}
+
+	_, err = prescriptionContainer.MappedPort(context.Background(), "8080/tcp")
+
+	if err != nil {
+		log.Panic("prescription port:", err)
+	}
+
+	if err != nil {
+		log.Panic(err)
+	}
+
 	// Run tests
 	exitCode := m.Run()
 
@@ -82,96 +138,153 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
-	fmt.Println(testPort)
-	// Define the API endpoint for creating a prescriptions
-	createRxEndpoint := "http://localhost:" + testPort + "/api/v1/prescription"
-	// Define the API endpoint for getting a prescription by ID
-	getRxEndpoint := "http://localhost:" + testPort + "/api/v1/prescription"
+func TestSetUserToken(t *testing.T) {
+	fmt.Println("calling endpionts w/ port", gatewayPort)
+	registerEndpoint := "http://localhost:" + gatewayPort + "/api/v1/auth/register"
+	refreshEndpoint := "http://localhost:" + gatewayPort + "/api/v1/auth/refresh"
+	random := uuid.NewString()
+	randomEmail := "tommylay." + random + "@gmail.com"
 
-	// Define the prescription data (you can customize this data)
-	randomMed := "Medication " + uuid.NewString()
-	started := time.Now().UTC().Format("2006-01-02T15:04:05.999999-07:00")
+	authDTO := `{
+		"email":    "` + randomEmail + `",
+		"password": "` + random + `"
+	}`
 
-	prescriptionData := `{
-        "medication": "` + randomMed + `",
-        "dosage": "Sample Dosage",
-        "notes": "Sample Notes",
-        "started": "` + started + `,"
-    }`
+	registerRes, registerErr := http.Post(registerEndpoint, "application/json", strings.NewReader(authDTO))
 
-	// Step 1: Create the prescription
-	createResp, createErr := http.Post(createRxEndpoint, "application/json", strings.NewReader(prescriptionData))
+	assert.NoError(t, registerErr)
 
-	if createErr != nil {
-		t.Fatal(createErr)
-	}
+	assert.Equal(t, http.StatusOK, registerRes.StatusCode)
 
-	defer createResp.Body.Close()
+	rBody, readErr := io.ReadAll(registerRes.Body)
+	defer registerRes.Body.Close()
 
-	// Check the response status code for creating a prescription
-	if createResp.StatusCode != http.StatusCreated {
-		t.Fatalf("Expected status code %d for creating a prescription, got %d", http.StatusCreated, createResp.StatusCode)
-	}
+	assert.NoError(t, readErr)
 
-	// Decode the response body to retrieve the created prescription ID
-	var createdPrescriptionID struct {
-		Success uuid.UUID `json:"success"`
-	}
+	var accessToken customtype.AccessToken
 
-	createDecoder := json.NewDecoder(createResp.Body)
-	if err := createDecoder.Decode(&createdPrescriptionID); err != nil {
-		t.Fatal("Failed to decode create response body:", err)
-	}
+	unmarshalErr := json.Unmarshal(rBody, &accessToken)
 
-	// Step 2: Get the prescription by its ID
-	getResp, getErr := http.Get(getRxEndpoint + createdPrescriptionID.Success.String())
-	if getErr != nil {
-		t.Fatal(getErr)
-	}
-	defer getResp.Body.Close()
+	assert.NoError(t, unmarshalErr)
+	assert.NotEmpty(t, accessToken.AccessToken)
+	// assert.True(t, helper.IsValidToken(accessToken.AccessToken))
 
-	// Check the response status code for getting a prescription by ID
-	if getResp.StatusCode != http.StatusOK {
-		t.Fatalf("Expected status code %d for getting a prescription, got %d", http.StatusOK, getResp.StatusCode)
-	}
+	accessTokenJson := `{
+		"access":    "` + accessToken.AccessToken + `"
+	}`
 
-	// Decode the response body to process the retrieved prescription
-	var retrievedPrescription dto.PrescriptionDTO // Define a struct matching the format of the response
-	getDecoder := json.NewDecoder(getResp.Body)
-	if err := getDecoder.Decode(&retrievedPrescription); err != nil {
-		t.Fatal("Failed to decode get response body:", err)
-	}
+	accessRes, accessErr := http.Post(refreshEndpoint, "application/json", strings.NewReader(accessTokenJson))
 
-	// Perform assertions on the retrieved prescription
-	// Check properties of the prescription based on your actual data structure
+	assert.NoError(t, accessErr)
 
-	assert.NotEmpty(t, retrievedPrescription.Medication)
+	assert.Equal(t, http.StatusOK, accessRes.StatusCode)
 
-	expected, err := parsePrescriptionDataToDTO(prescriptionData)
-	if err != nil {
-		t.Fatal("Failed to parse prescriptionData: ")
-	}
+	rBody2, readErr2 := io.ReadAll(accessRes.Body)
+	defer registerRes.Body.Close()
 
-	assert.Equal(t, *expected.Medication, *retrievedPrescription.Medication)
-	assert.Equal(t, *expected.Dosage, *retrievedPrescription.Dosage)
-	assert.Equal(t, *expected.Notes, *retrievedPrescription.Notes)
+	assert.NoError(t, readErr2)
 
-	// Convert the expected Started time to UTC
-	expectedStarted := expected.Started.UTC()
+	var accessToken2 customtype.AccessToken
 
-	// Compare the Started time
-	assert.True(t, expectedStarted.Equal(*retrievedPrescription.Started))
+	unmarshalErr2 := json.Unmarshal(rBody2, &accessToken2)
+
+	assert.NoError(t, unmarshalErr2)
+
+	assert.NotEmpty(t, accessToken2.AccessToken)
+	// assert.True(t, helper.IsValidToken(accessToken2.AccessToken))
+
 }
+
+// func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
+// 	fmt.Println(gatewayPort)
+// 	// Define the API endpoint for creating a prescriptions
+// 	createRxEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription"
+// 	// Define the API endpoint for getting a prescription by ID
+// 	getRxEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription"
+
+// 	// Define the prescription data (you can customize this data)
+// 	randomMed := "Medication " + uuid.NewString()
+// 	started := time.Now().UTC().Format("2006-01-02T15:04:05.999999-07:00")
+
+// 	prescriptionData := `{
+//         "medication": "` + randomMed + `",
+//         "dosage": "Sample Dosage",
+//         "notes": "Sample Notes",
+//         "started": "` + started + `,"
+//     }`
+
+// 	// Step 1: Create the prescription
+// 	createResp, createErr := http.Post(createRxEndpoint, "application/json", strings.NewReader(prescriptionData))
+
+// 	if createErr != nil {
+// 		t.Fatal(createErr)
+// 	}
+
+// 	defer createResp.Body.Close()
+
+// 	// Check the response status code for creating a prescription
+// 	if createResp.StatusCode != http.StatusCreated {
+// 		t.Fatalf("Expected status code %d for creating a prescription, got %d", http.StatusCreated, createResp.StatusCode)
+// 	}
+
+// 	// Decode the response body to retrieve the created prescription ID
+// 	var createdPrescriptionID struct {
+// 		Success uuid.UUID `json:"success"`
+// 	}
+
+// 	createDecoder := json.NewDecoder(createResp.Body)
+// 	if err := createDecoder.Decode(&createdPrescriptionID); err != nil {
+// 		t.Fatal("Failed to decode create response body:", err)
+// 	}
+
+// 	// Step 2: Get the prescription by its ID
+// 	getResp, getErr := http.Get(getRxEndpoint + createdPrescriptionID.Success.String())
+// 	if getErr != nil {
+// 		t.Fatal(getErr)
+// 	}
+// 	defer getResp.Body.Close()
+
+// 	// Check the response status code for getting a prescription by ID
+// 	if getResp.StatusCode != http.StatusOK {
+// 		t.Fatalf("Expected status code %d for getting a prescription, got %d", http.StatusOK, getResp.StatusCode)
+// 	}
+
+// 	// Decode the response body to process the retrieved prescription
+// 	var retrievedPrescription dto.PrescriptionDTO // Define a struct matching the format of the response
+// 	getDecoder := json.NewDecoder(getResp.Body)
+// 	if err := getDecoder.Decode(&retrievedPrescription); err != nil {
+// 		t.Fatal("Failed to decode get response body:", err)
+// 	}
+
+// 	// Perform assertions on the retrieved prescription
+// 	// Check properties of the prescription based on your actual data structure
+
+// 	assert.NotEmpty(t, retrievedPrescription.Medication)
+
+// 	expected, err := parsePrescriptionDataToDTO(prescriptionData)
+// 	if err != nil {
+// 		t.Fatal("Failed to parse prescriptionData: ")
+// 	}
+
+// 	assert.Equal(t, *expected.Medication, *retrievedPrescription.Medication)
+// 	assert.Equal(t, *expected.Dosage, *retrievedPrescription.Dosage)
+// 	assert.Equal(t, *expected.Notes, *retrievedPrescription.Notes)
+
+// 	// Convert the expected Started time to UTC
+// 	expectedStarted := expected.Started.UTC()
+
+// 	// Compare the Started time
+// 	assert.True(t, expectedStarted.Equal(*retrievedPrescription.Started))
+// }
 
 func TestCreateGetDeleteGetPrescription(t *testing.T) {
 	// Setup your database connection, similar to other integration tests
 
 	// Define the API endpoint for creating a prescription
-	createEndpoint := "http://" + testPort + "/api/v1/prescription"
+	createEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription"
 
 	// Define the API endpoint for getting a prescription by ID
-	getDeleteEndpoint := "http://" + testPort + "/api/v1/prescription/"
+	getDeleteEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription/"
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()
@@ -271,9 +384,9 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 
 func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
 	// Define the API endpoints
-	createEndpoint := "http://localhost:" + testPort + "/api/v1/prescription"
-	updateEndpoint := "http://localhost:" + testPort + "/api/v1/prescription/"
-	getEndpoint := "http://localhost:" + testPort + "/api/v1/prescription/"
+	createEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription"
+	updateEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription/"
+	getEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription/"
 
 	// Define the prescription data (you can customize this data)
 	randomMed := "Medication " + uuid.NewString()

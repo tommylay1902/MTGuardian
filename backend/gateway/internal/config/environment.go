@@ -7,7 +7,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Setup() (string, string, string) {
+func Setup() (string, string, string, string, string, string) {
 
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
@@ -33,5 +33,24 @@ func Setup() (string, string, string) {
 	if hostIP == "" {
 		log.Fatal("Port is not specified")
 	}
-	return secret, portString, hostIP
+
+	pMicro := os.Getenv("PRESCRIPTION_MICRO")
+
+	if pMicro == "" {
+		log.Fatal("Port is not specified")
+	}
+
+	hMicro := os.Getenv("RX_HISTORY_MICRO")
+
+	if hMicro == "" {
+		log.Fatal("Port is not specified")
+	}
+
+	aMicro := os.Getenv("AUTH_MICRO")
+
+	if aMicro == "" {
+		log.Fatal("Port is not specified")
+	}
+
+	return secret, portString, hostIP, pMicro, hMicro, aMicro
 }
