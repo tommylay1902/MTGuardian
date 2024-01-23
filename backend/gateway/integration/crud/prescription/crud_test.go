@@ -49,7 +49,6 @@ func TestMain(m *testing.M) {
 	gatewayPort = testhelper.SetupTestContainerEnvironment(context.Background())
 	setUserToken()
 
-	// Run tests
 	exitCode := m.Run()
 
 	// Exit with the test exit code
