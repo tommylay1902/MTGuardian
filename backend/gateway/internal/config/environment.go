@@ -10,7 +10,7 @@ import (
 func Setup() (string, string, string, string, string, string) {
 
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file", err)
 	}
 
 	//setup jwt helper
