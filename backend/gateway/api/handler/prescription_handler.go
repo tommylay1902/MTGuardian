@@ -131,6 +131,7 @@ func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 
 	// Check the response status code
 	if resp.StatusCode != http.StatusCreated {
+		fmt.Println("ERROR")
 		var bodyErr encoder.Error
 		json.NewDecoder(resp.Body).Decode(&bodyErr)
 		return c.Status(resp.StatusCode).JSON(fiber.Map{
