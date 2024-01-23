@@ -49,8 +49,6 @@ func TestMain(m *testing.M) {
 	gatewayPort = testhelper.SetupTestContainerEnvironment(context.Background())
 	setUserToken()
 
-	fmt.Println("usertoken is", userToken)
-
 	// Run tests
 	exitCode := m.Run()
 
@@ -202,7 +200,7 @@ func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
 }
 
 func TestCreateGetDeleteGetPrescription(t *testing.T) {
-	// Setup your database connection, similar to other integration tests
+	client := &http.Client{}
 
 	// Define the API endpoint for creating a prescription
 	createEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription"
@@ -221,11 +219,18 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
         "started": "` + started + `"
     }`
 
+	req, err := http.NewRequest("POST", createEndpoint, strings.NewReader(prescriptionData))
+	req.Header.Add("Authorization", "Bearer "+userToken)
+	if err != nil {
+		log.Panic(err)
+	}
+
 	// Step 1: Create the prescription
-	createResp, createErr := http.Post(createEndpoint, "application/json", strings.NewReader(prescriptionData))
+	createResp, createErr := client.Do(req)
 	if createErr != nil {
 		t.Fatal(createErr)
 	}
+
 	defer createResp.Body.Close()
 
 	// Check the response status code for creating a prescription
@@ -243,7 +248,13 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 	}
 
 	// Step 2: Get the prescription by its ID
-	getResp, getErr := http.Get(getDeleteEndpoint + createdPrescriptionID.Success.String())
+	req, err = http.NewRequest("GET", getDeleteEndpoint+createdPrescriptionID.Success.String(), nil)
+	req.Header.Add("Authorization", "Bearer "+userToken)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	getResp, getErr := client.Do(req)
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
@@ -255,8 +266,10 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 	}
 
 	// Decode the response body to process the retrieved prescription
-	var retrievedPrescription dto.PrescriptionDTO // Define a struct matching the format of the response
+	var retrievedPrescription customtype.Prescription // Define a struct matching the format of the response
+
 	getDecoder := json.NewDecoder(getResp.Body)
+
 	if err := getDecoder.Decode(&retrievedPrescription); err != nil {
 		t.Fatal("Failed to decode get response body:", err)
 	}
@@ -281,23 +294,32 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 	// Compare the Started time
 	assert.True(t, expectedStarted.Equal(*retrievedPrescription.Started))
 
-	req, deleteErr := http.NewRequest("DELETE", getDeleteEndpoint+createdPrescriptionID.Success.String(), nil)
-	if deleteErr != nil {
-		t.Fatal(deleteErr)
+	req, err = http.NewRequest("DELETE", getDeleteEndpoint+createdPrescriptionID.Success.String(), nil)
+
+	req.Header.Add("Authorization", "Bearer "+userToken)
+
+	if err != nil {
+		log.Panic(err)
 	}
 
-	client := &http.Client{}
 	respDelete, respErr := client.Do(req)
 
 	if respErr != nil {
-		log.Panic("Error sending DELETE request:", deleteErr)
-		return
+		log.Panic("Error sending DELETE request:", respErr)
 	}
+
 	defer respDelete.Body.Close()
 
 	assert.True(t, respDelete.StatusCode == http.StatusOK)
 
-	getAfterDeleteResp, getAfterDeleteErr := http.Get(getDeleteEndpoint + createdPrescriptionID.Success.String())
+	req, err = http.NewRequest("GET", getDeleteEndpoint+createdPrescriptionID.Success.String(), nil)
+	req.Header.Add("Authorization", "Bearer "+userToken)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	getAfterDeleteResp, getAfterDeleteErr := client.Do(req)
 	if getAfterDeleteErr != nil {
 		t.Fatal(getErr)
 	}
@@ -307,6 +329,7 @@ func TestCreateGetDeleteGetPrescription(t *testing.T) {
 }
 
 func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
+	client := &http.Client{}
 	// Define the API endpoints
 	createEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription"
 	updateEndpoint := "http://localhost:" + gatewayPort + "/api/v1/prescription/"
@@ -323,12 +346,17 @@ func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
         "started": "` + started + `"
     }`
 
+	req, err := http.NewRequest("POST", createEndpoint, strings.NewReader(prescriptionData))
+	req.Header.Add("Authorization", "Bearer "+userToken)
+	if err != nil {
+		log.Panic(err)
+	}
+
 	// Step 1: Create the prescription
-	createResp, createErr := http.Post(createEndpoint, "application/json", strings.NewReader(prescriptionData))
+	createResp, createErr := client.Do(req)
 	if createErr != nil {
 		t.Fatal(createErr)
 	}
-	defer createResp.Body.Close()
 
 	// Check the response status code for creating a prescription
 	if createResp.StatusCode != http.StatusCreated {
@@ -345,10 +373,20 @@ func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
 	}
 
 	// Step 2: Get the prescription by its ID
-	getResp, getErr := http.Get(getEndpoint + createdPrescriptionID.Success.String())
+	req, err = http.NewRequest("GET", getEndpoint+createdPrescriptionID.Success.String(), nil)
+
+	req.Header.Add("Authorization", "Bearer "+userToken)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	getResp, getErr := client.Do(req)
+
 	if getErr != nil {
 		t.Fatal(getErr)
 	}
+
 	defer getResp.Body.Close()
 
 	// Check the response status code for getting a prescription by ID
@@ -376,13 +414,14 @@ func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
     }`
 
 	putReq, putErr := http.NewRequest("PUT", updateEndpoint+createdPrescriptionID.Success.String(), strings.NewReader(updatedPrescriptionData))
+
 	if putErr != nil {
 		t.Fatal(putErr)
 	}
-	// Set the content type header to indicate JSON data
-	putReq.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	putReq.Header.Set("Content-Type", "application/json")
+	putReq.Header.Add("Authorization", "Bearer "+userToken)
+
 	respPut, updateErr := client.Do(putReq)
 
 	if updateErr != nil {
@@ -393,7 +432,14 @@ func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
 	assert.True(t, respPut.StatusCode == http.StatusOK)
 
 	// Step 4: Get the prescription again by its ID after the update
-	updatedGetResp, updatedGetErr := http.Get(getEndpoint + createdPrescriptionID.Success.String())
+	req, err = http.NewRequest("GET", getEndpoint+createdPrescriptionID.Success.String(), nil)
+
+	if err != nil {
+		log.Panic(err)
+	}
+	req.Header.Add("Authorization", "Bearer "+userToken)
+	updatedGetResp, updatedGetErr := client.Do(req)
+
 	if updatedGetErr != nil {
 		t.Fatal(updatedGetErr)
 	}
@@ -405,7 +451,7 @@ func TestCreateGetUpdatePrescriptionIntegration(t *testing.T) {
 	}
 
 	// Decode the response body to process the updated retrieved prescription
-	var updatedRetrievedPrescription dto.PrescriptionDTO // Define a struct matching the format of the response
+	var updatedRetrievedPrescription customtype.Prescription // Define a struct matching the format of the response
 	updatedGetDecoder := json.NewDecoder(updatedGetResp.Body)
 	if err := updatedGetDecoder.Decode(&updatedRetrievedPrescription); err != nil {
 		t.Fatal("Failed to decode updated get response body:", err)
