@@ -20,9 +20,7 @@ func InitializeAuth(baseUrl string) *AuthHandler {
 
 func (ah AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 	body := string(c.Body())
-
-	resp, err := helper.MakeRequest(
-		"POST", ah.BaseUrl+"/register", &body)
+	resp, err := helper.MakeRequest("POST", ah.BaseUrl+"/register", &body)
 
 	if err != nil {
 		fmt.Println(err)
@@ -48,14 +46,12 @@ func (ah AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 
 func (ah AuthHandler) LoginHandler(c *fiber.Ctx) error {
 	body := string(c.Body())
-
-	// Send the request
-	resp, err := helper.MakeRequest(
-		"POST", ah.BaseUrl+"/login", &body)
+	resp, err := helper.MakeRequest("POST", ah.BaseUrl+"/login", &body)
 
 	if err != nil {
-		fmt.Println(err)
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
 	defer resp.Body.Close()
@@ -71,15 +67,12 @@ func (ah AuthHandler) LoginHandler(c *fiber.Ctx) error {
 
 	var token encoder.AccessToken
 	json.NewDecoder(resp.Body).Decode(&token)
-
 	return c.Status(resp.StatusCode).JSON(token)
 }
 
 func (ah AuthHandler) RefreshHandler(c *fiber.Ctx) error {
 	body := string(c.Body())
-
-	resp, err := helper.MakeRequest(
-		"POST", ah.BaseUrl+"/refresh", &body)
+	resp, err := helper.MakeRequest("POST", ah.BaseUrl+"/refresh", &body)
 
 	if err != nil {
 		fmt.Println(err)
@@ -99,6 +92,5 @@ func (ah AuthHandler) RefreshHandler(c *fiber.Ctx) error {
 
 	var token encoder.AccessToken
 	json.NewDecoder(resp.Body).Decode(&token)
-
 	return c.Status(resp.StatusCode).JSON(token)
 }

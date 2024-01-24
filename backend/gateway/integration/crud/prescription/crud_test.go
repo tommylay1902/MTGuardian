@@ -25,6 +25,7 @@ var (
 	ctx         context.Context
 	gatewayPort string
 	userToken   string
+	email       string
 )
 
 type PrescriptionModel struct {
@@ -68,10 +69,10 @@ func setUserToken() {
 	registerEndpoint := "http://localhost:" + gatewayPort + "/api/v1/auth/register"
 
 	random := uuid.NewString()
-	randomEmail := "tommylay." + random + "@gmail.com"
+	email = "tommylay." + random + "@gmail.com"
 
 	authDTO := `{
-		"email":    "` + randomEmail + `",
+		"email":    "` + email + `",
 		"password": "` + random + `"
 	}`
 
@@ -115,7 +116,8 @@ func TestCreateAndGetPrescriptionIntegration(t *testing.T) {
         "medication": "` + randomMed + `",
         "dosage": "Sample Dosage",
         "notes": "Sample Notes",
-        "started": "` + started + `"
+        "started": "` + started + `",
+		"owner":"` + email + `"
     }`
 
 	req, err := http.NewRequest("POST", createRxEndpoint, strings.NewReader(prescriptionData))

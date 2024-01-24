@@ -2,13 +2,14 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/tommylay1902/gateway/internal/customtype"
+	"github.com/tommylay1902/gateway/internal/customtype/dto"
 	"github.com/tommylay1902/gateway/internal/customtype/encoder"
+	"github.com/tommylay1902/gateway/internal/error/apperror"
 	"github.com/tommylay1902/gateway/internal/error/errorhandler"
 	"github.com/tommylay1902/gateway/internal/helper"
 )
@@ -22,33 +23,30 @@ func InitializePrescriptionHistory(baseUrl string) *PrescriptionHistoryHandler {
 }
 
 func (h *PrescriptionHistoryHandler) CreateHistory(c *fiber.Ctx) error {
-	// resultBody := string(updatedJSON)
+	var rxHistory dto.PrescriptionHistoryDTO
+	err := c.BodyParser(&rxHistory)
 
-	body := string(c.Body())
+	if err != nil {
+		return errorhandler.HandleError(&apperror.BadRequestError{Message: "error"}, c)
+	}
+
 	token := c.Locals("user").(*jwt.Token)
-
 	claims := token.Claims.(jwt.MapClaims)
-	email := claims["sub"].(string)
+	email, ok := claims["sub"].(string)
 
-	var data map[string]interface{}
-
-	// Unmarshal the JSON string into the map
-	err := json.Unmarshal([]byte(body), &data)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil
+	if !ok {
+		return errorhandler.HandleError(&apperror.BadRequestError{Message: "email conversion went wrong"}, c)
 	}
 
-	// Add the additional field
-	data["owner"] = email
+	rxHistory.Owner = &email
 
-	updatedJSON, err := json.Marshal(data)
+	updatedJSON, err := json.Marshal(rxHistory)
+
 	if err != nil {
-		fmt.Println("Error:", err)
-		return nil
+		return errorhandler.HandleError(&apperror.BadRequestError{Message: err.Error()}, c)
 	}
+
 	resultBody := string(updatedJSON)
-
 	resp, err := helper.MakeRequest("POST", h.BaseUrl, &resultBody)
 
 	if err != nil {
@@ -57,7 +55,6 @@ func (h *PrescriptionHistoryHandler) CreateHistory(c *fiber.Ctx) error {
 
 	defer resp.Body.Close()
 
-	// Check the response status code
 	if resp.StatusCode != http.StatusCreated {
 		var bodyErr encoder.Error
 		json.NewDecoder(resp.Body).Decode(&bodyErr)
@@ -73,9 +70,13 @@ func (h *PrescriptionHistoryHandler) CreateHistory(c *fiber.Ctx) error {
 
 func (h *PrescriptionHistoryHandler) GetHistory(c *fiber.Ctx) error {
 	token := c.Locals("user").(*jwt.Token)
-
 	claims := token.Claims.(jwt.MapClaims)
-	email := claims["sub"].(string)
+	email, ok := claims["sub"].(string)
+
+	if !ok {
+		return errorhandler.HandleError(&apperror.BadRequestError{Message: "email conversion went wrong"}, c)
+	}
+
 	resp, err := helper.MakeRequest("GET", h.BaseUrl+"/all"+"/"+email, nil)
 
 	if err != nil {
@@ -85,19 +86,19 @@ func (h *PrescriptionHistoryHandler) GetHistory(c *fiber.Ctx) error {
 	defer resp.Body.Close()
 
 	var rxHistories []customtype.PrescriptionHistory
-
 	json.NewDecoder(resp.Body).Decode(&rxHistories)
-
 	return c.Status(fiber.StatusOK).JSON(rxHistories)
 }
 
 func (h *PrescriptionHistoryHandler) GetHistoryById(c *fiber.Ctx) error {
 	pId := c.Params("pId")
-
 	token := c.Locals("user").(*jwt.Token)
-
 	claims := token.Claims.(jwt.MapClaims)
-	email := claims["sub"].(string)
+	email, ok := claims["sub"].(string)
+
+	if !ok {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "email conversion went wrong"})
+	}
 
 	resp, err := helper.MakeRequest("GET", h.BaseUrl+"/"+email+"/"+pId, nil)
 
@@ -107,7 +108,6 @@ func (h *PrescriptionHistoryHandler) GetHistoryById(c *fiber.Ctx) error {
 
 	defer resp.Body.Close()
 
-	// Check the response status code
 	if resp.StatusCode != http.StatusOK {
 		var bodyErr encoder.Error
 		json.NewDecoder(resp.Body).Decode(&bodyErr)
@@ -117,37 +117,32 @@ func (h *PrescriptionHistoryHandler) GetHistoryById(c *fiber.Ctx) error {
 	}
 
 	var rxHistory customtype.PrescriptionHistory
-
 	json.NewDecoder(resp.Body).Decode(&rxHistory)
-
 	return c.Status(fiber.StatusOK).JSON(rxHistory)
 }
 
 func (h *PrescriptionHistoryHandler) UpdateRxHistory(c *fiber.Ctx) error {
-
 	pId := c.Params("pId")
-	body := string(c.Body())
-
 	token := c.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
+	email, ok := claims["sub"].(string)
 
-	email := claims["sub"].(string)
-
-	var data map[string]interface{}
-
-	// Unmarshal the JSON string into the map
-	err := json.Unmarshal([]byte(body), &data)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil
+	if !ok {
+		return errorhandler.HandleError(&apperror.BadRequestError{Message: "email conversion went wrong"}, c)
 	}
-	// Add the additional field
-	data["owner"] = email
 
-	updatedJSON, err := json.Marshal(data)
+	var rxHistory dto.PrescriptionHistoryDTO
+	err := c.BodyParser(&rxHistory)
+
 	if err != nil {
-		fmt.Println("Error:", err)
-		return nil
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err})
+	}
+
+	rxHistory.Owner = &email
+	updatedJSON, err := json.Marshal(rxHistory)
+
+	if err != nil {
+		return errorhandler.HandleError(err, c)
 	}
 
 	resultBody := string(updatedJSON)
@@ -175,10 +170,8 @@ func (h *PrescriptionHistoryHandler) UpdateRxHistory(c *fiber.Ctx) error {
 
 func (h *PrescriptionHistoryHandler) DeleteByEmailAndRx(c *fiber.Ctx) error {
 	pId := c.Params("pId")
-
 	token := c.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
-
 	email := claims["sub"].(string)
 
 	resp, err := helper.MakeRequest("DELETE", h.BaseUrl+"/"+email+"/"+pId, nil)
@@ -186,6 +179,8 @@ func (h *PrescriptionHistoryHandler) DeleteByEmailAndRx(c *fiber.Ctx) error {
 	if err != nil {
 		return errorhandler.HandleError(err, c)
 	}
+
+	defer resp.Body.Close()
 
 	// Check the response status code
 	if resp.StatusCode != http.StatusOK {
