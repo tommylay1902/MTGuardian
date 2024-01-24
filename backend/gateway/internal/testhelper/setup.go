@@ -57,14 +57,14 @@ func setupCustomContainer(filePath string, network testcontainers.DockerNetwork,
 			Networks:       []string{network.Name},
 			NetworkAliases: map[string][]string{network.Name: aliases},
 			Env:            env,
-			ExposedPorts:   []string{microPort.Port()},
+			ExposedPorts:   []string{microPort.Port() + "/tcp"},
 			WaitingFor:     wait.ForListeningPort(microPort),
 		},
 		Started: true,
 	})
 
 	if err != nil {
-		log.Panic(err)
+		log.Panic("error hit ", err)
 	}
 
 	return container
