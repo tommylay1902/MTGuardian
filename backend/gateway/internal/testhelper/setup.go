@@ -94,7 +94,7 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 	}
 
 	authDBPort, err := authDBContainer.MappedPort(ctx, postgresPort)
-
+	authDBHost, err := authDBContainer.ContainerIP(ctx)
 	if err != nil {
 		log.Panic("error trying to grab port for auth db container", err)
 	}
@@ -120,7 +120,7 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"POSTGRES_DB":       "auth",
 		"GORM_HOST":         "DB",
 		"PORT":              "8080",
-		"HOST":              "host.docker.internal",
+		"HOST":              authDBHost,
 		"JWT_SECRET":        "thisisajwtsecretbrod",
 		"DB_PORT":           authDBPort.Port(),
 	}, nat.Port("8080/tcp"), authDBPort)
