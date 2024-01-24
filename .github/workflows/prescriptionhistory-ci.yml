@@ -1,25 +1,25 @@
-name: Go run tests on prescription microservice before push/pull on main
+name: Go run test on prescription history microservice
 on:
   push:
     branches:
       - main
     paths:
-      - backend/prescription/**
+      - backend/prescriptionhistory/**
   pull_request:
     branches:
       - main
     paths:
-      - backend/prescription/**
+      - backend/prescriptionhistory/**
 jobs:
   build:
-    name: Go run tests on prescription before push/pull on main
+    name: Go run tests on prescriptionhistory before push/pull on main
     runs-on: ubuntu-latest
     env: # Define your environment variables here
       PORT: 8080
       TESTPORT: 0.0.0.0:8000
     defaults:
       run:
-        working-directory: backend/prescription
+        working-directory: backend/prescriptionhistory
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go
@@ -31,7 +31,6 @@ jobs:
           touch .env
           echo PORT=8080 >> .env
           echo TESTPORT=0.0.0.0:8000 >> .env
-          echo JWT_SECRET=thisisajwtsecretbrod >> .env
           cat .env
       - name: Build and Run Tests
         run: |

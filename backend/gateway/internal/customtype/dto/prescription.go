@@ -1,13 +1,10 @@
-package customtype
+package dto
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
-type Prescription struct {
-	ID         uuid.UUID  `json:"id" gorm:"type:uuid;primaryKey"`
+type PrescriptionDTO struct {
 	Medication *string    `json:"medication"`
 	Dosage     *string    `json:"dosage"`
 	Notes      *string    `json:"notes"`

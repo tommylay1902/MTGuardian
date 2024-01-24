@@ -1,3 +1,155 @@
+# version: '3'
+# services:
+#   auth:
+#     container_name: auth
+#     image: tommylay1902/mtguardian-auth-micro:latest
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: auth
+#       GORM_HOST: DB
+#       HOST: 5432
+#       PORT: 8080
+#     ports:
+#       - "8002:8080" 
+#     tty: true
+#     networks: 
+#       - db
+#     depends_on:
+#       dbauth: 
+#         condition: service_healthy
+#     restart: unless-stopped
+
+#   prescription:
+#     container_name: prescription
+#     image: tommylay1902/mtguardian-prescription-micro:latest
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: prescription
+#       GORM_HOST: DB
+#       HOST: dbprescription
+#       PORT: 8080
+#     ports:
+#       - "8000:8080" 
+#     tty: true
+#     networks: 
+#       - db
+#     depends_on:
+#       dbprescription: 
+#         condition: service_healthy
+#     restart: unless-stopped
+
+#   gateway:
+#     container_name: gateway
+#     image: tommylay1902/mtguardian-gateway:latest
+#     environment:
+#       - PORT=8080
+#       - PRESCRIPTION_MICRO=8000
+#       - RX_HISTORY_MICRO=8006
+#       - AUTH_MICRO=8002
+#       - HOST_IP=host.docker.internal
+#     ports:
+#       - "8004:8080" 
+#     tty: true
+#     restart: unless-stopped
+
+#   prescriptionhistory:
+#     container_name: prescriptionhistory
+#     image: tommylay1902/mtguardian-prescription-history-micro:latest
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: prescriptionhistory
+#       GORM_HOST: DB
+#       PORT: 8080
+#     ports:
+#       - "8006:8080" 
+#     tty: true
+#     networks: 
+#       - db
+#     depends_on:
+#       dbprescriptionhistory: 
+#         condition: service_healthy
+#     restart: unless-stopped
+  
+#   dbprescription:
+#     container_name: dbprescription
+#     image: postgres:15.3
+#     ports:
+#       - "8001:5432"
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password 
+#       POSTGRES_DB: prescription
+#       GORM_HOST: DB
+#     networks:
+#       - db
+#     volumes:
+#       - prescription_data:/var/lib/postgresql/data
+#       - ./initdb:/docker-entrypoint-initdb.d
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres -d prescription"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     restart: unless-stopped
+
+#   dbauth:
+#     container_name: dbauth
+#     image: postgres:15.3
+#     ports:
+#       - "8003:5432"
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password 
+#       POSTGRES_DB: auth
+#       GORM_HOST: DB
+#     networks:
+#       - db
+#     volumes:
+#       - auth_data:/var/lib/postgresql/data
+#       - ./initdb:/docker-entrypoint-initdb.d
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres -d auth"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     restart: unless-stopped
+
+#   dbprescriptionhistory:
+#     container_name: dbprescriptionhistory
+#     image: postgres:15.3
+#     ports:
+#       - "8005:5432"
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password 
+#       POSTGRES_DB: prescriptionhistory
+#       GORM_HOST: DB
+#     networks:
+#       - db
+#     volumes:
+#       - prescription_history_data:/var/lib/postgresql/data
+#       - ./initdb:/docker-entrypoint-initdb.d
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres -d prescriptionhistory"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     restart: unless-stopped
+
+# networks:
+#   db:
+#     driver: bridge
+
+# volumes:
+#   auth_data:
+#     driver: local
+#   prescription_data:
+#     driver: local
+#   prescription_history_data:
+#     driver: local
 version: '3'
 services:
   auth:
@@ -9,7 +161,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: auth
-      GORM_HOST: DB
+      JWT_SECRET: thisisajwtsecretbrod
+      HOST: dbauth
+      DB_PORT: 8003
       PORT: 8080
     ports:
       - "8002:8080" 
@@ -30,6 +184,8 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: prescription
       GORM_HOST: DB
+      HOST: dbprescription
+      DB_PORT: 8001
       PORT: 8080
     ports:
       - "8000:8080" 
@@ -46,8 +202,12 @@ services:
       context: ./backend/gateway
       dockerfile: Dockerfile  
     environment:
-      - PORT=8080
-      - HOST_IP=host.docker.internal
+      PORT: 8080
+      PRESCRIPTION_MICRO: 8000
+      RX_HISTORY_MICRO: 8006
+      AUTH_MICRO: 8002
+      JWT_SECRET: thisisajwtsecretbrod
+      HOST_IP: host.docker.internal
     ports:
       - "8004:8080" 
     tty: true
@@ -61,7 +221,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: prescriptionhistory
-      GORM_HOST: DB
+      HOST: dbprescriptionhistory
       PORT: 8080
     ports:
       - "8006:8080" 
@@ -82,7 +242,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password 
       POSTGRES_DB: prescription
-      GORM_HOST: DB
     networks:
       - db
     volumes:
@@ -104,7 +263,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password 
       POSTGRES_DB: auth
-      GORM_HOST: DB
     networks:
       - db
     volumes:
@@ -126,7 +284,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password 
       POSTGRES_DB: prescriptionhistory
-      GORM_HOST: DB
     networks:
       - db
     volumes:

@@ -26,7 +26,7 @@ func (ah AuthHandler) RegisterHandler(c *fiber.Ctx) error {
 
 	if err != nil {
 		fmt.Println(err)
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
 	}
 
 	defer resp.Body.Close()

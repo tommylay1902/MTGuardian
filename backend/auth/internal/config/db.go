@@ -6,17 +6,16 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupDB() *gorm.DB {
+func SetupDB(port string, host string) *gorm.DB {
 
-	dsn := "host=dbauth user=postgres password=password dbname=auth port=5432 sslmode=disable"
+	// dsn := "host=" + host + " user=postgres password=password dbname=auth port=" + port + " sslmode=disable"
+
+	dsn := "postgresql://postgres:password@" + host + ":5432/auth"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 	if err != nil {
-		dsnRetry := "host=localhost user=postgres password=password dbname=auth port=8003 sslmode=disable"
-		db, err = gorm.Open(postgres.Open(dsnRetry), &gorm.Config{})
-		if err != nil {
-			panic("error connecting to database")
-		}
+		panic("error connecting to database")
 	}
 
 	db.AutoMigrate(&model.Auth{})

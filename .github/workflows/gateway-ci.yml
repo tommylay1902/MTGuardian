@@ -1,25 +1,25 @@
-name: Go run tests on prescription microservice before push/pull on main
+name: Go run tests on gateway before push/pull on main
 on:
   push:
     branches:
       - main
     paths:
-      - backend/prescription/**
+      - backend/gateway/**
   pull_request:
     branches:
       - main
     paths:
-      - backend/prescription/**
+      - backend/gateway/**
 jobs:
   build:
-    name: Go run tests on prescription before push/pull on main
+    name: Go run tests on gateway before push/pull on main
     runs-on: ubuntu-latest
     env: # Define your environment variables here
       PORT: 8080
-      TESTPORT: 0.0.0.0:8000
+      TESTPORT: 0.0.0.0:8002
     defaults:
       run:
-        working-directory: backend/prescription
+        working-directory: backend/gateway
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go
@@ -31,9 +31,6 @@ jobs:
           touch .env
           echo PORT=8080 >> .env
           echo TESTPORT=0.0.0.0:8000 >> .env
-          echo JWT_SECRET=thisisajwtsecretbrod >> .env
           cat .env
       - name: Build and Run Tests
-        run: |
-          docker compose up -d
-          go test ./... -v
+        run: go test ./... -v -ci

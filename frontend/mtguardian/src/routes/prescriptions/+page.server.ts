@@ -5,8 +5,6 @@ export const load = (async ({ cookies, url }) => {
   const access = cookies.get("access");
   const fromURL = url.pathname + url.search;
   if (!access) {
-    //create this so we can be redirected back to the specific page that we want after logging in
-
     throw redirect(302, `/auth?redirectTo=${fromURL}`);
   }
 
@@ -48,10 +46,10 @@ export const load = (async ({ cookies, url }) => {
 
     const prescriptions = await res.json();
 
-    return { prescriptions, token };
+    return { prescriptions, access: token };
   }
 
   const prescriptions = await res.json();
 
-  return { prescriptions, access };
+  return { prescriptions, access: access };
 }) satisfies PageServerLoad;

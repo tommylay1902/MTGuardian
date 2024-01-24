@@ -108,5 +108,4 @@ func (h *PrescriptionHistoryHandler) UpdateByEmailAndRx(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": "succesfully updated!"})
-
 }
