@@ -2,8 +2,6 @@ package testhelper
 
 import (
 	"context"
-	"flag"
-	"fmt"
 	"log"
 
 	"github.com/docker/go-connections/nat"
@@ -72,15 +70,8 @@ func setupCustomContainer(filePath string, network testcontainers.DockerNetwork,
 	return container
 }
 
-func SetupTestContainerEnvironment(ctx context.Context) string {
+func SetupTestContainerEnvironment(ctx context.Context, hostIP string) string {
 
-	testMode := flag.Bool("ci", true, "determine test mode")
-	flag.Parse()
-	fmt.Println(testMode)
-	var hostIP string = "host.docker.internal"
-	if *testMode {
-		hostIP = "172.17.0.1"
-	}
 	dNetwork := setupDockerNetwork(ctx)
 
 	postgresPort := nat.Port("5432/tcp")
@@ -95,7 +86,7 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"POSTGRES_USER":     "postgres",
 		"POSTGRES_PASSWORD": "password",
 		"POSTGRES_DB":       "auth",
-		"GORM_HOST":         "DB"}, ctx, dNetwork, []string{"db-auth-bridge"})
+	}, ctx, dNetwork, []string{"db-auth-bridge"})
 
 	prescriptionDBPort, err := prescriptionDBContainer.MappedPort(ctx, postgresPort)
 	prescriptionDBHost, err := prescriptionDBContainer.ContainerIP(ctx)
@@ -128,11 +119,10 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"POSTGRES_USER":     "postgres",
 		"POSTGRES_PASSWORD": "password",
 		"POSTGRES_DB":       "auth",
-		"GORM_HOST":         "DB",
 		"PORT":              "8080",
 		"HOST":              authDBHost,
 		"JWT_SECRET":        "thisisajwtsecretbrod",
-		"DB_PORT":           authDBPort.Port(),
+		"DB_PORT":           "5432",
 	}, nat.Port("8080/tcp"), authDBPort)
 
 	authMicroPort, err := authContainer.MappedPort(ctx, nat.Port("8080/tcp"))
