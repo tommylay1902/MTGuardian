@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/tommylay1902/gateway/api/handler"
@@ -14,6 +16,7 @@ func main() {
 	secret, port, hostIP, pMicro, hMicro, aMicro := config.Setup()
 	jwt := middleware.NewAuthMiddleware(secret)
 
+	fmt.Printf("secret %v, port %v,  hostIP %v, pMicro %v, hMicro %v, aMicro %v", secret, port, hostIP, pMicro, hMicro, aMicro)
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 		AllowHeaders: "*",

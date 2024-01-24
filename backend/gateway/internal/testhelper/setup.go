@@ -139,6 +139,7 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"JWT_SECRET":         "thisisajwtsecretbrod",
 		"HOST_IP":            "host.docker.internal",
 	}, nat.Port("8080/tcp"), nat.Port("5432/tcp"))
+
 	gatewayPort, err := gatewayContainer.MappedPort(ctx, nat.Port("8080/tcp"))
 
 	if err != nil {

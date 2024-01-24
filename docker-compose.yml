@@ -162,7 +162,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: auth
       JWT_SECRET: thisisajwtsecretbrod
-      HOST: host.docker.internal
+      HOST: dbauth
       DB_PORT: 8003
       PORT: 8080
     ports:
@@ -184,7 +184,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: prescription
       GORM_HOST: DB
-      HOST: host.docker.internal
+      HOST: dbprescription
       DB_PORT: 8001
       PORT: 8080
     ports:
@@ -205,7 +205,8 @@ services:
       PORT: 8080
       PRESCRIPTION_MICRO: 8000
       RX_HISTORY_MICRO: 8006
-      AUTH_MICRO: 8002,
+      AUTH_MICRO: 8002
+      JWT_SECRET: thisisajwtsecretbrod
       HOST_IP: host.docker.internal
     ports:
       - "8004:8080" 
@@ -220,7 +221,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: prescriptionhistory
-      HOST: host.docker.internal
+      HOST: dbprescriptionhistory
       PORT: 8080
     ports:
       - "8006:8080" 

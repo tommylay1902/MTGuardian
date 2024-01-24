@@ -56,7 +56,7 @@ func TestMain(m *testing.M) {
 }
 
 func setUserToken() {
-	fmt.Println("calling endpionts w/ port", gatewayPort)
+	fmt.Println("calling endpoints w/ port", gatewayPort)
 	registerEndpoint := "http://localhost:" + gatewayPort + "/api/v1/auth/register"
 
 	random := uuid.NewString()
