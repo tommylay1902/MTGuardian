@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/tommylay1902/gateway/internal/customtype"
+	"github.com/tommylay1902/gateway/internal/customtype/dto"
 	"github.com/tommylay1902/gateway/internal/customtype/encoder"
 	"github.com/tommylay1902/gateway/internal/helper"
 )
@@ -21,12 +22,16 @@ func InitializePrescription(baseUrl string) *PrescriptionHandler {
 }
 
 func (ph *PrescriptionHandler) GetPrescriptionById(c *fiber.Ctx) error {
-	token := c.Locals("user").(*jwt.Token)
-
-	claims := token.Claims.(jwt.MapClaims)
-	email := claims["sub"].(string)
-
 	idParam := c.Params("id")
+	token := c.Locals("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	email, ok := claims["sub"].(string)
+
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Something went wrong",
+		})
+	}
 
 	resp, err := helper.MakeRequest("GET", ph.BaseUrl+"/"+email+"/"+idParam, nil)
 	if err != nil {
@@ -49,35 +54,29 @@ func (ph *PrescriptionHandler) GetPrescriptionById(c *fiber.Ctx) error {
 	json.NewDecoder(resp.Body).Decode(&prescription)
 
 	return c.Status(resp.StatusCode).JSON(prescription)
-
 }
 
 func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
-
 	token := c.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
-
 	email := claims["sub"].(string)
 	viewHistory := c.Query("present")
 
-	var url string
+	url := fmt.Sprintf("%s/all/%s?present=%s", ph.BaseUrl, email, viewHistory)
+
 	if viewHistory == "" {
 		url = fmt.Sprintf("%s/all/%s", ph.BaseUrl, email)
-	} else {
-		url = fmt.Sprintf("%s/all/%s?present=%s", ph.BaseUrl, email, viewHistory)
 	}
 
 	resp, err := helper.MakeRequest("GET", url, nil)
-	if err != nil {
 
+	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
 	defer resp.Body.Close()
 
-	// Check the response status code
 	if resp.StatusCode != http.StatusOK {
-
 		var bodyErr encoder.Error
 		json.NewDecoder(resp.Body).Decode(&bodyErr)
 		return c.Status(resp.StatusCode).JSON(fiber.Map{
@@ -86,31 +85,26 @@ func (ph *PrescriptionHandler) GetPrescriptions(c *fiber.Ctx) error {
 	}
 
 	var prescription []customtype.Prescription
-
 	json.NewDecoder(resp.Body).Decode(&prescription)
 
 	return c.Status(resp.StatusCode).JSON(prescription)
 }
 
 func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
-
+	//figure out why it wont take BodyParser
 	prescription := string(c.Body())
-
 	token := c.Locals("user").(*jwt.Token)
-
 	claims := token.Claims.(jwt.MapClaims)
 	email := claims["sub"]
 
 	var data map[string]interface{}
 
-	// Unmarshal the JSON string into the map
 	err := json.Unmarshal([]byte(prescription), &data)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil
 	}
 
-	// Add the additional field
 	data["owner"] = email
 
 	updatedJSON, err := json.Marshal(data)
@@ -129,7 +123,6 @@ func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 
 	defer resp.Body.Close()
 
-	// Check the response status code
 	if resp.StatusCode != http.StatusCreated {
 		fmt.Println("ERROR")
 		var bodyErr encoder.Error
@@ -145,34 +138,33 @@ func (ph *PrescriptionHandler) CreatePrescription(c *fiber.Ctx) error {
 }
 
 func (ph *PrescriptionHandler) UpdatePrescription(c *fiber.Ctx) error {
-	prescription := string(c.Body())
-	idParam := c.Params("id")
+	var prescription dto.PrescriptionDTO
+	err := c.BodyParser(&prescription)
 
-	token := c.Locals("user").(*jwt.Token)
-
-	claims := token.Claims.(jwt.MapClaims)
-	email := claims["sub"].(string)
-
-	var data map[string]interface{}
-
-	// Unmarshal the JSON string into the map
-	err := json.Unmarshal([]byte(prescription), &data)
 	if err != nil {
-		fmt.Println("Error:", err)
-		return nil
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 
-	// Add the additional field
-	data["owner"] = email
+	idParam := c.Params("id")
+	token := c.Locals("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	email, ok := claims["sub"].(string)
 
-	updatedJSON, err := json.Marshal(data)
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Something went wrong"})
+	}
+
+	prescription.Owner = &email
+	updatedJSON, err := json.Marshal(prescription)
+
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil
 	}
 
 	resultBody := string(updatedJSON)
-
 	resp, err := helper.MakeRequest("PUT", ph.BaseUrl+"/"+email+"/"+idParam, &resultBody)
 
 	if err != nil {
@@ -196,19 +188,21 @@ func (ph *PrescriptionHandler) UpdatePrescription(c *fiber.Ctx) error {
 }
 
 func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
-
 	idParam := c.Params("id")
-
 	token := c.Locals("user").(*jwt.Token)
-
 	claims := token.Claims.(jwt.MapClaims)
-	email := claims["sub"].(string)
+	email, ok := claims["sub"].(string)
+
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Something went wrong"})
+	}
 
 	resp, err := helper.MakeRequest("DELETE", ph.BaseUrl+"/"+email+"/"+idParam, nil)
 
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
+
 	defer resp.Body.Close()
 
 	// Check the response status code
@@ -220,5 +214,5 @@ func (ph *PrescriptionHandler) DeletePrescription(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.SendStatus(resp.StatusCode)
+	return c.Status(resp.StatusCode).JSON(fiber.Map{"success": "succesfully deleted prescription"})
 }

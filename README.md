@@ -22,6 +22,13 @@ Under progress of developing a website/mobile application. Stay tuned for the of
 
 ![Database Schema](/readMeAssets/databaseSchemaV3.png)
 
+# Running Tests Locally
+
+To ensure the reliability and stability of our Medication Management App, you can run tests locally using the following command:
+
+```bash
+go list -f '{{.Dir}}/...' -m | xargs go test -v
+
 ## Contributing
 
 We welcome contributions! If you have ideas for improvements, bug reports, or feature requests, please open an issue or submit a pull request. Check out our [Contribution Guidelines](link-to-guidelines) for more information.
@@ -29,3 +36,4 @@ We welcome contributions! If you have ideas for improvements, bug reports, or fe
 ## License
 
 This Medication Management App is licensed under the [LICENSE NAME] - see the [LICENSE.
+```
