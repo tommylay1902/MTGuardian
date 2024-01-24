@@ -12,6 +12,7 @@ on:
       - backend/auth/**
 jobs:
   build:
+    name: Go run tests on auth before push/pull on main
     runs-on: ubuntu-latest
     env: # Define your environment variables here
       PORT: 8080
