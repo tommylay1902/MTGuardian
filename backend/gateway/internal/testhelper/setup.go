@@ -122,6 +122,7 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"GORM_HOST":         "DB",
 		"PORT":              "8080",
 		"HOST":              "host.docker.internal",
+		"JWT_SECRET":        "thisisajwtsecretbrod",
 		"DB_PORT":           authDBPort.Port(),
 	}, nat.Port("8080/tcp"), authDBPort)
 
@@ -136,6 +137,7 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"PRESCRIPTION_MICRO": prescriptionMicroPort.Port(),
 		"RX_HISTORY_MICRO":   "8006",
 		"AUTH_MICRO":         authMicroPort.Port(),
+		"JWT_SECRET":         "thisisajwtsecretbrod",
 		"HOST_IP":            "host.docker.internal",
 	}, nat.Port("8080/tcp"), nat.Port("5432/tcp"))
 	gatewayPort, err := gatewayContainer.MappedPort(ctx, nat.Port("8080/tcp"))

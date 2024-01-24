@@ -1,21 +1,18 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 func SetupEnvironment() (string, string, string) {
-	fileDir, err := os.Getwd()
+	// fileDir, err := os.Getwd()
 
-	fmt.Println(fileDir)
-	err = godotenv.Load(fileDir + "/.env")
-	if err != nil {
-		log.Fatal("Error loading .env file", err)
-	}
+	// fmt.Println(fileDir)
+	// err = godotenv.Load(fileDir + "/.env")
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file", err)
+	// }
 	portString := os.Getenv("PORT")
 
 	if portString == "" {
