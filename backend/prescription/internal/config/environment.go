@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -8,8 +9,10 @@ import (
 )
 
 func SetupEnvironment() (string, string, string) {
+	fileDir, err := os.Getwd()
 
-	err := godotenv.Load(".env")
+	fmt.Println(fileDir)
+	err = godotenv.Load(fileDir + "/.env")
 	if err != nil {
 		log.Fatal("Error loading .env file", err)
 	}
