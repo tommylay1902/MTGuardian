@@ -75,6 +75,7 @@ func setUserToken() {
 
 	rBody, readErr := io.ReadAll(registerRes.Body)
 	defer registerRes.Body.Close()
+	fmt.Println(string(rBody))
 
 	if readErr != nil {
 		log.Panic("error in setUserToken when trying to read body data", readErr)
