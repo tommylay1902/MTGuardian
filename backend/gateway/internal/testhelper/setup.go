@@ -88,7 +88,7 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"GORM_HOST":         "DB"}, ctx, dNetwork, []string{"db-auth-bridge"})
 
 	prescriptionDBPort, err := prescriptionDBContainer.MappedPort(ctx, postgresPort)
-
+	prescriptionDBHost, err := prescriptionDBContainer.ContainerIP(ctx)
 	if err != nil {
 		log.Panic("error trying to grab port for prescription db container", err)
 	}
@@ -104,8 +104,8 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"POSTGRES_PASSWORD": "password",
 		"POSTGRES_DB":       "prescription",
 		"PORT":              "8080",
-		"HOST":              "host.docker.internal",
-		"DB_PORT":           prescriptionDBPort.Port(),
+		"HOST":              prescriptionDBHost,
+		"DB_PORT":           "5432",
 	}, nat.Port("8080/tcp"), prescriptionDBPort)
 
 	prescriptionMicroPort, err := prescriptionContainer.MappedPort(ctx, nat.Port("8080/tcp"))
