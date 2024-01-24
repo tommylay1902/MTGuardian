@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	port, host, dbPort := config.SetupEnvironment()
-	db := config.SetupDB(dbPort, host)
+	port, dbHostName, dbPort, dbUsername, dbPassword, dbName := config.SetupEnvironment()
+	db := config.SetupDB(dbUsername, dbHostName, dbPort, dbPassword, dbName)
 
 	defer func() {
 		dbInstance, _ := db.DB()

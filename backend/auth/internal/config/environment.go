@@ -7,7 +7,44 @@ import (
 	"github.com/tommylay1902/authmicro/internal/helper"
 )
 
-func SetupEnvironment() (string, string, string) {
+func SetupEnvironment() (string, string, string, string, string, string) {
+
+	port := os.Getenv("PORT")
+
+	if port == "" {
+
+		log.Fatal("Port is not specified")
+	}
+
+	dbUsername := os.Getenv("POSTGRES_USER")
+
+	if dbUsername == "" {
+		log.Fatal("db user name not specified")
+	}
+
+	dbHostName := os.Getenv("HOST")
+
+	if dbHostName == "" {
+		log.Fatal("db host name not specified")
+	}
+
+	dbPort := os.Getenv("DB_PORT")
+
+	if dbPort == "" {
+		log.Fatal("db port not specified")
+	}
+
+	dbPassword := os.Getenv("POSTGRES_PASSWORD")
+
+	if dbPassword == "" {
+		log.Fatal("db password not specified")
+	}
+
+	dbName := os.Getenv("POSTGRES_DB")
+
+	if dbName == "" {
+		log.Fatal("db name not specified")
+	}
 
 	//setup jwt helper
 	secret := os.Getenv("JWT_SECRET")
@@ -18,21 +55,5 @@ func SetupEnvironment() (string, string, string) {
 
 	helper.InitJwtHelper(secret)
 
-	//setup and return port
-	portString := os.Getenv("PORT")
-
-	if portString == "" {
-		log.Fatal("Port is not specified")
-	}
-
-	host := os.Getenv("HOST")
-	if host == "" {
-		log.Fatal("host is not specified")
-	}
-
-	dbPort := os.Getenv("DB_PORT")
-	if dbPort == "" {
-		log.Fatal("db_port is not specified")
-	}
-	return portString, host, dbPort
+	return port, dbHostName, dbPort, dbUsername, dbPassword, dbName
 }

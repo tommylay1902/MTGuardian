@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/tommylay1902/prescriptionmicro/internal/model"
@@ -8,17 +9,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupDB(port string, host string) *gorm.DB {
+func SetupDB(dbUsername string, dbHostName string, dbPort string, dbPassword string, dbName string) *gorm.DB {
 
-	// dsn := "host=" + host + " user=postgres password=password dbname=prescription port=" + port + " sslmode=disable"
-	// dsn := "host=" + host + " user=postgres password=password dbname=prescription port=" + port + " sslmode=disable"
-
-	dsn := "postgresql://postgres:password@" + host + ":5432/prescription"
+	dsn := fmt.Sprintf("postgresql://%v:%v@%v:%v/%v", dbUsername, dbPassword, dbHostName, dbPort, dbName)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		log.Panic("error connecting to database", err)
+		log.Panic("error connecting to db", err)
 	}
 
 	db.AutoMigrate(&model.Prescription{})

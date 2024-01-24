@@ -1,21 +1,24 @@
 package config
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/tommylay1902/authmicro/internal/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func SetupDB(port string, host string) *gorm.DB {
+func SetupDB(dbUsername string, dbHostName string, dbPort string, dbPassword string, dbName string) *gorm.DB {
 
-	// dsn := "host=" + host + " user=postgres password=password dbname=auth port=" + port + " sslmode=disable"
+	dsn := fmt.Sprintf("postgresql://%v:%v@%v:%v/%v", dbUsername, dbPassword, dbHostName, dbPort, dbName)
 
-	dsn := "postgresql://postgres:password@" + host + ":5432/auth"
+	fmt.Println(dsn)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		panic("error connecting to database")
+		log.Panic("error connecting to db", err)
 	}
 
 	db.AutoMigrate(&model.Auth{})

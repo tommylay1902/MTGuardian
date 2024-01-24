@@ -1,22 +1,22 @@
 package config
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/tommylay1902/prescriptionhistory/internal/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func SetupDB() *gorm.DB {
+func SetupDB(dbUsername string, dbHostName string, dbPort string, dbPassword string, dbName string) *gorm.DB {
 
-	dsn := "host=dbprescriptionhistory user=postgres password=password dbname=prescriptionhistory port=5432 sslmode=disable"
+	dsn := fmt.Sprintf("postgresql://%v:%v@%v:%v/%v", dbUsername, dbPassword, dbHostName, dbPort, dbName)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 	if err != nil {
-		dsnRetry := "host=localhost user=postgres password=password dbname=prescriptionhistory port=8005 sslmode=disable"
-		db, err = gorm.Open(postgres.Open(dsnRetry), &gorm.Config{})
-		if err != nil {
-			panic("error connecting to database")
-		}
+		log.Panic("error connecting to db", err)
 	}
 
 	db.AutoMigrate(&model.PrescriptionHistory{})

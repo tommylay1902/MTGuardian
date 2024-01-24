@@ -5,29 +5,44 @@ import (
 	"os"
 )
 
-func SetupEnvironment() (string, string, string) {
-	// fileDir, err := os.Getwd()
+func SetupEnvironment() (string, string, string, string, string, string) {
 
-	// fmt.Println(fileDir)
-	// err = godotenv.Load(fileDir + "/.env")
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file", err)
-	// }
-	portString := os.Getenv("PORT")
+	port := os.Getenv("PORT")
 
-	if portString == "" {
+	if port == "" {
+
 		log.Fatal("Port is not specified")
 	}
 
-	host := os.Getenv("HOST")
-	if host == "" {
-		log.Fatal("host is not specified")
+	dbUsername := os.Getenv("POSTGRES_USER")
+
+	if dbUsername == "" {
+		log.Fatal("db user name not specified")
+	}
+
+	dbHostName := os.Getenv("HOST")
+
+	if dbHostName == "" {
+		log.Fatal("db host name not specified")
 	}
 
 	dbPort := os.Getenv("DB_PORT")
+
 	if dbPort == "" {
-		log.Fatal("host is not specified")
+		log.Fatal("db port not specified")
 	}
 
-	return portString, host, dbPort
+	dbPassword := os.Getenv("POSTGRES_PASSWORD")
+
+	if dbPassword == "" {
+		log.Fatal("db password not specified")
+	}
+
+	dbName := os.Getenv("POSTGRES_DB")
+
+	if dbName == "" {
+		log.Fatal("db name not specified")
+	}
+
+	return port, dbHostName, dbPort, dbUsername, dbPassword, dbName
 }

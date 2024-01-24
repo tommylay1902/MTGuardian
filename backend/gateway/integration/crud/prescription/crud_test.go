@@ -3,6 +3,7 @@ package crud_test
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -45,8 +46,15 @@ func parsePrescriptionDataToDTO(data string) (*dto.PrescriptionDTO, error) {
 
 func TestMain(m *testing.M) {
 	ctx = context.Background()
+	testMode := flag.Bool("ci", false, "determine test mode")
+	flag.Parse()
+	var hostIP string = "host.docker.internal"
+	if *testMode {
+		fmt.Println(*testMode)
+		hostIP = "172.17.0.1"
+	}
 
-	gatewayPort = testhelper.SetupTestContainerEnvironment(context.Background())
+	gatewayPort = testhelper.SetupTestContainerEnvironment(context.Background(), hostIP)
 	setUserToken()
 
 	exitCode := m.Run()
