@@ -32,4 +32,4 @@ jobs:
           echo TESTPORT=0.0.0.0:8000 >> .env
           cat .env
       - name: Build and Run Tests
-        run: go test ./... -v
+        run: go test ./... -v -ci

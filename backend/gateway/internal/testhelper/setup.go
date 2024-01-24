@@ -2,6 +2,8 @@ package testhelper
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"log"
 
 	"github.com/docker/go-connections/nat"
@@ -71,6 +73,14 @@ func setupCustomContainer(filePath string, network testcontainers.DockerNetwork,
 }
 
 func SetupTestContainerEnvironment(ctx context.Context) string {
+
+	testMode := flag.Bool("ci", true, "determine test mode")
+	flag.Parse()
+	fmt.Println(testMode)
+	var hostIP string = "host.docker.internal"
+	if *testMode {
+		hostIP = "172.17.0.1"
+	}
 	dNetwork := setupDockerNetwork(ctx)
 
 	postgresPort := nat.Port("5432/tcp")
@@ -137,7 +147,7 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"RX_HISTORY_MICRO":   "8006",
 		"AUTH_MICRO":         authMicroPort.Port(),
 		"JWT_SECRET":         "thisisajwtsecretbrod",
-		"HOST_IP":            "172.17.0.1",
+		"HOST_IP":            hostIP,
 	}, nat.Port("8080/tcp"), nat.Port("5432/tcp"))
 
 	gatewayPort, err := gatewayContainer.MappedPort(ctx, nat.Port("8080/tcp"))
