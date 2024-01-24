@@ -137,7 +137,7 @@ func SetupTestContainerEnvironment(ctx context.Context) string {
 		"RX_HISTORY_MICRO":   "8006",
 		"AUTH_MICRO":         authMicroPort.Port(),
 		"JWT_SECRET":         "thisisajwtsecretbrod",
-		"HOST_IP":            "host.docker.internal",
+		"HOST_IP":            "172.17.0.1",
 	}, nat.Port("8080/tcp"), nat.Port("5432/tcp"))
 
 	gatewayPort, err := gatewayContainer.MappedPort(ctx, nat.Port("8080/tcp"))
