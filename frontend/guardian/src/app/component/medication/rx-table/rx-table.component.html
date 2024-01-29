@@ -1,0 +1,37 @@
+<div class="flex flex-col">
+    <div class="-m-1.5 overflow-x-auto">
+      <div class="p-1.5 min-w-full inline-block align-middle">
+        <div class="overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-auto">
+            <thead>
+              <tr>
+                <ng-container *ngFor="let header of tableHeaders">
+                    <th class="pr-6 py-3 text-start text-xs font-medium text-black uppercase" [ngClass]="{'sm:hidden': header=== 'started' || header==='ended', 'hidden': header=== 'started' || header==='ended', 'tbreak:table-cell': header=== 'started' || header==='ended'}" >{{header}} </th>
+                </ng-container>
+                
+                <th class="pr-6 py-3 text-center text-xs font-medium text-black uppercase">Edit</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tr *ngFor="let rx of prescriptions">
+                <td>{{rx.medication}}</td>
+                <td>{{rx.dosage}}</td>
+                <td class="sm:hidden hidden tbreak:table-cell">{{rx.started}}</td>
+                <td class="sm:hidden hidden tbreak:table-cell"> {{ rx.ended == null ? "Present": rx.ended}}</td>
+                <td > {{rx.refills == null ? "0": rx.refills}}</td>
+                <td class=""> 
+                  <button type="button" class="py-2 px-3 mr-2 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600 w-full tbreak:w-fit" (click)="toggleModal(rx)">
+                    Edit
+                  </button>
+             
+                  <button type="button" class="py-2 px-3 inline-flex items-center text-sm font-semibold rounded-lg border border-transparent text-white  bg-red-600 hover:bg-red-800 disabled:opacity-50  disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600 w-full mt-1 tbreak:w-fit">
+                    Delete
+                  </button>
+                </td>
+              </tr> 
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>

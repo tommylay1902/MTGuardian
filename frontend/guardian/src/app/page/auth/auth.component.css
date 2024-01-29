@@ -1,0 +1,30 @@
+.fade-in-login {
+    opacity: 0;
+    animation: fadeInAnimation 3000ms forwards;
+}
+
+@keyframes fadeInAnimation {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+}
+
+.slide-up {
+    opacity: 0;
+    transform: translateY(3vh);
+    animation: slideUpAnimation 1000ms forwards;
+  }
+
+  @keyframes slideUpAnimation {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }

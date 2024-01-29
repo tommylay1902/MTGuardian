@@ -1,0 +1,25 @@
+<div class="flex flex-col justify-center items-center h-screen shadow-xl bg-[#0084a8]">
+    <div class="fade-in-login slide-up">
+        <div class="md:text-[4rem] text-[10vw] text-white fade-in-login text-center slide-up">Login</div>
+        <form method="POST" class=" px-4 pt-4 md:px-12 md:pt-12 min-w-[20dvw] min-h-[45dvh] rounded-xl fade-in-form slide-up bg-white text-xl shadow-xl pb-4" [formGroup]="loginGroup" (ngSubmit)="onSubmit()">
+            
+            <label  class="block text-xl font-medium" for="email-input" >Email</label>
+            <input type="text" class="py-3 px-4 h-[8dvh] block w-full rounded-lg text-lg border-gray-600 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none bg-gray-100" placeholder="john123@gmail.com" formControlName="email"  id="email-input"/>
+
+            <label  class="block text-xl font-medium" for="password-input" >Password</label>
+            <input type="password" class="py-3 px-4 h-[8dvh] block w-full rounded-lg text-lg focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none border-gray-700 bg-gray-100" placeholder="Password" formControlName="password"  id="password-input"/>
+
+            <div class="flex justify-center mt-4 md:mt-10 text-center">
+                <button type="submit" class="py-2 px-4 inline-flex items-center gap-x-2 font-semibold rounded-lg border border-transparent bg-[#0187bf] text-white hover:bg-blue-700 disabled:opacity-50 text-lg">
+                    <span class="text-center">Sign In</span>
+                </button>
+            </div>
+            
+            <div class="flex justify-center mt-3 md:mt-10 mb-1 text-center text-blue-500 hover:text-blue-300 text-md">
+                <button type="button">
+                    Don't have an account? Sign up here
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

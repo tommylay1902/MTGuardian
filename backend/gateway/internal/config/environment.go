@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -23,7 +24,7 @@ func Setup() (string, string, string, string, string, string) {
 
 	//setup and return port
 	hostIP := os.Getenv("HOST_IP")
-
+	fmt.Println(hostIP)
 	if hostIP == "" {
 		log.Fatal("host_ip is not specified")
 	}
